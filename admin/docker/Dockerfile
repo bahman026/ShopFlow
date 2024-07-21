@@ -52,4 +52,4 @@ RUN chown -R $uid:$gid "/var/www/.npm"
 RUN mkdir -p "/var/www/.pm2"
 RUN chown -R $uid:$gid "/var/www/.pm2"
 
-WORKDIR /var/www/html
+WORKDIR /var/www/html/admin
