@@ -4,14 +4,31 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\RolesEnum;
+use Carbon\Carbon;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+/**
+ * @property string|null $first_name
+ * @property string|null $last_name
+ * @property string $email
+ * @property string $mobile
+ * @property Carbon $mobile_verified_at
+ * @property string $national_id
+ * @property Carbon|null $email_verified_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+class User extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory;
+    use HasRoles;
     use Notifiable;
 
     /**
@@ -20,7 +37,10 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'mobile',
+        'national_id',
         'email',
         'password',
     ];
@@ -46,5 +66,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getFilamentName(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasRole([RolesEnum::SUPER_ADMIN->value, RolesEnum::ADMIN->value]);
     }
 }
