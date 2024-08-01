@@ -38,8 +38,11 @@ RUN pecl install redis && docker-php-ext-enable redis
 
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
+RUN apt-get install -y npm
 RUN npm install pm2 -g
 
+RUN  apt-get install -y fish
+RUN  chsh -s 'which fish'
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
