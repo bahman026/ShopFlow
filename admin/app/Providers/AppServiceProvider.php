@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../../../infrastructure/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../../../infrastructure/migrations');
     }
 
     /**
