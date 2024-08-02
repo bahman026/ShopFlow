@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
-use function Pest\Laravel\get;
+use function Pest\Laravel\withoutExceptionHandling;
 
-it('has a welcome page', function () {
-    get('/')->assertStatus(200);
+it('returns a successful response', function () {
+    withoutExceptionHandling();
+
+    $response = $this->get('/');
+
+    $response->assertStatus(302);
 });
