@@ -21,6 +21,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $mobile
  * @property Carbon $mobile_verified_at
  * @property string $national_id
+ * @property positive-int $status
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -43,6 +44,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         'national_id',
         'email',
         'password',
+        'status',
     ];
 
     /**
