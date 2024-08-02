@@ -19,12 +19,14 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('mobile',15)->nullable();
+            $table->string('mobile',20)->nullable();
             $table->timestamp('mobile_verified_at')->nullable();
             $table->string('national_id',10)->nullable();
             $table->string('password');
             $table->unsignedTinyInteger('status')->default(\App\Enums\UserStatusEnum::ACTIVE->value);
             $table->rememberToken();
+            $table->string('login_token')->nullable();
+            $table->timestamp('login_token_expire_time')->nullable();
             $table->timestamps();
         });
 

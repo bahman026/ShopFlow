@@ -14,6 +14,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
@@ -47,11 +49,24 @@ class UserResource extends Resource
                 Forms\Components\DateTimePicker::make('mobile_verified_at'),
                 Forms\Components\TextInput::make('national_id')
                     ->maxLength(10),
-
+                Forms\Components\TextInput::make('login_token')
+                    ->hint(function () {
+                        return new HtmlString('
+                <span wire:click="$set(\'data.login_token\', \'' . Str::random(100) . '\')" class="font-medium h- px-2 py-0.5 rounded-xl bg-primary-500 text-white text-xs tracking-tight mt-[10px] cursor-pointer">
+                    Generate Token
+                </span>
+        ');
+                    })
+                    ->visible(function (User $record) {
+                        return $record->hasRole(RolesEnum::USER->value);
+                    }),
                 Forms\Components\Select::make('roles')
                     ->multiple()
                     ->preload()
-                    ->relationship('roles', 'name'),
+                    ->relationship('roles', 'name')
+                    ->visible(function () {
+                        return auth()->user()->hasRole(RolesEnum::SUPER_ADMIN->value);
+                    }),
             ]);
     }
 
