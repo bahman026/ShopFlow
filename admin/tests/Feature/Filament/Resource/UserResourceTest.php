@@ -70,7 +70,7 @@ it('can update user model.', function () {
                     'address' => $address->address,
                     'postal_code' => $address->postal_code,
                     'description' => $address->description,
-                ]
+                ],
             ],
         ])
         ->call('save')
@@ -82,7 +82,7 @@ it('can update user model.', function () {
         ->email->toBe($newUser->email)
         ->email_verified_at->toDateString()->toBe($newUser->email_verified_at->toDateString())
         ->mobile->toBe($newUser->mobile)
-        ->mobile_verified_at->toBe((string)$newUser->mobile_verified_at)
+        ->mobile_verified_at->toBe((string) $newUser->mobile_verified_at)
         ->national_id->toBe($newUser->national_id)
         ->login_token->toBe($newUser->login_token)
         ->status->toBe($newUser->status)

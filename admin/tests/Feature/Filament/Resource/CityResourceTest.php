@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Filament\Resources\CityResource;
 use App\Models\City;
-
 use Filament\Actions\DeleteAction;
+
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
@@ -51,12 +51,11 @@ it('can update city model.', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-//    dd($newCity)
+    //    dd($newCity)
     expect($city->refresh())
         ->name->toBe($newCity->name)
         ->province_id->toBe($newCity->province_id);
 });
-
 
 it('can create city model.', function () {
     // Arrange

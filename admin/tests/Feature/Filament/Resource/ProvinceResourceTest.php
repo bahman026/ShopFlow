@@ -53,7 +53,6 @@ it('can update province model.', function () {
         ->name->toBe($newProvince->name);
 });
 
-
 it('can create province model.', function () {
     // Arrange
     $newProvince = Province::factory()->make();
