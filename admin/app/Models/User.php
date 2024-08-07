@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -24,6 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $national_id
  * @property string $login_token
  * @property positive-int $status
+ * @property Collection<Address> $addresses
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $login_token_expire_time
  * @property Carbon|null $created_at

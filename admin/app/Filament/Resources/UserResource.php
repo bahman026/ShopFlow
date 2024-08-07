@@ -49,7 +49,7 @@ class UserResource extends Resource
                     ->maxLength(255),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('mobile')
-                    ->maxLength(15),
+                    ->maxLength(20),
                 Forms\Components\DateTimePicker::make('mobile_verified_at'),
                 Forms\Components\TextInput::make('national_id')
                     ->maxLength(10),
@@ -72,7 +72,7 @@ class UserResource extends Resource
                         return auth()->user()->hasRole(RolesEnum::SUPER_ADMIN->value);
                     }),
                 Forms\Components\Repeater::make('addresses')
-                    ->relationship()
+                    ->relationship('addresses')
                     ->mutateRelationshipDataBeforeSaveUsing(function (Forms\Get $get, array $data, Address $record) {
                         unset($data['province']);
                         if (! Address::query()->where($data)->first()?->id) {

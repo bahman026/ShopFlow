@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\RolesEnum;
 use App\Filament\Resources\UserResource;
+use App\Models\Address;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -40,7 +42,9 @@ it('can update user model.', function () {
     $user = User::factory()->create();
     $newUser = User::factory()->make();
 
-    $role = Role::query()->firstOrCreate(['name' => \App\Enums\RolesEnum::USER->value]);
+    $role = Role::query()->firstOrCreate(['name' => RolesEnum::USER->value]);
+
+    $address = Address::factory()->create();
 
     // Act & Assert
     livewire(UserResource\Pages\EditUser::class, [
@@ -57,6 +61,17 @@ it('can update user model.', function () {
             'status' => $newUser->status,
             'email_verified_at' => $newUser->email_verified_at,
             'roles' => $role->id,
+            'addresses' => [
+                [
+                    'name' => $address->name,
+                    'phone' => $address->phone,
+                    'user_id' => $address->user_id,
+                    'city_id' => $address->city_id,
+                    'address' => $address->address,
+                    'postal_code' => $address->postal_code,
+                    'description' => $address->description,
+                ]
+            ],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -67,9 +82,14 @@ it('can update user model.', function () {
         ->email->toBe($newUser->email)
         ->email_verified_at->toDateString()->toBe($newUser->email_verified_at->toDateString())
         ->mobile->toBe($newUser->mobile)
-        ->mobile_verified_at->toBe((string) $newUser->mobile_verified_at)
+        ->mobile_verified_at->toBe((string)$newUser->mobile_verified_at)
         ->national_id->toBe($newUser->national_id)
         ->login_token->toBe($newUser->login_token)
         ->status->toBe($newUser->status)
-        ->roles->first()->id->toBe($role->id);
+        ->roles->first()->id->toBe($role->id)
+        ->addresses->first()->name->toBe($address->name)
+        ->addresses->first()->phone->toBe($address->phone)
+        ->addresses->first()->postal_code->toBe($address->postal_code)
+        ->addresses->first()->address->toBe($address->address)
+        ->addresses->first()->description->toBe($address->description);
 });
