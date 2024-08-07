@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Enums\RolesEnum;
+use App\Enums\UserStatusEnum;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -23,6 +24,7 @@ class AdminSeeder extends Seeder
                 'last_name' => 'doe',
                 'email_verified_at' => now(),
                 'password' => 'password',
+                'status' => UserStatusEnum::ACTIVE->value,
             ]
         );
         $user->assignRole(RolesEnum::SUPER_ADMIN);

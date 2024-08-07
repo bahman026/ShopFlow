@@ -13,9 +13,15 @@ declare(strict_types=1);
 |
 */
 
+use App\Enums\RolesEnum;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
+use function Pest\Laravel\actingAs;
+
 uses(
     Tests\TestCase::class,
-    // Illuminate\Foundation\Testing\RefreshDatabase::class,
+    Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->in('Feature');
 
 /*
@@ -44,7 +50,10 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function login(?User $user = null): void
 {
-    // ..
+    $user ??= User::factory()->create();
+    Role::create(['name' => RolesEnum::SUPER_ADMIN->value]);
+    $user->assignRole(RolesEnum::SUPER_ADMIN->value);
+    actingAs($user);
 }

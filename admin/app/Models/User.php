@@ -10,6 +10,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -21,7 +22,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $mobile
  * @property Carbon $mobile_verified_at
  * @property string $national_id
+ * @property string $login_token
+ * @property positive-int $status
  * @property Carbon|null $email_verified_at
+ * @property Carbon|null $login_token_expire_time
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -43,6 +47,9 @@ class User extends Authenticatable implements FilamentUser, HasName
         'national_id',
         'email',
         'password',
+        'status',
+        'login_token',
+        'login_token_expire_time',
     ];
 
     /**
@@ -76,5 +83,10 @@ class User extends Authenticatable implements FilamentUser, HasName
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->hasRole([RolesEnum::SUPER_ADMIN->value, RolesEnum::ADMIN->value]);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
     }
 }
