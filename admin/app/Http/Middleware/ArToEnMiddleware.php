@@ -9,9 +9,6 @@ use Illuminate\Http\Request;
 
 class ArToEnMiddleware
 {
-    /**
-     * @var array
-     */
     protected array $except = [];
 
     public function handle(Request $request, Closure $next): mixed
@@ -34,10 +31,6 @@ class ArToEnMiddleware
         return $data;
     }
 
-    /**
-     * @param mixed $value
-     * @return mixed
-     */
     protected function processValue(mixed $value): mixed
     {
         if (is_string($value)) {

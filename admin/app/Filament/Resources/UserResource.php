@@ -7,6 +7,7 @@ namespace App\Filament\Resources;
 use App\Enums\RolesEnum;
 use App\Enums\UserStatusEnum;
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Address;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
@@ -72,6 +73,16 @@ class UserResource extends Resource
                     }),
                 Forms\Components\Repeater::make('addresses')
                     ->relationship()
+                    ->mutateRelationshipDataBeforeSaveUsing(function (Forms\Get $get, array $data, Address $record) {
+                        unset($data['province']);
+                        if (! Address::query()->where($data)->first()?->id) {
+                            $record->delete();
+                            $data['user_id'] = $record->user_id;
+                            Address::query()->create($data);
+
+                            return null;
+                        }
+                    })
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->maxLength(255)
@@ -101,6 +112,7 @@ class UserResource extends Resource
                             ->relationship('city', 'name')
                             ->live()
                             ->preload()
+                            ->required()
                             ->options(function (Forms\Get $get, $record) {
                                 if ($record && ! $get('province')) {
                                     return [$record->city->id => $record->city->name];
