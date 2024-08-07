@@ -7,9 +7,12 @@ namespace App\Filament\Resources;
 use App\Enums\RolesEnum;
 use App\Enums\UserStatusEnum;
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\City;
+use App\Models\Province;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -67,6 +70,48 @@ class UserResource extends Resource
                     ->visible(function () {
                         return auth()->user()->hasRole(RolesEnum::SUPER_ADMIN->value);
                     }),
+                Forms\Components\Repeater::make('addresses')
+                    ->relationship()
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->maxLength(255)
+                            ->required(),
+                        Forms\Components\TextInput::make('phone')
+                            ->required()
+                            ->maxLength(20),
+                        Forms\Components\TextInput::make('postal_code')
+                            ->maxLength(50),
+                        Forms\Components\TextInput::make('address')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('description')
+                            ->maxLength(255),
+                        Forms\Components\Select::make('province')
+                            ->options(function () {
+                                return Province::all()->pluck('name', 'id');
+                            })
+                            ->default(1)
+                            ->searchable()
+                            ->live()
+                            ->preload()
+                            ->afterStateUpdated(function (Set $set) {
+                                $set('city_id', null);
+                            }),
+                        Forms\Components\Select::make('city_id')
+                            ->relationship('city', 'name')
+                            ->live()
+                            ->preload()
+                            ->options(function (Forms\Get $get, $record) {
+                                if ($record && ! $get('province')) {
+                                    return [$record->city->id => $record->city->name];
+                                }
+
+                                return City::query()
+                                    ->where('province_id', $get('province'))
+                                    ->pluck('name', 'id');
+                            }),
+
+                    ]),
             ]);
     }
 
