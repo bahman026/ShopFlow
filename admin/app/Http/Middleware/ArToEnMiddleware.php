@@ -21,9 +21,10 @@ class ArToEnMiddleware
 
     protected function process(array $data): array
     {
+
         array_walk_recursive(
             $data,
-            function (&$value) {
+            function (mixed &$value) {
                 $value = $this->processValue($value);
             }
         );
