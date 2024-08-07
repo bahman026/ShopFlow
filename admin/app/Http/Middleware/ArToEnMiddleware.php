@@ -12,7 +12,7 @@ class ArToEnMiddleware
     /**
      * @var array
      */
-    protected $except = [];
+    protected array $except = [];
 
     public function handle(Request $request, Closure $next): mixed
     {
@@ -35,10 +35,10 @@ class ArToEnMiddleware
     }
 
     /**
-     * @param  mixed  $value
-     * @param  string  $key
+     * @param mixed $value
+     * @return mixed
      */
-    protected function processValue($value): mixed
+    protected function processValue(mixed $value): mixed
     {
         if (is_string($value)) {
             $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
