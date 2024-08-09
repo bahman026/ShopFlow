@@ -29,7 +29,7 @@ class CategoryFactory extends Factory
             'content' => fake()->paragraph(),
             'title' => fake()->text,
             'description' => fake()->text,
-            'no_index' => false,
+            'no_index' => 0,
             'canonical' => null,
             'parent_id' => null,
             'status' => CategoryStatusEnum::ACTIVE->value,
@@ -39,7 +39,7 @@ class CategoryFactory extends Factory
     public function configure(): CategoryFactory | Factory
     {
         return $this->afterCreating(function (Category $category) {
-            $category->imageable()->create([
+            $category->images()->create([
                 'path' => fake()->imageUrl(),
             ]);
         });

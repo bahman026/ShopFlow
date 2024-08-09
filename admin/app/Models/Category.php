@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\CategoryStatusEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property positive-int|null $parent_id
  * @property positive-int|null $image_id
  * @property bool $status
- * @property Image $image
+ * @property Collection<Image> $images
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -45,6 +46,7 @@ class Category extends Model
         'status',
     ];
 
+
     public function images(): MorphMany
     {
         return $this->morphMany(Image::class, 'imageable');
@@ -53,11 +55,5 @@ class Category extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', CategoryStatusEnum::ACTIVE->value);
-    }
-
-    public function forceDeleteAny()
-    {
-        //        dd("Test");
-        return false;
     }
 }
