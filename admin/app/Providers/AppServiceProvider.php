@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Category;
+use App\Policies\CategoryPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::guessPolicyNamesUsing(function (string $modelClass) {
+            return 'App\\Policies\\' . class_basename($modelClass) . 'Policy';
+        });
+        Gate::policy(Category::class, CategoryPolicy::class);
     }
 }

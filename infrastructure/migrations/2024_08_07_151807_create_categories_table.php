@@ -21,7 +21,6 @@ return new class extends Migration
             $table->boolean('no_index')->default(false);
             $table->text('canonical')->nullable();
             $table->unsignedInteger('parent_id')->nullable();
-            $table->foreignId('image_id')->references('id')->on('images');
             $table->unsignedTinyInteger('status');
             $table->timestamps();
         });

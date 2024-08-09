@@ -113,8 +113,8 @@ class UserResource extends Resource
                             ->live()
                             ->preload()
                             ->required()
-                            ->options(function (Forms\Get $get, Address $record) {
-                                if ($record && ! $get('province')) {
+                            ->options(function (?Forms\Get $get, ?Address $record) {
+                                if (!empty($record) && !$get('province')) {
                                     return [$record->city->id => $record->city->name];
                                 }
 
