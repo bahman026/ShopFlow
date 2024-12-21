@@ -151,8 +151,8 @@ class UserResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('national_id')
                     ->searchable(), Tables\Columns\TextColumn::make('status')
-                    ->getStateUsing(fn (User $user) => UserStatusEnum::from($user->status)->label())
-                    ->color(fn (User $user) => UserStatusEnum::from($user->status)->color())
+                    ->getStateUsing(fn (User $user) => $user->status->label())
+                    ->color(fn (User $user) => $user->status->color())
                     ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
