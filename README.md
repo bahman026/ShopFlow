@@ -17,4 +17,3 @@ https://docs.google.com/document/d/e/2PACX-1vTqah2hdQeeiu3Le07zfOfp5vK-ojLwJtQmz
 ```
 
 Fill in the values for DB_DATABASE, DB_USERNAME, and DB_PASSWORD according to the .env file in the infrastructure directory.
-
