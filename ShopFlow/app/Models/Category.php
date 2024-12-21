@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property string|null $canonical
  * @property positive-int|null $parent_id
  * @property positive-int|null $image_id
- * @property bool $status
+ * @property CategoryStatusEnum $status
  * @property Collection<Image> $images
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -44,6 +44,11 @@ class Category extends Model
         'canonical',
         'parent_id',
         'status',
+    ];
+
+    protected $casts = [
+        'no_index' => 'boolean',
+        'status' => CategoryStatusEnum::class,
     ];
 
     public function images(): MorphMany

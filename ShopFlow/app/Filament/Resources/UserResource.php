@@ -18,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -41,7 +42,7 @@ class UserResource extends Resource
                     ->required()
                     ->options(UserStatusEnum::options())
                     ->default(UserStatusEnum::ACTIVE->value)
-                    ->dehydrateStateUsing(fn (string $state): int => (int) $state),
+                    ->dehydrateStateUsing(fn (UserStatusEnum $state): UserStatusEnum => $state),
 
                 Forms\Components\TextInput::make('email')
                     ->email()
@@ -149,11 +150,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('mobile_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('national_id')
-                    ->searchable(), Tables\Columns\TextColumn::make('status')
-                    ->getStateUsing(fn (User $user) => UserStatusEnum::from($user->status)->label())
-                    ->color(fn (User $user) => UserStatusEnum::from($user->status)->color())
-                    ->badge(),
+                Tables\Columns\TextColumn::make('national_id'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -196,7 +193,7 @@ class UserResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return Auth::user()->hasRole('super-admin');
     }
 
     public static function getPages(): array
