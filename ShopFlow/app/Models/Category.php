@@ -46,7 +46,6 @@ class Category extends Model
         'status',
     ];
 
-
     public function images(): MorphMany
     {
         return $this->morphMany(Image::class, 'imageable');

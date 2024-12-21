@@ -97,7 +97,10 @@ class CategoryResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('images')
                     ->getStateUsing(function (Category $record) {
-                        return $record->images->first()?->path;
+                        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images */
+                        $images = $record->images;
+
+                        return $images->first()?->path;
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')

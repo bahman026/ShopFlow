@@ -188,7 +188,7 @@ class UserResource extends Resource
         $query = parent::getEloquentQuery();
         $query->whereNot('id', auth()->id());
         if (! auth()->user()->hasRole(RolesEnum::SUPER_ADMIN->value) && auth()->user()->hasRole(RolesEnum::ADMIN->value)) {
-            $query->withoutRole(RolesEnum::SUPER_ADMIN->value);
+            $query->withoutRole(RolesEnum::SUPER_ADMIN->value); // @phpstan-ignore-line
         }
 
         return $query;
