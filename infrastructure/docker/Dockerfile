@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 ARG uid
 ARG gid
@@ -34,11 +34,11 @@ RUN docker-php-ext-install bcmath
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install intl
+RUN docker-php-ext-install xml
 RUN pecl install redis && docker-php-ext-enable redis
 
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
-RUN npm install pm2 -g
 
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -53,3 +53,7 @@ RUN mkdir -p "/var/www/.pm2"
 RUN chown -R $uid:$gid "/var/www/.pm2"
 
 WORKDIR /var/www/html
+
+USER www-data
+
+ENTRYPOINT ["./run.sh"]

@@ -1,6 +1,0 @@
-volumes/postgres/
-volumes/redis/
-.env
-/.fleet
-/.idea
-/.vscode
