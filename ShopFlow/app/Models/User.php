@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\RolesEnum;
+use App\Enums\UserStatusEnum;
 use Carbon\Carbon;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
@@ -24,7 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon $mobile_verified_at
  * @property string $national_id
  * @property string $login_token
- * @property positive-int $status
+ * @property UserStatusEnum $status
  * @property Collection<Address> $addresses
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $login_token_expire_time
@@ -74,6 +75,7 @@ class User extends Authenticatable implements FilamentUser, HasName
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => UserStatusEnum::class,
         ];
     }
 

@@ -78,8 +78,8 @@ class CategoryResource extends Resource
                     ->limit(60)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->getStateUsing(fn (Category $record): string => CategoryStatusEnum::from((int) $record->status)->label())
-                    ->color(fn (Category $record): string => CategoryStatusEnum::from((int) $record->status)->color())
+                    ->getStateUsing(fn (Category $record) => $record->status->label())
+                    ->color(fn (Category $record): string => $record->status->color())
                     ->sortable(),
                 Tables\Columns\IconColumn::make('no_index')
                     ->boolean(),
