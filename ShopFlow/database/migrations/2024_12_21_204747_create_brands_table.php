@@ -1,7 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\BrandStatusEnum;
-use App\Models\Image;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,8 +22,7 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->string('description')->nullable();
             $table->boolean('no_index')->default(false);
-            $table->text('canonical')->nullable();
-            $table->foreignIdFor(Image::class)->nullable();
+            $table->string('canonical')->nullable();
             $table->unsignedTinyInteger('status')->default(BrandStatusEnum::ACTIVE);
             $table->timestamps();
         });

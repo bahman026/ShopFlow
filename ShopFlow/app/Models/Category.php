@@ -7,10 +7,9 @@ namespace App\Models;
 use App\Enums\CategoryStatusEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
  * @property positive-int $id
@@ -22,9 +21,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property bool $no_index
  * @property string|null $canonical
  * @property positive-int|null $parent_id
- * @property positive-int|null $image_id
  * @property CategoryStatusEnum $status
- * @property Collection<Image> $images
+ * @property Image $image
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -51,9 +49,9 @@ class Category extends Model
         'status' => CategoryStatusEnum::class,
     ];
 
-    public function images(): MorphMany
+    public function image(): MorphOne
     {
-        return $this->morphMany(Image::class, 'imageable');
+        return $this->morphOne(Image::class, 'imageable');
     }
 
     public function scopeActive(Builder $query): Builder

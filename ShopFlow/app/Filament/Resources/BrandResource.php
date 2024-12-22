@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources;
 
+use App\Enums\BrandStatusEnum;
 use App\Filament\Resources\BrandResource\Pages;
-use App\Filament\Resources\BrandResource\RelationManagers;
 use App\Models\Brand;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use FilamentTiptapEditor\Enums\TiptapOutput;
+use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Support\Str;
 
 class BrandResource extends Resource
 {
@@ -21,44 +24,58 @@ class BrandResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('heading')
                     ->required()
-                    ->maxLength(255),
+                    ->live(onBlur: true)
+                    ->maxLength(255)
+                    ->afterStateUpdated(function (string $operation, ?string $state, Forms\Set $set): void {
+                        if ($operation === 'create') {
+                            $set('slug', Str::slug($state));
+                        }
+                    }),
                 Forms\Components\TextInput::make('slug')
+                    ->disabled()
+                    ->dehydrated()
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('content')
-                    ->columnSpanFull(),
+                    ->maxLength(255)
+                    ->unique(Brand::class, 'slug', ignoreRecord: true),
+
+                TiptapEditor::make('content')
+                    ->output(TiptapOutput::Html) // optional, change the format for saved data, default is html
+                    ->columnSpanFull()
+                    ->extraInputAttributes(['style' => 'min-height: 12rem;']),
                 Forms\Components\TextInput::make('title')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('description')
                     ->maxLength(255),
                 Forms\Components\Toggle::make('no_index')
                     ->required(),
-                Forms\Components\Textarea::make('canonical')
-                    ->columnSpanFull(),
-                Forms\Components\Group::make()
-                    ->relationship('image') // Connect the image relationship
+                Forms\Components\TextInput::make('canonical')
+                    ->maxLength(255),
+                Forms\Components\Fieldset::make('image')
+                    ->relationship('image')
                     ->schema([
-                        Forms\Components\FileUpload::make('path') // Map to the 'path' column
-                        ->label('Upload Image')
-                            ->required() // Ensure the field is not left empty
-                            ->disk('public') // Specify the disk for file storage
-                            ->directory('uploads/brands') // Directory where images will be stored
-                            ->visibility('public') // Ensures public access if needed
-                            ->previewable() // Enables image preview
+                        Forms\Components\FileUpload::make('path')
+                            ->nullable()
+                            ->columns(1)
+                            ->columnSpanFull(),
                     ])
-                    ->columns(1)
+                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Brand $record) {
+                        if ($data['path'] === null) {
+                            $record->image->delete();
+                        }
+
+                        return $data;
+                    })
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('status')
+                Forms\Components\Select::make('status')
                     ->required()
-                    ->numeric()
-                    ->default(1),
+                    ->options(BrandStatusEnum::options())
+                    ->default(BrandStatusEnum::ACTIVE->value),
             ]);
     }
 
@@ -67,13 +84,17 @@ class BrandResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('heading')
-                    ->searchable(),
+                    ->limit(30)
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
+                    ->limit(30)
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
+                    ->limit(30)
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('description')
-                    ->searchable(),
+                    ->limit(30)
+                    ->wrap(),
                 Tables\Columns\IconColumn::make('no_index')
                     ->boolean(),
                 Tables\Columns\ImageColumn::make('image.path'),

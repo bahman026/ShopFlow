@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Filament\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\Image;
 use Filament\Actions\DeleteAction;
+use Illuminate\Http\UploadedFile;
 
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
@@ -37,9 +39,10 @@ it('can render edit category page.', function () {
 
 it('can update category model.', function () {
     // Arrange
-    $category = Category::factory()->create();
+    $category = Category::factory()->withImage()->create();
     $newCategory = Category::factory()->make();
-    $imagePath = fake()->imageUrl();
+    $file = UploadedFile::fake()->image('avatar.png', 500);
+
     // Act & Assert
     livewire(CategoryResource\Pages\EditCategory::class, [
         'record' => $category->getRouteKey(),
@@ -54,8 +57,8 @@ it('can update category model.', function () {
             'canonical' => $newCategory->canonical,
             'parent_id' => $newCategory->parent_id,
             'status' => $newCategory->status,
-            'images' => null,
         ])
+        ->set('data.image.path', [$file->getClientOriginalPath()])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -63,19 +66,26 @@ it('can update category model.', function () {
         ->heading->toBe($newCategory->heading)
         ->slug->toBe($newCategory->slug)
         ->title->toBe($newCategory->title)
-        ->content->toBe('<p>' . $newCategory->content . '</p>')
+        ->content->toBe($newCategory->content ? '<p>' . $newCategory->content . '</p>' : null)
         ->description->toBe($newCategory->description)
         ->no_index->toBe($newCategory->no_index)
         ->canonical->toBe($newCategory->canonical)
         ->parent_id->toBe($newCategory->parent_id)
         ->status->toBe($newCategory->status);
-    //    TODO: fix this
-    //        ->images->toBe($newCategory->images);
+
+    $category = Category::query()->where('slug', $newCategory->slug)->first();
+
+    $this->assertDatabaseHas(Image::class, [
+        'path' => $file->getClientOriginalPath(),
+        'imageable_id' => $category->id,
+        'imageable_type' => Category::class,
+    ]);
 });
 
 it('can create category model.', function () {
     // Arrange
     $newCategory = Category::factory()->make();
+    $file = UploadedFile::fake()->image('avatar.png', 500);
 
     // Act & Assert
     livewire(CategoryResource\Pages\CreateCategory::class)
@@ -88,23 +98,29 @@ it('can create category model.', function () {
             'no_index' => $newCategory->no_index,
             'canonical' => $newCategory->canonical,
             'parent_id' => $newCategory->parent_id,
-            'status' => $newCategory->status,
-            'images' => null,
+            'status' => $newCategory->status->value,
         ])
+        ->set('data.image.path', [$file->getClientOriginalPath()])
         ->call('create')
         ->assertHasNoFormErrors();
     $this->assertDatabaseHas(Category::class, [
         'heading' => $newCategory->heading,
         'slug' => $newCategory->slug,
         'title' => $newCategory->title,
-        'content' => '<p>' . $newCategory->content . '</p>',
+        'content' => $newCategory->content ? '<p>' . $newCategory->content . '</p>' : null,
         'description' => $newCategory->description,
         'no_index' => $newCategory->no_index,
         'canonical' => $newCategory->canonical,
         'parent_id' => $newCategory->parent_id,
-        'status' => $newCategory->status,
-        //TODO: fix this
-        //        'images' => null
+        'status' => $newCategory->status->value,
+    ]);
+
+    $category = Category::query()->where('slug', $newCategory->slug)->first();
+
+    $this->assertDatabaseHas(Image::class, [
+        'path' => $file->getClientOriginalPath(),
+        'imageable_id' => $category->id,
+        'imageable_type' => Category::class,
     ]);
 });
 

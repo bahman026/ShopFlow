@@ -7,6 +7,7 @@ namespace App\Filament\Resources;
 use App\Enums\CategoryStatusEnum;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
+use App\Models\Image;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,6 +15,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
 {
@@ -28,10 +30,22 @@ class CategoryResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('heading')
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->maxLength(255)
+                    ->afterStateUpdated(function (string $operation, ?string $state, Forms\Set $set): void {
+                        if ($operation === 'create') {
+                            $set('slug', Str::slug($state));
+                        }
+                    }),
                 Forms\Components\TextInput::make('slug')
-                    ->required(),
-                Forms\Components\TextInput::make('title'),
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(Category::class, 'slug', ignoreRecord: true),
+                Forms\Components\TextInput::make('title')
+                    ->maxLength(255),
                 TiptapEditor::make('content')
                     ->output(TiptapOutput::Html) // optional, change the format for saved data, default is html
                     ->columnSpanFull()
@@ -40,26 +54,36 @@ class CategoryResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->maxLength(255)
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('canonical'),
+                Forms\Components\TextInput::make('canonical')
+                    ->maxLength(255),
                 Forms\Components\Select::make('parent_id')
                     ->options(function () {
                         return Category::active()
                             ->get()
                             ->pluck('heading', 'id');
                     }),
-                Forms\Components\Toggle::make('no_index'),
-
-                Forms\Components\Repeater::make('images')
-                    ->relationship()
-                    ->maxItems(1)
+                Forms\Components\Toggle::make('no_index')
+                    ->required(),
+                Forms\Components\Fieldset::make('image')
+                    ->relationship('image')
                     ->schema([
                         Forms\Components\FileUpload::make('path')
-                            ->previewable(),
+                            ->nullable()
+                            ->columns(1)
+                            ->columnSpanFull(),
                     ])
-                    ->columns(1)
+                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Category $record) {
+                        if ($data['path'] === null) {
+                            $record->image->delete();
+                        }
+
+                        return $data;
+                    })
                     ->columnSpanFull(),
                 Forms\Components\Select::make('status')
-                    ->options(CategoryStatusEnum::options()),
+                    ->required()
+                    ->options(CategoryStatusEnum::options())
+                    ->default(CategoryStatusEnum::ACTIVE->value),
             ]);
     }
 
@@ -97,10 +121,10 @@ class CategoryResource extends Resource
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('images')
                     ->getStateUsing(function (Category $record) {
-                        /** @var \Illuminate\Database\Eloquent\Collection|\App\Models\Image[] $images */
-                        $images = $record->images;
+                        /** @var Image|null $image */
+                        $image = $record->image;
 
-                        return $images->first()?->path;
+                        return $image?->path;
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')

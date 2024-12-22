@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\BrandStatusEnum;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -18,15 +21,14 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property string|null $description
  * @property bool $no_index
  * @property string|null $canonical
- * @property positive-int|null $image_id
  * @property BrandStatusEnum $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
-// * @property Image|null $image
+ * @property Image|null $image
  */
-
 class Brand extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
         'heading',
@@ -36,7 +38,6 @@ class Brand extends Model
         'description',
         'no_index',
         'canonical',
-        'image_id',
         'status',
     ];
 
@@ -44,10 +45,8 @@ class Brand extends Model
         'no_index' => 'boolean',
         'status' => BrandStatusEnum::class,
     ];
-    /**
-     * Get all of the Brand's image.
-     */
-    public function image()
+
+    public function image(): MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
     }
