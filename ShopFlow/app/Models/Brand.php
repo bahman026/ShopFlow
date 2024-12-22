@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CategoryStatusEnum;
+use App\Enums\BrandStatusEnum;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
+ * App\Models\Brand
+ *
  * @property positive-int $id
  * @property string $heading
  * @property string $slug
@@ -20,15 +21,12 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property string|null $description
  * @property bool $no_index
  * @property string|null $canonical
- * @property positive-int|null $parent_id
- * @property CategoryStatusEnum $status
- * @property Image $image
+ * @property BrandStatusEnum $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
- * @method static Builder|Category active()
+ * @property Image|null $image
  */
-class Category extends Model
+class Brand extends Model
 {
     use HasFactory;
 
@@ -40,22 +38,16 @@ class Category extends Model
         'description',
         'no_index',
         'canonical',
-        'parent_id',
         'status',
     ];
 
     protected $casts = [
         'no_index' => 'boolean',
-        'status' => CategoryStatusEnum::class,
+        'status' => BrandStatusEnum::class,
     ];
 
     public function image(): MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
-    }
-
-    public function scopeActive(Builder $query): Builder
-    {
-        return $query->where('status', CategoryStatusEnum::ACTIVE->value);
     }
 }
