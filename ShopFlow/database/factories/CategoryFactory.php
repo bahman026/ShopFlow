@@ -36,11 +36,13 @@ class CategoryFactory extends Factory
         ];
     }
 
-    public function configure(): CategoryFactory | Factory
+    public function withImage(): BrandFactory | Factory
     {
         return $this->afterCreating(function (Category $category) {
-            $category->images()->create([
+            $category->image()->create([
                 'path' => fake()->imageUrl(),
+                'imageable_type' => Category::class,
+                'imageable_id' => $category->id,
             ]);
         });
     }
