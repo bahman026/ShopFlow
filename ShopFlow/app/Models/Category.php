@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -57,5 +58,14 @@ class Category extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', CategoryStatusEnum::ACTIVE->value);
+    }
+
+    /**
+     * Relationship with the AttributeGroupCategory model.
+     * This indicates that a category can have many AttributeGroupCategory records.
+     */
+    public function attributeGroupCategories(): HasMany
+    {
+        return $this->hasMany(AttributeGroupCategory::class);
     }
 }

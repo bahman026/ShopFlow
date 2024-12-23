@@ -15,6 +15,7 @@ class CitySeeder extends Seeder
      */
     public function run(): void
     {
+        City::query()->delete();
         Province::query()->delete();
 
         $provinces = [
@@ -145,8 +146,6 @@ class CitySeeder extends Seeder
         ];
 
         Province::query()->insert($provinces);
-
-        City::query()->delete();
 
         $cities = [
             [
