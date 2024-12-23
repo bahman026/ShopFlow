@@ -32,7 +32,6 @@ class AttributeGroupCategory extends Model
         'category_id',
         'as_filter',
         'required',
-        'order',
     ];
 
     /**
