@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Filament\Resources\AncestorResource;
 use App\Models\Ancestor;
 use Filament\Actions\DeleteAction;
-use Illuminate\Http\UploadedFile;
 
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
@@ -61,14 +60,12 @@ it('can update ancestor model.', function () {
 it('can create ancestor model.', function () {
     // Arrange
     $newAncestor = Ancestor::factory()->make();
-    $file = UploadedFile::fake()->image('avatar.png', 500);
 
     livewire(AncestorResource\Pages\CreateAncestor::class)
         ->fillForm([
             'name' => $newAncestor->name,
             'order' => $newAncestor->order,
         ])
-        ->set('data.image.path', [$file->getClientOriginalPath()])
         ->call('create')
         ->assertHasNoFormErrors();
 
