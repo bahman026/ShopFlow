@@ -38,6 +38,7 @@ class AttributeGroup extends Model
     {
         return $this->belongsTo(Ancestor::class);
     }
+
     public function attributes(): HasMany
     {
         return $this->hasMany(Attribute::class);
