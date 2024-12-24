@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             CategorySeeder::class,
             AncestorSeeder::class,
-            AttributeGroupSeeder::class,
+            AttributeSeeder::class,
             AttributeGroupCategorySeeder::class,
         ]);
     }
