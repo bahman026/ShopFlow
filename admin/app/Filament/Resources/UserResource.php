@@ -62,8 +62,8 @@ class UserResource extends Resource
                 </span>
         ');
                     })
-                    ->visible(function (User $record) {
-                        return $record->hasRole(RolesEnum::USER->value);
+                    ->visible(function (?User $record) {
+                        return $record?->hasRole(RolesEnum::USER->value) ?? false;
                     }),
                 Forms\Components\Select::make('roles')
                     ->multiple()
