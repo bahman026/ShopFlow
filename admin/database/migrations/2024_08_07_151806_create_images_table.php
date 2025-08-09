@@ -17,6 +17,9 @@ return new class extends Migration
             $table->id();
             $table->text('path')->nullable();
             $table->morphs('imageable');
+            $table->integer('order')->default(0);
+            $table->boolean('is_featured')->default(false);
+            $table->string('alt_text')->nullable();
             $table->timestamps();
         });
     }
