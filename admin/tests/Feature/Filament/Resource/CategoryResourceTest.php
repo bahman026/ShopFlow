@@ -131,7 +131,6 @@ it('can delete category model.', function () {
     // Act & Assert
     livewire(CategoryResource\Pages\EditCategory::class, [
         'record' => $category->getRouteKey(),
-    ])
-        ->callAction(DeleteAction::class);
+    ])->callAction(DeleteAction::class);
     $this->assertModelMissing($category);
 });
