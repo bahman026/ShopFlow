@@ -96,11 +96,9 @@ class CategoryResource extends Resource
                     ->wrap(),
                 Tables\Columns\TextColumn::make('description')
                     ->limit(30)
-                    ->wrap()
-                    ->searchable(),
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('content')
-                    ->limit(60)
-                    ->searchable(),
+                    ->limit(60),
                 Tables\Columns\TextColumn::make('status')
                     ->getStateUsing(fn (Category $record) => $record->status->label())
                     ->color(fn (Category $record): string => $record->status->color())
