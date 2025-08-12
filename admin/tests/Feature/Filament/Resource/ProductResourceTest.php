@@ -56,8 +56,6 @@ it('can update product model.', function () {
             'maximum' => $newProduct->maximum,
             'step' => $newProduct->step,
             'profit_percent' => $newProduct->profit_percent,
-            'attributes' => $newProduct->attributes,
-            'highlight' => $newProduct->highlight,
             'has_stock' => $newProduct->has_stock,
             'variety_counts' => $newProduct->variety_counts,
             'weight' => $newProduct->weight,
@@ -76,7 +74,7 @@ it('can update product model.', function () {
         ->heading->toBe($newProduct->heading)
         ->slug->toBe($newProduct->slug)
         ->price->toBe($newProduct->price)
-        ->content->toBe($newProduct->content ? '<p>' . $newProduct->content . '</p>' : null)
+        ->content->toBe($newProduct->content ? $newProduct->content : null)
         ->title->toBe($newProduct->title)
         ->description->toBe($newProduct->description)
         ->no_index->toBe($newProduct->no_index)
@@ -88,8 +86,6 @@ it('can update product model.', function () {
         ->maximum->toBe($newProduct->maximum)
         ->step->toBe($newProduct->step)
         ->profit_percent->toBe($newProduct->profit_percent)
-        ->attributes->toBe($newProduct->attributes)
-        ->highlight->toBe($newProduct->highlight)
         ->has_stock->toBe($newProduct->has_stock)
         ->variety_counts->toBe($newProduct->variety_counts)
         ->weight->toBe($newProduct->weight)
@@ -129,8 +125,6 @@ it('can create product model.', function () {
             'maximum' => $newProduct->maximum,
             'step' => $newProduct->step,
             'profit_percent' => $newProduct->profit_percent,
-            'attributes' => $newProduct->attributes,
-            'highlight' => $newProduct->highlight,
             'has_stock' => $newProduct->has_stock,
             'variety_counts' => $newProduct->variety_counts,
             'weight' => $newProduct->weight,
@@ -149,7 +143,7 @@ it('can create product model.', function () {
         'heading' => $newProduct->heading,
         'slug' => $newProduct->slug,
         'price' => $newProduct->price,
-        'content' => $newProduct->content ? '<p>' . $newProduct->content . '</p>' : null,
+        'content' => $newProduct->content ? $newProduct->content : null,
         'title' => $newProduct->title,
         'description' => $newProduct->description,
         'no_index' => $newProduct->no_index,
@@ -161,8 +155,6 @@ it('can create product model.', function () {
         'maximum' => $newProduct->maximum,
         'step' => $newProduct->step,
         'profit_percent' => $newProduct->profit_percent,
-        'attributes' => $newProduct->attributes,
-        'highlight' => $newProduct->highlight,
         'has_stock' => $newProduct->has_stock,
         'variety_counts' => $newProduct->variety_counts,
         'weight' => $newProduct->weight,
