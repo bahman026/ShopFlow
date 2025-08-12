@@ -19,33 +19,33 @@ jobs:
           tools: composer
 
       - name: Install PHP Dependencies
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Compile CSS and JavaScript
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           npm ci
           npm run build
 
       - name: Setup Environment
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           cp .env.example .env
           php artisan key:generate
 
       - name: Run Pint Test
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           ./vendor/bin/pint --test
 
       - name: Run Pest Tests
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           ./vendor/bin/pest
 
       - name: Run PHPStan Analysis
-        working-directory: ./ShopFlow
+        working-directory: ./admin
         run: |
           ./vendor/bin/phpstan --memory-limit=2048M analyse

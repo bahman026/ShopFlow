@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+    app:
+        build:
+            args:
+                gid: ${GROUP_ID}
+                uid: ${USER_ID}
+            context: ./
+            dockerfile: Dockerfile
+        image: website
+        container_name: "${COMPOSE_PROJECT_NAME}_app"
+        restart: unless-stopped
+        volumes:
+            - ../../:/var/www/html
+        networks:
+            - shop_flow_net
+
+    webserver:
+        image: nginx:alpine3.19
+        container_name: "${COMPOSE_PROJECT_NAME}_nginx"
+        restart: unless-stopped
+        ports:
+            - "127.0.0.1:${NGINX_EXPOSE_PORT}:80"
+        volumes:
+            - ../../:/var/www/html
+            - ./volumes/nginx:/etc/nginx/conf.d/
+        networks:
+            - shop_flow_net
+
+networks:
+    shop_flow_net:
+      external: true
+
