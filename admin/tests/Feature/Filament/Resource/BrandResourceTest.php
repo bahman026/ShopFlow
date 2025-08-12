@@ -65,7 +65,7 @@ it('can update brand model.', function () {
         ->heading->toBe($newBrand->heading)
         ->slug->toBe($newBrand->slug)
         ->title->toBe($newBrand->title)
-        ->content->toBe($newBrand->content ? '<p>' . $newBrand->content . '</p>' : null)
+        ->content->toBe($newBrand->content ? $newBrand->content : null)
         ->description->toBe($newBrand->description)
         ->no_index->toBe($newBrand->no_index)
         ->canonical->toBe($newBrand->canonical)
@@ -105,7 +105,7 @@ it('can create brand model.', function () {
         'heading' => $newBrand->heading,
         'slug' => $newBrand->slug,
         'title' => $newBrand->title,
-        'content' => $newBrand->content ? '<p>' . $newBrand->content . '</p>' : null,
+        'content' => $newBrand->content ? $newBrand->content : null,
         'description' => $newBrand->description,
         'no_index' => $newBrand->no_index,
         'canonical' => $newBrand->canonical,
