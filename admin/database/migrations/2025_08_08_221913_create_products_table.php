@@ -36,8 +36,6 @@ return new class extends Migration
             $table->unsignedInteger('maximum')->nullable();
             $table->unsignedInteger('step')->default(1);
             $table->decimal('profit_percent', 5, 2)->default(0);
-            $table->json('attributes')->nullable();
-            $table->json('highlight')->nullable();
             $table->boolean('has_stock')->default(true);
             $table->unsignedInteger('variety_counts')->default(0);
             $table->decimal('weight', 10, 2)->nullable();
