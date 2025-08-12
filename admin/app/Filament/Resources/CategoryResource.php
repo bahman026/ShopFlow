@@ -13,9 +13,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use FilamentTiptapEditor\Enums\TiptapOutput;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Str;
+use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
 
 class CategoryResource extends Resource
 {
@@ -46,10 +45,8 @@ class CategoryResource extends Resource
                     ->unique(Category::class, 'slug', ignoreRecord: true),
                 Forms\Components\TextInput::make('title')
                     ->maxLength(255),
-                TiptapEditor::make('content')
-                    ->output(TiptapOutput::Html) // optional, change the format for saved data, default is html
+                TinyEditor::make('content')
                     ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),
                 Forms\Components\Textarea::make('description')
                     ->maxLength(255)
