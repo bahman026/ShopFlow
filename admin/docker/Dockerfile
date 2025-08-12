@@ -56,10 +56,10 @@ RUN chown -R $uid:$gid "/var/www/.pm2"
 
 WORKDIR /var/www/html/admin
 # Copy entrypoint file
-COPY entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Make it executable
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set the entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
