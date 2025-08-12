@@ -6,15 +6,15 @@ namespace App\Filament\Resources;
 
 use App\Enums\ProductStatusEnum;
 use App\Filament\Resources\ProductResource\Pages;
+use App\Models\Attribute;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use FilamentTiptapEditor\Enums\TiptapOutput;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Str;
+use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
 
 class ProductResource extends Resource
 {
@@ -47,10 +47,8 @@ class ProductResource extends Resource
                     ->required()
                     ->numeric()
                     ->prefix('تومان'),
-                TiptapEditor::make('content')
-                    ->output(TiptapOutput::Html)
+                TinyEditor::make('content')
                     ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),
                 Forms\Components\TextInput::make('title')
                     ->maxLength(255),
@@ -62,7 +60,7 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('canonical')
                     ->maxLength(255),
                 Forms\Components\Repeater::make('images')
-                    ->relationship('images') // link to morphMany
+                    ->relationship('images')
                     ->schema([
                         Forms\Components\FileUpload::make('path')
                             ->nullable()
@@ -107,11 +105,46 @@ class ProductResource extends Resource
                     ->numeric()
                     ->suffix('%')
                     ->default(0),
-                Forms\Components\TextInput::make('attributes')
-                    ->nullable(),
-                Forms\Components\TextInput::make('highlight')
-                    ->nullable(),
+
+                Forms\Components\Repeater::make('attributes')
+                    ->schema([
+                        Forms\Components\Select::make('attribute_id')
+                            ->label('Attribute')
+                            ->options(
+                                Attribute::with('attributeGroup')->get()->mapWithKeys(function ($attribute) {
+                                    return [
+                                        $attribute->id => $attribute->attributeGroup->name . ' - ' . $attribute->value,
+                                    ];
+                                })
+                            )
+                            ->searchable(),
+                        Forms\Components\Checkbox::make('pivot.is_highlight')
+                            ->label('Highlight'),
+                    ])
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function ($state, callable $set, $livewire) {
+                        if ($livewire->record) {
+                            $attributes = $livewire->record->attributes()->get();
+
+                            $data = $attributes->map(function ($attribute) {
+                                return [
+                                    'attribute_id' => $attribute->id,
+                                    'pivot' => ['is_highlight' => $attribute->pivot->is_highlight],
+                                ];
+                            })->toArray();
+
+                            $set('attributes', $data);
+                        }
+                    })
+                    ->saveRelationshipsUsing(function ($record, $state) {
+                        $syncData = [];
+                        foreach ($state as $item) {
+                            $syncData[$item['attribute_id']] = ['is_highlight' => $item['pivot']['is_highlight'] ?? false];
+                        }
+                        $record->attributes()->sync($syncData);
+                    }),
                 Forms\Components\Toggle::make('has_stock')
+                    ->default(true)
                     ->required(),
                 Forms\Components\TextInput::make('variety_counts')
                     ->required()
@@ -150,6 +183,9 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('slug')
                     ->limit(30)
                     ->wrap(),
+                Tables\Columns\ImageColumn::make('featuredImage.path')
+                    ->label('Featured')
+                    ->square(),
                 Tables\Columns\TextColumn::make('price')
                     ->money()
                     ->sortable(),
@@ -159,11 +195,6 @@ class ProductResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('canonical')
                     ->searchable(),
-
-                Tables\Columns\ImageColumn::make('featuredImage.path')
-                    ->label('Featured')
-                    ->square(),
-
                 Tables\Columns\TextColumn::make('attributeGroup.name')
                     ->numeric()
                     ->sortable(),
