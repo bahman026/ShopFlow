@@ -6,8 +6,10 @@ namespace App\Models;
 
 use App\Enums\BrandStatusEnum;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property BrandStatusEnum $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Collection<Product> $products
  * @property Image|null $image
  */
 class Brand extends Model
@@ -49,5 +52,10 @@ class Brand extends Model
     public function image(): MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
+    }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
     }
 }

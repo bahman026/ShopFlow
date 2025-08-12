@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\CategoryStatusEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property Image $image
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Collection<Product> $products
  *
  * @method static Builder|Category active()
  */
@@ -49,6 +51,11 @@ class Category extends Model
         'no_index' => 'boolean',
         'status' => CategoryStatusEnum::class,
     ];
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 
     public function image(): MorphOne
     {

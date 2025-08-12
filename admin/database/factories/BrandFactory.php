@@ -22,7 +22,7 @@ class BrandFactory extends Factory
     public function definition(): array
     {
         return [
-            'heading' => fake()->text,
+            'heading' => fake()->text(30),
             'slug' => fn (array $attributes): string => Str::slug($attributes['heading']),
             'content' => fake()->optional()->paragraph(),
             'title' => fake()->optional()->text,

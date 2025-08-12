@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Attribute;
+use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,13 +15,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('images', function (Blueprint $table) {
+        Schema::create('product_attribute', function (Blueprint $table) {
             $table->id();
-            $table->text('path')->nullable();
-            $table->morphs('imageable');
-            $table->integer('order')->default(0);
-            $table->boolean('is_featured')->default(false);
-            $table->string('alt_text')->nullable();
+            $table->foreignIdFor(Product::class);
+            $table->foreignIdFor(Attribute::class);
+            $table->boolean('is_highlight')->default(false);
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('images');
+        Schema::dropIfExists('product_attribute');
     }
 };

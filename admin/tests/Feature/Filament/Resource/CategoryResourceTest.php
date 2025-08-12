@@ -66,7 +66,7 @@ it('can update category model.', function () {
         ->heading->toBe($newCategory->heading)
         ->slug->toBe($newCategory->slug)
         ->title->toBe($newCategory->title)
-        ->content->toBe($newCategory->content ? '<p>' . $newCategory->content . '</p>' : null)
+        ->content->toBe($newCategory->content ? $newCategory->content : null)
         ->description->toBe($newCategory->description)
         ->no_index->toBe($newCategory->no_index)
         ->canonical->toBe($newCategory->canonical)
@@ -107,7 +107,7 @@ it('can create category model.', function () {
         'heading' => $newCategory->heading,
         'slug' => $newCategory->slug,
         'title' => $newCategory->title,
-        'content' => $newCategory->content ? '<p>' . $newCategory->content . '</p>' : null,
+        'content' => $newCategory->content ? $newCategory->content : null,
         'description' => $newCategory->description,
         'no_index' => $newCategory->no_index,
         'canonical' => $newCategory->canonical,
@@ -131,7 +131,6 @@ it('can delete category model.', function () {
     // Act & Assert
     livewire(CategoryResource\Pages\EditCategory::class, [
         'record' => $category->getRouteKey(),
-    ])
-        ->callAction(DeleteAction::class);
+    ])->callAction(DeleteAction::class);
     $this->assertModelMissing($category);
 });
