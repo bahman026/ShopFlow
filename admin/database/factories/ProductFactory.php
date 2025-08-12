@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ProductStatusEnum;
+use App\Models\Attribute;
 use App\Models\AttributeGroup;
 use App\Models\Brand;
 use App\Models\Category;
@@ -39,8 +40,6 @@ class ProductFactory extends Factory
             'maximum' => null,
             'step' => 1,
             'profit_percent' => fake()->numberBetween(0, 50),
-            'attributes' => null,
-            'highlight' => null,
             'has_stock' => fake()->boolean,
             'variety_counts' => fake()->numberBetween(0, 5),
             'weight' => fake()->randomNumber(3),
@@ -63,6 +62,21 @@ class ProductFactory extends Factory
                     'alt_text' => fake()->words(2, true),
                     'imageable_type' => Product::class,
                     'imageable_id' => $product->id,
+                ]);
+            }
+        });
+    }
+
+    public function withAttributes(int $count = 3): static
+    {
+        $highlight = fake()->boolean;
+
+        return $this->afterCreating(function (Product $product) use ($count, $highlight) {
+            $attributes = Attribute::query()->inRandomOrder()->take($count)->get();
+
+            foreach ($attributes as $attribute) {
+                $product->attributes()->attach($attribute->id, [
+                    'is_highlight' => $highlight,
                 ]);
             }
         });
