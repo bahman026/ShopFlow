@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -31,8 +32,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property positive-int|null $maximum
  * @property positive-int|null $step
  * @property positive-int|null $profit_percent
- * @property array|null $attributes
- * @property bool $highlight
  * @property bool $has_stock
  * @property positive-int|null $variety_counts
  * @property positive-int|null $weight
@@ -73,8 +72,6 @@ class Product extends Model
         'maximum',
         'step',
         'profit_percent',
-        'attributes',
-        'highlight',
         'has_stock',
         'variety_counts',
         'weight',
@@ -88,8 +85,6 @@ class Product extends Model
     protected $casts = [
         'no_index' => 'boolean',
         'has_stock' => 'boolean',
-        'attributes' => 'array',
-        'highlight' => 'array',
         'minimum' => 'integer',
         'maximum' => 'integer',
         'step' => 'integer',
@@ -134,6 +129,21 @@ class Product extends Model
             'order' => 0,
             'is_default' => true,
         ]);
+    }
+
+    public function attributes(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class, 'product_attribute')
+            ->withPivot('is_highlight')
+            ->withTimestamps();
+    }
+
+    public function highlights(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class, 'product_attribute')
+            ->wherePivot('is_highlight', true)
+            ->withPivot('is_highlight')
+            ->withTimestamps();
     }
 
     public function attributeGroup(): BelongsTo
