@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\ProductStatusEnum;
+use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Attribute;
 use App\Models\Product;
@@ -165,11 +166,40 @@ class ProductResource extends Resource
                 Forms\Components\Select::make('status')
                     ->required()
                     ->options(ProductStatusEnum::options())
-                    ->default(ProductStatusEnum::DRAFT->value),
+                    ->default(ProductStatusEnum::PUBLISHED->value),
                 Forms\Components\TextInput::make('seen')
                     ->required()
                     ->numeric()
                     ->default(0),
+                Forms\Components\Fieldset::make('Variety Details')
+                    ->schema([
+                        Forms\Components\Repeater::make('varieties')
+                            ->relationship('varieties')
+                            ->schema([
+                                Forms\Components\TextInput::make('attribute_value')
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('color')
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('price')
+                                    ->required()
+                                    ->numeric(),
+                                Forms\Components\TextInput::make('sale_price')
+                                    ->numeric()
+                                    ->nullable(),
+                                Forms\Components\TextInput::make('inventory')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0),
+                                Forms\Components\Toggle::make('has_stock')
+                                    ->default(true)
+                                    ->required(),
+                                Forms\Components\Select::make('status')
+                                    ->required()
+                                    ->options(VarietyStatusEnum::options())
+                                    ->default(VarietyStatusEnum::PUBLISHED->value),
+                            ])
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
