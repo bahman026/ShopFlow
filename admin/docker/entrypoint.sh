@@ -2,7 +2,7 @@
 
 set -e
 # Migrate and seed database
-composer  install --no-dev
+composer  install
 php "/var/www/html/admin/artisan" migrate --seed --force
 
 php "/var/www/html/admin/artisan" vendor:publish --tag=filament-tables-views --force
