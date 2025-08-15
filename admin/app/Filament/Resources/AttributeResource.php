@@ -30,6 +30,9 @@ class AttributeResource extends Resource
                 Forms\Components\TextInput::make('value')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('color')
+                    ->nullable()
+                    ->maxLength(31),
             ]);
     }
 
@@ -40,8 +43,8 @@ class AttributeResource extends Resource
                 Tables\Columns\TextColumn::make('attributeGroup.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('value')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('value'),
+                Tables\Columns\TextColumn::make('color'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
