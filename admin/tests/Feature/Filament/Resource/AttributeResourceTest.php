@@ -47,13 +47,15 @@ it('can update attribute model.', function () {
         ->fillForm([
             'attribute_group_id' => $newAttribute->attribute_group_id,
             'value' => $newAttribute->value,
+            'color' => $newAttribute->color,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     expect($attribute->refresh())
         ->attribute_group_id->toBe($newAttribute->attribute_group_id)
-        ->value->toBe($newAttribute->value);
+        ->value->toBe($newAttribute->value)
+        ->color->toBe($newAttribute->color);
 });
 
 it('can create attribute model.', function () {
@@ -64,6 +66,7 @@ it('can create attribute model.', function () {
         ->fillForm([
             'attribute_group_id' => $newAttribute->attribute_group_id,
             'value' => $newAttribute->value,
+            'color' => $newAttribute->color,
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -72,6 +75,7 @@ it('can create attribute model.', function () {
     $this->assertDatabaseHas(Attribute::class, [
         'attribute_group_id' => $newAttribute->attribute_group_id,
         'value' => $newAttribute->value,
+        'color' => $newAttribute->color,
     ]);
 
 });

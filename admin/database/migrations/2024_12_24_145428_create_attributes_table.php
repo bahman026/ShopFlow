@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(AttributeGroup::class);
             $table->string('value');
+            $table->string('color')->nullable();
             $table->timestamps();
         });
     }

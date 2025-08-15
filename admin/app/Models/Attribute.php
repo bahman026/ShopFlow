@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property positive-int $id
  * @property positive-int $attribute_group_id
+ * @property string|null $color
  * @property string $value
  * @property AttributeGroup $attributeGroup
  */
@@ -23,6 +24,7 @@ class Attribute extends Model
     protected $fillable = [
         'attribute_group_id',
         'value',
+        'color',
     ];
 
     public function attributeGroup(): BelongsTo

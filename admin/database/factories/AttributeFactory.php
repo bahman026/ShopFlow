@@ -20,6 +20,7 @@ class AttributeFactory extends Factory
         return [
             'attribute_group_id' => AttributeGroup::factory(),
             'value' => $this->faker->word,
+            'color' => $this->faker->optional()->hexColor,
         ];
     }
 }
