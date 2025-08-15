@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Filament\Resources\ProductResource;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\Variety;
 use Filament\Actions\DeleteAction;
 use Illuminate\Http\UploadedFile;
 
@@ -35,6 +36,7 @@ it('can render edit product page.', function () {
 it('can update product model.', function () {
     $product = Product::factory()->create();
     $newProduct = Product::factory()->make();
+
     $file = UploadedFile::fake()->image('image.png', 500);
 
     livewire(ProductResource\Pages\EditProduct::class, [
@@ -106,6 +108,7 @@ it('can update product model.', function () {
 
 it('can create product model.', function () {
     $newProduct = Product::factory()->make();
+    $variety = Variety::factory()->make();
     $file = UploadedFile::fake()->image('image.png', 500);
 
     livewire(ProductResource\Pages\CreateProduct::class)
@@ -134,8 +137,23 @@ it('can create product model.', function () {
             'status' => $newProduct->status->value,
             'seen' => $newProduct->seen,
         ])
-        ->set('data.images.0.path', [$file->getClientOriginalName()])
-        ->set('data.images.0.is_featured', false)
+        ->set('data.images', [
+            [
+                'path' => [$file->getClientOriginalName()],
+                'is_featured' => true,
+            ],
+        ])
+        ->set('data.varieties', [
+            [
+                'attribute_value' => $variety->attribute_value,
+                'color' => $variety->color,
+                'price' => $variety->price,
+                'sale_price' => $variety->sale_price,
+                'inventory' => $variety->inventory,
+                'has_stock' => $variety->has_stock,
+                'status' => $variety->status,
+            ],
+        ])
         ->call('create')
         ->assertHasNoFormErrors();
 
@@ -171,6 +189,16 @@ it('can create product model.', function () {
         'path' => $file->getClientOriginalName(),
         'imageable_id' => $product->id,
         'imageable_type' => Product::class,
+        'is_featured' => true,
+    ]);
+    $this->assertDatabaseHas(Variety::class, [
+        'attribute_value' => $variety->attribute_value,
+        'color' => $variety->color,
+        'price' => $variety->price,
+        'sale_price' => $variety->sale_price,
+        'inventory' => $variety->inventory,
+        'has_stock' => (int) $variety->has_stock,
+        'status' => $variety->status,
     ]);
 });
 
