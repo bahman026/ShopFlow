@@ -64,8 +64,8 @@ class VarietyResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('product.title')
-                    ->numeric(),
+                TextColumn::make('product.heading')
+                    ->searchable(),
                 TextColumn::make('attribute_value'),
                 TextColumn::make('color'),
                 TextColumn::make('price')

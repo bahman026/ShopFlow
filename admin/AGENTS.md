@@ -229,3 +229,9 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())->field->toBe(...)`.
 - Do not assert computed fields against a fresh factory value; assert the expected computed result.
 
+## Roadmap & docs
+
+- The implementation status and priority order live in `IMPLEMENTATION.md`. When an entity is finished or the plan changes, update it.
+- The full schema reference is `ShoFlow db doc.md`. Treat it as the source of truth for table columns and relationships.
+- Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
+
