@@ -129,12 +129,8 @@ class ProductResource extends Resource
                             ->label('Attribute')
                             ->options(
                                 Attribute::with('attributeGroup')->get()->mapWithKeys(function (Attribute $attribute): array {
-                                    $groupName = $attribute->attributeGroup?->name;
-
                                     return [
-                                        $attribute->id => $groupName === null
-                                            ? $attribute->value
-                                            : $groupName . ' - ' . $attribute->value,
+                                        $attribute->id => $attribute->attributeGroup->name . ' - ' . $attribute->value,
                                     ];
                                 })
                             )
@@ -161,6 +157,9 @@ class ProductResource extends Resource
                     ->saveRelationshipsUsing(function (Product $record, array $state): void {
                         $syncData = [];
                         foreach ($state as $item) {
+                            if (empty($item['attribute_id'])) {
+                                continue;
+                            }
                             $syncData[$item['attribute_id']] = ['is_highlight' => $item['pivot']['is_highlight'] ?? false];
                         }
                         $record->attributes()->sync($syncData);
