@@ -22,6 +22,7 @@ Catalog layer and platform basics.
 - [x] Products (+ `product_attribute` pivot, product images)
 - [x] Varieties (+ `variety_counts` auto-sync on Product)
 - [x] Discounts (auto-applied price rules per variety)
+- [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
 - [~] Addresses (model only, no resource yet)
 
@@ -40,10 +41,7 @@ Done. Variety has model, migration, factory, resource (+ pages), tests, and `var
 Builds on Products/Varieties; prerequisite for Orders.
 
 - [x] Discounts (auto-applied price rules per variety)
-- [ ] Coupons
-- [ ] `coupon_product`
-- [ ] `coupon_variety`
-- [ ] `category_coupon`
+- [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 
 ## Phase 2 - CMS / content (independent quick wins)
 

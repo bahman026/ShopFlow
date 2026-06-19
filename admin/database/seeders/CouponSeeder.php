@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Brand;
+use App\Models\Coupon;
 use Illuminate\Database\Seeder;
 
-class BrandSeeder extends Seeder
+class CouponSeeder extends Seeder
 {
     public function run(): void
     {
-        Brand::query()->truncate();
-        Brand::factory()->count(20)->create();
+        Coupon::factory()->count(20)->create();
     }
 }

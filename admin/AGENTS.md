@@ -199,6 +199,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Select fields backed by an enum use `->options(SomeEnum::options())` and `->default(SomeEnum::CASE->value)`.
 - Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
 - Enum-backed table columns render via `->getStateUsing(fn ($record) => $record->field->label())` and `->color(fn ($record) => $record->field->color())`.
+- Manage many-to-many pivots with a relationship multi-select: `Select::make('products')->relationship('products', 'heading')->multiple()->searchable()->preload()` (see `CouponResource`). No separate resource for pure scoping pivots.
 
 ## Models
 
@@ -218,7 +219,9 @@ When adding a new entity, build the files in this order, matching the existing f
 ## Migrations
 
 - Anonymous class style: `return new class extends Migration`.
-- Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional).
+- Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional). Chain `->constrained()->cascadeOnDelete()` / `->nullOnDelete()` / `->restrictOnDelete()` to add the real FK constraint with its delete rule.
+- For a second FK to the same table, use a named column: `$table->foreignId('user_creator_id')->nullable()->constrained('users')->nullOnDelete()` (see `coupons`).
+- Pivot tables add `$table->unique([...])` on the key pair and `->cascadeOnDelete()` on both FKs (see `coupon_product`).
 - Default enum columns to a case value: `$table->unsignedTinyInteger('status')->default(ProductStatusEnum::PUBLISHED->value);`.
 - Always implement `down()` with `Schema::dropIfExists(...)`.
 

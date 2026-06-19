@@ -16,6 +16,7 @@ class TestSeeder extends Seeder
             ProductSeeder::class,
             VarietySeeder::class,
             DiscountSeeder::class,
+            CouponSeeder::class,
         ]);
     }
 }
