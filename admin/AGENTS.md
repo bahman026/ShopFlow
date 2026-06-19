@@ -197,6 +197,8 @@ When adding a new entity, build the files in this order, matching the existing f
 - Page classes set `protected static string $resource = {Name}Resource::class;`. List pages expose `CreateAction::make()` in `getHeaderActions()`. Create and Edit pages redirect with `getRedirectUrl(): string` returning `$this->getResource()::getUrl('index')`.
 - Rich text uses `AmidEsfahani\FilamentTinyEditor\TinyEditor`.
 - Select fields backed by an enum use `->options(SomeEnum::options())` and `->default(SomeEnum::CASE->value)`.
+- Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
+- Enum-backed table columns render via `->getStateUsing(fn ($record) => $record->field->label())` and `->color(fn ($record) => $record->field->color())`.
 
 ## Models
 
@@ -231,7 +233,8 @@ When adding a new entity, build the files in this order, matching the existing f
 
 ## Seeders
 
-- `DatabaseSeeder::run()` calls all seeders via `$this->call([...])` in dependency order.
+- `DatabaseSeeder::run()` calls all seeders via `$this->call([...])` in dependency order. It holds only necessary/reference data (roles, admin, cities, categories, ancestors, attributes, etc.).
+- `TestSeeder` holds factory-generated sample data (`Model::factory()->count(20)->create()`) for manual admin-panel testing. Run it separately with `php artisan db:seed --class=TestSeeder`. Add new sample-data seeders here, not in `DatabaseSeeder`.
 - Reference seeders use idempotent `updateOrCreate()` / `firstOrCreate()` so re-seeding is safe.
 - Read configurable values from config, not literals (see `AdminSeeder` reading `config('admin.account')`).
 
