@@ -29,6 +29,10 @@ Catalog layer and platform basics.
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
 
+Cross-cutting improvements landed:
+- Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address.
+- `CACHE.md` added to track identified-but-not-implemented cache keys.
+
 ## Phase 0 - Finish current branch (`implement_variety`)
 
 Done. Variety has model, migration, factory, resource (+ pages), tests, and `variety_counts` auto-sync.
