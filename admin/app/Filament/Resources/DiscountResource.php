@@ -26,7 +26,7 @@ class DiscountResource extends Resource
 {
     protected static ?string $model = Discount::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Promotions';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';
 
