@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Filament\Resources\VarietyResource;
+use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\Variety;
 use Filament\Actions\DeleteAction;
@@ -44,8 +45,6 @@ it('can update variety model.', function () {
     ])
         ->fillForm([
             'product_id' => $product->id,
-            'attribute_value' => $newVariety->attribute_value,
-            'color' => $newVariety->color,
             'price' => $newVariety->price,
             'sale_price' => $newVariety->sale_price,
             'inventory' => $newVariety->inventory,
@@ -57,8 +56,6 @@ it('can update variety model.', function () {
 
     expect($variety->refresh())
         ->product_id->toBe($product->id)
-        ->attribute_value->toBe($newVariety->attribute_value)
-        ->color->toBe($newVariety->color)
         ->price->toBe($newVariety->price)
         ->sale_price->toBe($newVariety->sale_price)
         ->inventory->toBe($newVariety->inventory)
@@ -73,8 +70,6 @@ it('can create variety model.', function () {
     livewire(VarietyResource\Pages\CreateVariety::class)
         ->fillForm([
             'product_id' => $product->id,
-            'attribute_value' => $newVariety->attribute_value,
-            'color' => $newVariety->color,
             'price' => $newVariety->price,
             'sale_price' => $newVariety->sale_price,
             'inventory' => $newVariety->inventory,
@@ -86,8 +81,6 @@ it('can create variety model.', function () {
 
     $this->assertDatabaseHas(Variety::class, [
         'product_id' => $product->id,
-        'attribute_value' => $newVariety->attribute_value,
-        'color' => $newVariety->color,
         'price' => $newVariety->price,
         'sale_price' => $newVariety->sale_price,
         'inventory' => $newVariety->inventory,
@@ -105,6 +98,15 @@ it('can delete variety model.', function () {
         ->callAction(DeleteAction::class);
 
     $this->assertModelMissing($variety);
+});
+
+it('auto-fills attribute_value and color from attribute when attribute_id is set.', function () {
+    $attribute = Attribute::factory()->create(['value' => 'Red', 'color' => '#ff0000']);
+    $variety = Variety::factory()->withAttribute($attribute)->create();
+
+    expect($variety->refresh())
+        ->attribute_value->toBe('Red')
+        ->color->toBe('#ff0000');
 });
 
 it('auto-syncs variety_counts on product when a variety is created.', function () {

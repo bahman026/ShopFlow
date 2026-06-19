@@ -119,8 +119,6 @@ it('can create product model.', function () {
         ])
         ->set('data.varieties', [
             [
-                'attribute_value' => $variety->attribute_value,
-                'color' => $variety->color,
                 'price' => $variety->price,
                 'sale_price' => $variety->sale_price,
                 'inventory' => $variety->inventory,
@@ -148,7 +146,6 @@ it('can create product model.', function () {
 
     $this->assertDatabaseHas(Variety::class, [
         'product_id' => $product->id,
-        'attribute_value' => $variety->attribute_value,
         'price' => $variety->price,
         'inventory' => $variety->inventory,
     ]);

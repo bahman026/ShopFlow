@@ -17,6 +17,7 @@ use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use App\Models\Attribute as AttributeModel;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -24,6 +25,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Set;
@@ -198,10 +200,22 @@ class ProductResource extends Resource
                         Repeater::make('varieties')
                             ->relationship('varieties')
                             ->schema([
-                                TextInput::make('attribute_value')
-                                    ->maxLength(255),
-                                TextInput::make('color')
-                                    ->maxLength(255),
+                                Select::make('attribute_id')
+                                    ->label('Attribute')
+                                    ->options(function (Get $get): array {
+                                        $groupId = $get('../../attribute_group_id');
+                                        if (! $groupId) {
+                                            return [];
+                                        }
+
+                                        return AttributeModel::query()
+                                            ->where('attribute_group_id', $groupId)
+                                            ->pluck('value', 'id')
+                                            ->toArray();
+                                    })
+                                    ->searchable()
+                                    ->nullable()
+                                    ->helperText('Selecting an attribute auto-fills the value and color.'),
                                 TextInput::make('price')
                                     ->required()
                                     ->numeric(),

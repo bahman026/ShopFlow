@@ -817,9 +817,10 @@ For storing user permissions and removing role-based permissions.
 
 Contains product variations entered by the seller on the site. This table creates a record depending on the selected variation and price.
 
-* `product_id`: Indicates which product this variety belongs to. Foreign key to `products`; cascades on product delete.  
-* `attribute_value`: Free-text value of the selected variation (e.g., "Red", "8GB"). Currently not linked to the `attributes` table.  
-* `color`: Optional color value for the variation.  
+* `product_id`: Indicates which product this variety belongs to. Foreign key to `products`; cascades on product delete.
+* `attribute_id`: Links to the `attributes` table - the specific attribute that defines this variety (e.g. "Red", "XL"). Nullable FK; set to null when the attribute is deleted. When set, `attribute_value` and `color` are auto-populated from the linked attribute via model saving event.
+* `attribute_value`: Display label for the variation, auto-populated from `attribute.value` when `attribute_id` is set. Can also be set manually when no attribute is linked.
+* `color`: Hex or name color for the variation, auto-populated from `attribute.color` when `attribute_id` is set.
 * `price`  
 * `sale_price`   
 * `inventory`: Number of ShopFlow inventory, the default value is 0\.  

@@ -8,6 +8,8 @@ use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\VarietyResource\Pages\CreateVariety;
 use App\Filament\Resources\VarietyResource\Pages\EditVariety;
 use App\Filament\Resources\VarietyResource\Pages\ListVarieties;
+use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\Variety;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -15,6 +17,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -36,15 +39,32 @@ class VarietyResource extends Resource
                 Select::make('product_id')
                     ->relationship('product', 'heading')
                     ->searchable()
+                    ->live()
                     ->required(),
-                TextInput::make('attribute_value')
-                    ->maxLength(255),
-                TextInput::make('color')
-                    ->maxLength(255),
+                Select::make('attribute_id')
+                    ->label('Attribute')
+                    ->options(function (Get $get, ?Variety $record): array {
+                        $productId = $get('product_id') ?? $record?->product_id;
+                        if (! $productId) {
+                            return [];
+                        }
+                        $product = Product::find($productId);
+                        if (! $product?->attribute_group_id) {
+                            return [];
+                        }
+
+                        return Attribute::query()
+                            ->where('attribute_group_id', $product->attribute_group_id)
+                            ->pluck('value', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->nullable()
+                    ->helperText('Selecting an attribute auto-fills the value and color.'),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('تومان'),
                 TextInput::make('sale_price')
                     ->numeric(),
                 TextInput::make('inventory')
@@ -68,7 +88,11 @@ class VarietyResource extends Resource
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
-                TextColumn::make('attribute_value'),
+                TextColumn::make('attribute.value')
+                    ->label('Attribute')
+                    ->searchable(),
+                TextColumn::make('attribute_value')
+                    ->label('Value'),
                 TextColumn::make('color'),
                 TextColumn::make('price')
                     ->money(),
