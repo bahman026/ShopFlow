@@ -24,6 +24,7 @@ Catalog layer and platform basics.
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
+- [x] Banners (polymorphic images via `images` table)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
@@ -47,7 +48,7 @@ Builds on Products/Varieties; prerequisite for Orders.
 
 Depend mostly on Images only.
 
-- [ ] Banners
+- [x] Banners
 - [ ] Sliders + Slides
 - [ ] Menus + Menu Items
 - [ ] Pages

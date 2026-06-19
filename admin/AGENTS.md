@@ -255,5 +255,6 @@ When adding a new entity, build the files in this order, matching the existing f
 
 - The implementation status and priority order live in `IMPLEMENTATION.md`. When an entity is finished or the plan changes, update it.
 - The full schema reference is `ShoFlow db doc.md`. Treat it as the source of truth for table columns and relationships.
+- Cache keys that have been identified but not yet implemented are tracked in `CACHE.md`. When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
 - Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
 
