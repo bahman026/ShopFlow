@@ -129,8 +129,12 @@ class ProductResource extends Resource
                             ->label('Attribute')
                             ->options(
                                 Attribute::with('attributeGroup')->get()->mapWithKeys(function (Attribute $attribute): array {
+                                    $groupName = $attribute->attributeGroup?->name;
+
                                     return [
-                                        $attribute->id => $attribute->attributeGroup->name . ' - ' . $attribute->value,
+                                        $attribute->id => $groupName === null
+                                            ? $attribute->value
+                                            : $groupName . ' - ' . $attribute->value,
                                     ];
                                 })
                             )
