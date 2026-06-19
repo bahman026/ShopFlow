@@ -20,6 +20,7 @@ class CreateAttributeGroupCategoryTable extends Migration
             $table->foreignIdFor(AttributeGroup::class);
             $table->foreignIdFor(Category::class);
             $table->boolean('as_filter')->default(false);
+            //            todo : implement in product resource
             $table->boolean('required')->default(false);
             $table->timestamps();
         });

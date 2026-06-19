@@ -1,4 +1,4 @@
-FROM php:8.4-fpm
+FROM php:8.5-fpm
 
 ARG uid
 ARG gid
@@ -17,6 +17,7 @@ RUN apt-get install -y libwebp-dev
 RUN apt-get install -y libjpeg62-turbo-dev
 RUN apt-get install -y libxpm-dev
 RUN apt-get install -y libfreetype6-dev
+RUN apt-get install -y libicu-dev
 
 RUN docker-php-ext-configure gd \
     --enable-gd \
@@ -25,6 +26,7 @@ RUN docker-php-ext-configure gd \
     --with-xpm=/usr/include/ \
     --with-freetype=/usr/include
 
+RUN docker-php-ext-install intl
 RUN docker-php-ext-install pgsql
 RUN docker-php-ext-install pdo_pgsql
 RUN docker-php-ext-install mbstring
@@ -33,7 +35,6 @@ RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install bcmath
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install zip
-RUN docker-php-ext-install intl
 RUN pecl install redis && docker-php-ext-enable redis
 
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
