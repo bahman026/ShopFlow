@@ -148,9 +148,10 @@ class ProductResource extends Resource
                     ->default(true)
                     ->required(),
                 Forms\Components\TextInput::make('variety_counts')
-                    ->required()
                     ->numeric()
-                    ->default(0),
+                    ->disabled()
+                    ->dehydrated(false)
+                    ->helperText('Calculated automatically from the varieties below.'),
                 Forms\Components\TextInput::make('weight')
                     ->numeric()
                     ->nullable(),
@@ -226,13 +227,10 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('canonical')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('attributeGroup.name')
-                    ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category.title')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('category.heading')
                     ->limit(60),
-                Tables\Columns\TextColumn::make('brand.title')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('brand.heading')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('minimum')
                     ->numeric()

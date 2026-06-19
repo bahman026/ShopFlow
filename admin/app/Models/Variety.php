@@ -40,6 +40,25 @@ class Variety extends Model
         'status' => VarietyStatusEnum::class,
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(fn (Variety $variety) => $variety->syncProductVarietyCount());
+        static::deleted(fn (Variety $variety) => $variety->syncProductVarietyCount());
+    }
+
+    public function syncProductVarietyCount(): void
+    {
+        $product = $this->product()->first();
+
+        if ($product === null) {
+            return;
+        }
+
+        $product->forceFill([
+            'variety_counts' => $product->varieties()->count(),
+        ])->saveQuietly();
+    }
+
     // Relationships
 
     public function product(): BelongsTo

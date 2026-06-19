@@ -40,6 +40,21 @@ class Image extends Model
         'order' => 'integer',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function (Image $image): void {
+            if (! $image->is_featured) {
+                return;
+            }
+
+            static::query()
+                ->where('imageable_type', $image->imageable_type)
+                ->where('imageable_id', $image->imageable_id)
+                ->whereKeyNot($image->getKey())
+                ->update(['is_featured' => false]);
+        });
+    }
+
     /**
      * Get the parent imageable model (post or video).
      */

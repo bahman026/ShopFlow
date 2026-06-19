@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\RolesEnum;
 use App\Enums\UserStatusEnum;
 use Carbon\Carbon;
 use Filament\Models\Contracts\FilamentUser;
@@ -15,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property string|null $first_name
@@ -26,7 +24,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $national_id
  * @property string $login_token
  * @property UserStatusEnum $status
- * @property Collection<Address> $addresses
  * @property Carbon|null $email_verified_at
  * @property Carbon|null $login_token_expire_time
  * @property Carbon|null $created_at
