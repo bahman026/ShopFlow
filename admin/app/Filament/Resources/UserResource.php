@@ -6,16 +6,24 @@ namespace App\Filament\Resources;
 
 use App\Enums\RolesEnum;
 use App\Enums\UserStatusEnum;
-use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Set;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -26,35 +34,35 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('first_name')
+        return $schema
+            ->components([
+                TextInput::make('first_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('last_name')
+                TextInput::make('last_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->required()
                     ->options(UserStatusEnum::options())
                     ->default(UserStatusEnum::ACTIVE->value)
-                    ->dehydrateStateUsing(fn (UserStatusEnum $state): UserStatusEnum => $state),
+                    ->dehydrateStateUsing(fn (mixed $state): UserStatusEnum => $state instanceof UserStatusEnum ? $state : UserStatusEnum::from($state)),
 
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
-                Forms\Components\TextInput::make('mobile')
+                DateTimePicker::make('email_verified_at'),
+                TextInput::make('mobile')
                     ->maxLength(20),
-                Forms\Components\DateTimePicker::make('mobile_verified_at'),
-                Forms\Components\TextInput::make('national_id')
+                DateTimePicker::make('mobile_verified_at'),
+                TextInput::make('national_id')
                     ->maxLength(10),
-                Forms\Components\TextInput::make('login_token')
+                TextInput::make('login_token')
                     ->hint(function () {
                         return new HtmlString('
                 <span wire:click="$set(\'data.login_token\', \'' . Str::random(100) . '\')" class="font-medium h- px-2 py-0.5 rounded-xl bg-primary-500 text-white text-xs tracking-tight mt-[10px] cursor-pointer">
@@ -65,16 +73,16 @@ class UserResource extends Resource
                     ->visible(function (?User $record) {
                         return $record?->hasRole(RolesEnum::USER->value) ?? false;
                     }),
-                Forms\Components\Select::make('roles')
+                Select::make('roles')
                     ->multiple()
                     ->preload()
                     ->relationship('roles', 'name')
                     ->visible(function () {
                         return auth()->user()->hasRole(RolesEnum::SUPER_ADMIN->value);
                     }),
-                Forms\Components\Repeater::make('addresses')
+                Repeater::make('addresses')
                     ->relationship('addresses')
-                    ->mutateRelationshipDataBeforeSaveUsing(function (Forms\Get $get, array $data, Address $record) {
+                    ->mutateRelationshipDataBeforeSaveUsing(function (Get $get, array $data, Address $record) {
                         unset($data['province']);
                         if (! Address::query()->where($data)->first()?->id) {
                             $record->delete();
@@ -85,20 +93,20 @@ class UserResource extends Resource
                         }
                     })
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->maxLength(255)
                             ->required(),
-                        Forms\Components\TextInput::make('phone')
+                        TextInput::make('phone')
                             ->required()
                             ->maxLength(20),
-                        Forms\Components\TextInput::make('postal_code')
+                        TextInput::make('postal_code')
                             ->maxLength(50),
-                        Forms\Components\TextInput::make('address')
+                        TextInput::make('address')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('description')
+                        TextInput::make('description')
                             ->maxLength(255),
-                        Forms\Components\Select::make('province')
+                        Select::make('province')
                             ->options(function () {
                                 return Province::all()->pluck('name', 'id');
                             })
@@ -109,12 +117,12 @@ class UserResource extends Resource
                             ->afterStateUpdated(function (Set $set) {
                                 $set('city_id', null);
                             }),
-                        Forms\Components\Select::make('city_id')
+                        Select::make('city_id')
                             ->relationship('city', 'name')
                             ->live()
                             ->preload()
                             ->required()
-                            ->options(function (?Forms\Get $get, ?Address $record) {
+                            ->options(function (?Get $get, ?Address $record) {
                                 if (! empty($record) && ! $get('province')) {
                                     return [$record->city->id => $record->city->name];
                                 }
@@ -132,30 +140,30 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('first_name')
+                TextColumn::make('first_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('last_name')
-                    ->searchable(),
-
-                Tables\Columns\TextColumn::make('roles.name')
+                TextColumn::make('last_name')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('roles.name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
+
+                TextColumn::make('email')
+                    ->searchable(),
+                TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mobile')
+                TextColumn::make('mobile')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('mobile_verified_at')
+                TextColumn::make('mobile_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('national_id'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('national_id'),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -163,11 +171,11 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     //                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -199,8 +207,8 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

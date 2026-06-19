@@ -6,11 +6,13 @@ namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -42,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property positive-int $seen
  * @property Image $featuredImage
  * @property Collection<Image> $images
+ * @property Collection<Variety> $varieties
  * @property AttributeGroup $attributeGroup
  * @property Category $category
  * @property Brand $brand
@@ -85,25 +88,20 @@ class Product extends Model
     protected $casts = [
         'no_index' => 'boolean',
         'has_stock' => 'boolean',
-        'minimum' => 'integer',
-        'maximum' => 'integer',
-        'step' => 'integer',
-        'variety_counts' => 'integer',
-        'seen' => 'integer',
         'status' => ProductStatusEnum::class,
     ];
 
-    public function scopePublished($query)
+    public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::PUBLISHED->value);
     }
 
-    public function scopeDraft($query)
+    public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::DRAFT->value);
     }
 
-    public function scopeDeleted($query)
+    public function scopeDeleted(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::DELETED->value);
     }
@@ -111,6 +109,11 @@ class Product extends Model
     public function images(): MorphMany
     {
         return $this->morphMany(Image::class, 'imageable');
+    }
+
+    public function varieties(): HasMany
+    {
+        return $this->hasMany(Variety::class);
     }
 
     public function featuredImage(): HasOne

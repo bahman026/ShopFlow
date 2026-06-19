@@ -41,7 +41,7 @@ class ProductFactory extends Factory
             'step' => 1,
             'profit_percent' => fake()->numberBetween(0, 50),
             'has_stock' => fake()->boolean,
-            'variety_counts' => fake()->numberBetween(0, 5),
+            'variety_counts' => 0,
             'weight' => fake()->randomNumber(3),
             'length' => fake()->randomNumber(3),
             'width' => fake()->randomNumber(3),

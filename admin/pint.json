@@ -14,5 +14,8 @@
     },
     "exclude": [
         "docker"
+    ],
+    "notPath": [
+        "app/Console/Commands/TestCommand.php"
     ]
 }

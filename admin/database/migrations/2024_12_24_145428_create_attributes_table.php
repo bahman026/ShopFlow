@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(AttributeGroup::class);
+            $table->foreignIdFor(AttributeGroup::class)->constrained()->cascadeOnDelete();
             $table->string('value');
             $table->string('color')->nullable();
             $table->timestamps();

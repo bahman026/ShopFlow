@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\UserStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,7 +24,7 @@ return new class extends Migration
             $table->timestamp('mobile_verified_at')->nullable();
             $table->string('national_id', 10)->nullable();
             $table->string('password');
-            $table->unsignedTinyInteger('status')->default(\App\Enums\UserStatusEnum::ACTIVE->value);
+            $table->unsignedTinyInteger('status')->default(UserStatusEnum::ACTIVE->value);
             $table->rememberToken();
             $table->string('login_token')->nullable();
             $table->timestamp('login_token_expire_time')->nullable();

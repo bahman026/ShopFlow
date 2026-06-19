@@ -4,33 +4,39 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AttributeResource\Pages;
+use App\Filament\Resources\AttributeResource\Pages\CreateAttribute;
+use App\Filament\Resources\AttributeResource\Pages\EditAttribute;
+use App\Filament\Resources\AttributeResource\Pages\ListAttributes;
 use App\Models\Attribute;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
 
-    protected static ?string $navigationGroup = 'Attribute';
+    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('attribute_group_id')
+        return $schema
+            ->components([
+                Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('value')
+                TextInput::make('value')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('color')
+                TextInput::make('color')
                     ->nullable()
                     ->maxLength(31),
             ]);
@@ -40,16 +46,16 @@ class AttributeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('attributeGroup.name')
+                TextColumn::make('attributeGroup.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('value'),
-                Tables\Columns\TextColumn::make('color'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('value'),
+                TextColumn::make('color'),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -57,11 +63,11 @@ class AttributeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     //                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -77,9 +83,9 @@ class AttributeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttributes::route('/'),
-            'create' => Pages\CreateAttribute::route('/create'),
-            'edit' => Pages\EditAttribute::route('/{record}/edit'),
+            'index' => ListAttributes::route('/'),
+            'create' => CreateAttribute::route('/create'),
+            'edit' => EditAttribute::route('/{record}/edit'),
         ];
     }
 }

@@ -17,35 +17,38 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::query()->truncate();
-        Permission::query()->truncate();
-
-        foreach (RolesEnum::options() as $key => $role) {
-            Role::create(['name' => $key]);
+        foreach (RolesEnum::options() as $value => $label) {
+            Role::firstOrCreate(['name' => $value]);
         }
 
-        foreach (PermissionsEnum::options() as $key => $permission) {
-            Permission::create(['name' => $key]);
+        foreach (PermissionsEnum::options() as $value => $label) {
+            Permission::firstOrCreate(['name' => $value]);
         }
 
-        $admin = Role::query()->whereName(RolesEnum::USER)->first();
         $adminPermissions = [
-            PermissionsEnum::CREATE_POSTS->value,
-            PermissionsEnum::DELETE_POSTS->value,
-            PermissionsEnum::EDIT_POSTS->value,
             PermissionsEnum::VIEW_POSTS->value,
+            PermissionsEnum::CREATE_POSTS->value,
+            PermissionsEnum::EDIT_POSTS->value,
+            PermissionsEnum::DELETE_POSTS->value,
         ];
-        $admin->syncPermissions($adminPermissions);
 
-        $superAdmin = Role::query()->whereName(RolesEnum::SUPER_ADMIN)->first();
-        $superAdminPermissions = [
-            PermissionsEnum::CREATE_USERS->value,
-            PermissionsEnum::DELETE_USERS->value,
+        Role::query()
+            ->whereName(RolesEnum::ADMIN->value)
+            ->first()
+            ?->syncPermissions($adminPermissions);
+
+        $superAdminPermissions = array_merge($adminPermissions, [
             PermissionsEnum::VIEW_USERS->value,
+            PermissionsEnum::CREATE_USERS->value,
             PermissionsEnum::EDIT_USERS->value,
-        ];
-        $superAdminPermissions = array_merge($superAdminPermissions, $adminPermissions);
-        $superAdmin->syncPermissions($superAdminPermissions);
+            PermissionsEnum::DELETE_USERS->value,
+            PermissionsEnum::VIEW_SETTINGS->value,
+            PermissionsEnum::EDIT_SETTINGS->value,
+        ]);
 
+        Role::query()
+            ->whereName(RolesEnum::SUPER_ADMIN->value)
+            ->first()
+            ?->syncPermissions($superAdminPermissions);
     }
 }
