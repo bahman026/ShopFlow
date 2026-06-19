@@ -1,0 +1,12 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "sg",
+            "args": [
+                "docker",
+                "-c",
+                "docker exec -i -u www-data shop_flow_admin_app php /var/www/html/admin/artisan boost:mcp"
+            ]
+        }
+    }
+}
