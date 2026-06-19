@@ -163,8 +163,9 @@ This table stores cards.
 
 Scopes a coupon so it applies only to products in specific categories.
 
-* `category_id` specifies the category the coupon is allowed for.  
-* `coupon_id` specifies the coupon this scope belongs to.
+* `category_id` specifies the category the coupon is allowed for. Foreign key; cascades on category delete.  
+* `coupon_id` specifies the coupon this scope belongs to. Foreign key; cascades on coupon delete.  
+* The pair `(category_id, coupon_id)` is unique.
 
 # cities
 
@@ -184,9 +185,9 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `max_discount`: The maximum discount amount the coupon can give.  
 * `total_used`: How many times this coupon has already been used.  
 * `total_uses`: How many times this coupon is allowed to be used in total.  
-* `user_id`: Limits usage to a specific user.  
-* `user_creator_id`: The admin user who created the coupon, if created by an admin.  
-* `seller_creator_id`: The seller who created the coupon, if created by a seller.  
+* `user_id`: Limits usage to a specific user. Nullable foreign key to `users`; set to null when the user is deleted.  
+* `user_creator_id`: The admin user who created the coupon, if created by an admin. Nullable foreign key to `users`.  
+* `seller_creator_id`: The seller who created the coupon, if created by a seller. Nullable foreign key to `users`.  
 * `status`: Has states "active" (default, usable), "canceled", "used", and "under review".  
 * `is_percent`: Indicates if the discount is a percentage or a fixed amount.  
 * `shipping`: Indicates if this coupon includes free shipping (applies only to free shipping, not to the price).  
@@ -197,14 +198,16 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 # coupon\_product
 
 * Scopes a coupon so it can only be applied to certain products.  
-* `coupon_id`: The coupon this scope belongs to.  
-* `product_id`: A product the coupon is allowed for.
+* `coupon_id`: The coupon this scope belongs to. Foreign key; cascades on coupon delete.  
+* `product_id`: A product the coupon is allowed for. Foreign key; cascades on product delete.  
+* The pair `(coupon_id, product_id)` is unique.
 
 # coupon\_variety
 
 * Scopes a coupon so it applies to certain varieties only, useful for sellers who want a coupon for some of their varieties.  
-* `coupon_id`: The coupon this scope belongs to.  
-* `variety_id`: A variety the coupon is allowed for.
+* `coupon_id`: The coupon this scope belongs to. Foreign key; cascades on coupon delete.  
+* `variety_id`: A variety the coupon is allowed for. Foreign key; cascades on variety delete.  
+* The pair `(coupon_id, variety_id)` is unique.
 
 # discounts
 

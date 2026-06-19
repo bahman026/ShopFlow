@@ -22,6 +22,7 @@ Catalog layer and platform basics.
 - [x] Products (+ `product_attribute` pivot, product images)
 - [x] Varieties (+ `variety_counts` auto-sync on Product)
 - [x] Discounts (auto-applied price rules per variety)
+- [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
 - [~] Addresses (model only, no resource yet)
 
