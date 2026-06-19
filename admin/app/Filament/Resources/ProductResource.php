@@ -157,6 +157,9 @@ class ProductResource extends Resource
                     ->saveRelationshipsUsing(function (Product $record, array $state): void {
                         $syncData = [];
                         foreach ($state as $item) {
+                            if (empty($item['attribute_id'])) {
+                                continue;
+                            }
                             $syncData[$item['attribute_id']] = ['is_highlight' => $item['pivot']['is_highlight'] ?? false];
                         }
                         $record->attributes()->sync($syncData);

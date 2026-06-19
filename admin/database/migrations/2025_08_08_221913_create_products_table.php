@@ -29,9 +29,9 @@ return new class extends Migration
             $table->boolean('no_index')->default(false);
             $table->string('canonical')->nullable();
             $table->foreignIdFor(Image::class)->nullable();
-            $table->foreignIdFor(AttributeGroup::class)->nullable();
-            $table->foreignIdFor(Category::class);
-            $table->foreignIdFor(Brand::class)->nullable();
+            $table->foreignIdFor(AttributeGroup::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(Category::class)->constrained()->restrictOnDelete();
+            $table->foreignIdFor(Brand::class)->nullable()->constrained()->nullOnDelete();
             $table->unsignedInteger('minimum')->default(1);
             $table->unsignedInteger('maximum')->nullable();
             $table->unsignedInteger('step')->default(1);

@@ -17,10 +17,12 @@ return new class extends Migration
     {
         Schema::create('product_attribute', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Product::class);
-            $table->foreignIdFor(Attribute::class);
+            $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Attribute::class)->constrained()->cascadeOnDelete();
             $table->boolean('is_highlight')->default(false);
             $table->timestamps();
+
+            $table->unique(['product_id', 'attribute_id']);
         });
     }
 

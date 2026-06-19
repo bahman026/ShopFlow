@@ -167,6 +167,22 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 Project-specific patterns. Match these when adding or editing code. All PHP files use `declare(strict_types=1);` and are formatted by Pint (`vendor/bin/pint`).
 
+## Running commands and tests
+
+- The app runs in Docker. Execute commands inside the container: `docker exec -it -u www-data shop_flow_admin_app bash`.
+- Before committing, run `composer test-dev` (Pest, Pint, type coverage, PHPStan) inside the container and make sure it passes.
+- Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
+- Always ask before committing.
+
+## Implementation order
+
+When adding a new entity, build the files in this order, matching the existing files:
+
+1. Migration
+2. Model, factory, seeder
+3. Filament resource
+4. Pest test file
+
 ## Filament (v5)
 
 - Resources live in `app/Filament/Resources/{Name}Resource.php`. Page classes live in `app/Filament/Resources/{Name}Resource/Pages/`.
