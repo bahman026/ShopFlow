@@ -48,6 +48,7 @@ class Variety extends Model
 
     public function syncProductVarietyCount(): void
     {
+        /** @var Product|null $product */
         $product = $this->product()->first();
 
         if ($product === null) {

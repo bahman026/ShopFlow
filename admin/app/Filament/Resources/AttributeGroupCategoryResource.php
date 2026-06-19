@@ -4,35 +4,42 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AttributeGroupCategoryResource\Pages;
+use App\Filament\Resources\AttributeGroupCategoryResource\Pages\CreateAttributeGroupCategory;
+use App\Filament\Resources\AttributeGroupCategoryResource\Pages\EditAttributeGroupCategory;
+use App\Filament\Resources\AttributeGroupCategoryResource\Pages\ListAttributeGroupCategories;
 use App\Models\AttributeGroupCategory;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class AttributeGroupCategoryResource extends Resource
 {
     protected static ?string $model = AttributeGroupCategory::class;
 
-    protected static ?string $navigationGroup = 'Attribute';
+    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('attribute_group_id')
+        return $schema
+            ->components([
+                Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
                     ->required(),
-                Forms\Components\Select::make('category_id')
+                Select::make('category_id')
                     ->relationship('category', 'title')
                     ->required(),
-                Forms\Components\Toggle::make('as_filter')
+                Toggle::make('as_filter')
                     ->required(),
-                Forms\Components\Toggle::make('required')
+                Toggle::make('required')
                     ->required(),
             ]);
     }
@@ -41,21 +48,21 @@ class AttributeGroupCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('attributeGroup.name')
+                TextColumn::make('attributeGroup.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category.title')
+                TextColumn::make('category.title')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('as_filter')
+                IconColumn::make('as_filter')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('required')
+                IconColumn::make('required')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -63,11 +70,11 @@ class AttributeGroupCategoryResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     //                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -83,9 +90,9 @@ class AttributeGroupCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttributeGroupCategories::route('/'),
-            'create' => Pages\CreateAttributeGroupCategory::route('/create'),
-            'edit' => Pages\EditAttributeGroupCategory::route('/{record}/edit'),
+            'index' => ListAttributeGroupCategories::route('/'),
+            'create' => CreateAttributeGroupCategory::route('/create'),
+            'edit' => EditAttributeGroupCategory::route('/{record}/edit'),
         ];
     }
 }

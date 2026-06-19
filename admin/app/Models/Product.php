@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -90,17 +91,17 @@ class Product extends Model
         'status' => ProductStatusEnum::class,
     ];
 
-    public function scopePublished($query)
+    public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::PUBLISHED->value);
     }
 
-    public function scopeDraft($query)
+    public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::DRAFT->value);
     }
 
-    public function scopeDeleted($query)
+    public function scopeDeleted(Builder $query): Builder
     {
         return $query->where('status', ProductStatusEnum::DELETED->value);
     }

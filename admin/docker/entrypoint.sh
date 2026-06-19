@@ -1,20 +1,18 @@
 #!/bin/bash
 
 set -e
-# Migrate and seed database
-composer  install
-php "/var/www/html/admin/artisan" migrate --seed --force
+git config --global --add safe.directory /var/www/html
 
-php "/var/www/html/admin/artisan" vendor:publish --tag=filament-tables-views --force
+composer install
+
+php "/var/www/html/admin/artisan" migrate --force
+
+# Create storage symlinks (ignore if it already exists)
+php "/var/www/html/admin/artisan" storage:link || true
+
 # Refresh caches
 php "/var/www/html/admin/artisan" optimize:clear
-php "/var/www/html/admin/artisan" optimize
-php "/var/www/html/admin/artisan" icon:cache
-php "/var/www/html/admin/artisan" filament:cache-components
+php "/var/www/html/admin/artisan" filament:optimize
 
-# Create storage symlinks
-php "/var/www/html/admin/artisan" storage:link
-
-# Start Supervisor
-#exec supervisord -c /etc/supervisor/supervisord.conf
+# Start php-fpm
 exec php-fpm

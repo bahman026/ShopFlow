@@ -4,132 +4,149 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\ProductStatusEnum;
 use App\Enums\VarietyStatusEnum;
-use App\Filament\Resources\ProductResource\Pages;
+use App\Filament\Resources\ProductResource\Pages\CreateProduct;
+use App\Filament\Resources\ProductResource\Pages\EditProduct;
+use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Attribute;
 use App\Models\Product;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
-use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
+use Livewire\Component;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Product';
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('heading')
+        return $schema
+            ->components([
+                TextInput::make('heading')
                     ->required()
                     ->live(onBlur: true)
                     ->maxLength(255)
-                    ->afterStateUpdated(function (string $operation, ?string $state, Forms\Set $set): void {
+                    ->afterStateUpdated(function (string $operation, ?string $state, Set $set): void {
                         if ($operation === 'create') {
                             $set('slug', Str::slug($state));
                         }
                     }),
-                Forms\Components\TextInput::make('slug')
+                TextInput::make('slug')
                     ->disabled()
                     ->dehydrated()
                     ->required()
                     ->maxLength(255)
                     ->unique(Product::class, 'slug', ignoreRecord: true),
-                Forms\Components\TextInput::make('price')
+                TextInput::make('price')
                     ->required()
                     ->numeric()
                     ->prefix('تومان'),
                 TinyEditor::make('content')
                     ->columnSpanFull()
                     ->required(),
-                Forms\Components\TextInput::make('title')
+                TextInput::make('title')
                     ->maxLength(255),
-                Forms\Components\Textarea::make('description')
+                Textarea::make('description')
                     ->maxLength(255)
                     ->columnSpanFull(),
-                Forms\Components\Toggle::make('no_index')
+                Toggle::make('no_index')
                     ->required(),
-                Forms\Components\TextInput::make('canonical')
+                TextInput::make('canonical')
                     ->maxLength(255),
-                Forms\Components\Repeater::make('images')
+                Repeater::make('images')
                     ->relationship('images')
                     ->schema([
-                        Forms\Components\FileUpload::make('path')
+                        FileUpload::make('path')
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
 
-                        Forms\Components\Toggle::make('is_featured')
+                        Toggle::make('is_featured')
                             ->label('Featured Image')
                             ->reactive(),
 
-                        Forms\Components\TextInput::make('alt_text')
+                        TextInput::make('alt_text')
                             ->label('Alt Text'),
                     ])
                     ->columnSpanFull(),
 
-                Forms\Components\Select::make('attribute_group_id')
+                Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
                     ->native(false)
                     ->preload(),
-                Forms\Components\Select::make('category_id')
+                Select::make('category_id')
                     ->relationship('category', 'heading')
                     ->required()
                     ->native(false)
                     ->preload(),
-                Forms\Components\Select::make('brand_id')
+                Select::make('brand_id')
                     ->relationship('brand', 'heading')
                     ->required()
                     ->native(false)
                     ->preload(),
-                Forms\Components\TextInput::make('minimum')
+                TextInput::make('minimum')
                     ->required()
                     ->numeric()
                     ->default(1),
-                Forms\Components\TextInput::make('maximum')
+                TextInput::make('maximum')
                     ->numeric(),
-                Forms\Components\TextInput::make('step')
+                TextInput::make('step')
                     ->required()
                     ->numeric()
                     ->default(1),
-                Forms\Components\TextInput::make('profit_percent')
+                TextInput::make('profit_percent')
                     ->required()
                     ->numeric()
                     ->suffix('%')
                     ->default(0),
 
-                Forms\Components\Repeater::make('attributes')
+                Repeater::make('attributes')
                     ->schema([
-                        Forms\Components\Select::make('attribute_id')
+                        Select::make('attribute_id')
                             ->label('Attribute')
                             ->options(
-                                Attribute::with('attributeGroup')->get()->mapWithKeys(function ($attribute) {
+                                Attribute::with('attributeGroup')->get()->mapWithKeys(function (Attribute $attribute): array {
                                     return [
                                         $attribute->id => $attribute->attributeGroup->name . ' - ' . $attribute->value,
                                     ];
                                 })
                             )
                             ->searchable(),
-                        Forms\Components\Checkbox::make('pivot.is_highlight')
+                        Checkbox::make('pivot.is_highlight')
                             ->label('Highlight'),
                     ])
                     ->dehydrated(false)
-                    ->afterStateHydrated(function ($state, callable $set, $livewire) {
-                        if ($livewire->record) {
+                    ->afterStateHydrated(function (mixed $state, callable $set, Component $livewire): void {
+                        if (isset($livewire->record) && $livewire->record) {
                             $attributes = $livewire->record->attributes()->get();
 
-                            $data = $attributes->map(function ($attribute) {
+                            $data = $attributes->map(function (Attribute $attribute): array {
                                 return [
                                     'attribute_id' => $attribute->id,
+                                    // @phpstan-ignore-next-line property.notFound
                                     'pivot' => ['is_highlight' => $attribute->pivot->is_highlight],
                                 ];
                             })->toArray();
@@ -137,64 +154,64 @@ class ProductResource extends Resource
                             $set('attributes', $data);
                         }
                     })
-                    ->saveRelationshipsUsing(function ($record, $state) {
+                    ->saveRelationshipsUsing(function (Product $record, array $state): void {
                         $syncData = [];
                         foreach ($state as $item) {
                             $syncData[$item['attribute_id']] = ['is_highlight' => $item['pivot']['is_highlight'] ?? false];
                         }
                         $record->attributes()->sync($syncData);
                     }),
-                Forms\Components\Toggle::make('has_stock')
+                Toggle::make('has_stock')
                     ->default(true)
                     ->required(),
-                Forms\Components\TextInput::make('variety_counts')
+                TextInput::make('variety_counts')
                     ->numeric()
                     ->disabled()
                     ->dehydrated(false)
                     ->helperText('Calculated automatically from the varieties below.'),
-                Forms\Components\TextInput::make('weight')
+                TextInput::make('weight')
                     ->numeric()
                     ->nullable(),
-                Forms\Components\TextInput::make('length')
+                TextInput::make('length')
                     ->numeric()
                     ->nullable(),
-                Forms\Components\TextInput::make('width')
+                TextInput::make('width')
                     ->numeric()
                     ->nullable(),
-                Forms\Components\TextInput::make('height')
+                TextInput::make('height')
                     ->numeric()
                     ->nullable(),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->required()
                     ->options(ProductStatusEnum::options())
                     ->default(ProductStatusEnum::PUBLISHED->value),
-                Forms\Components\TextInput::make('seen')
+                TextInput::make('seen')
                     ->required()
                     ->numeric()
                     ->default(0),
-                Forms\Components\Fieldset::make('Variety Details')
+                Fieldset::make('Variety Details')
                     ->schema([
-                        Forms\Components\Repeater::make('varieties')
+                        Repeater::make('varieties')
                             ->relationship('varieties')
                             ->schema([
-                                Forms\Components\TextInput::make('attribute_value')
+                                TextInput::make('attribute_value')
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('color')
+                                TextInput::make('color')
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('price')
+                                TextInput::make('price')
                                     ->required()
                                     ->numeric(),
-                                Forms\Components\TextInput::make('sale_price')
+                                TextInput::make('sale_price')
                                     ->numeric()
                                     ->nullable(),
-                                Forms\Components\TextInput::make('inventory')
+                                TextInput::make('inventory')
                                     ->required()
                                     ->numeric()
                                     ->default(0),
-                                Forms\Components\Toggle::make('has_stock')
+                                Toggle::make('has_stock')
                                     ->default(true)
                                     ->required(),
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->required()
                                     ->options(VarietyStatusEnum::options())
                                     ->default(VarietyStatusEnum::PUBLISHED->value),
@@ -208,71 +225,71 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('heading')
+                TextColumn::make('heading')
                     ->limit(30)
                     ->wrap(),
-                Tables\Columns\TextColumn::make('slug')
+                TextColumn::make('slug')
                     ->limit(30)
                     ->wrap(),
-                Tables\Columns\ImageColumn::make('featuredImage.path')
+                ImageColumn::make('featuredImage.path')
                     ->label('Featured')
                     ->square(),
-                Tables\Columns\TextColumn::make('price')
+                TextColumn::make('price')
                     ->money()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('no_index')
+                IconColumn::make('no_index')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('canonical')
+                TextColumn::make('canonical')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('attributeGroup.name')
+                TextColumn::make('attributeGroup.name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category.heading')
+                TextColumn::make('category.heading')
                     ->limit(60),
-                Tables\Columns\TextColumn::make('brand.heading')
+                TextColumn::make('brand.heading')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('minimum')
+                TextColumn::make('minimum')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('maximum')
+                TextColumn::make('maximum')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('step')
+                TextColumn::make('step')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('profit_percent')
+                TextColumn::make('profit_percent')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('has_stock')
+                IconColumn::make('has_stock')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('variety_counts')
+                TextColumn::make('variety_counts')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('weight')
+                TextColumn::make('weight')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('length')
+                TextColumn::make('length')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('width')
+                TextColumn::make('width')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('height')
+                TextColumn::make('height')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->getStateUsing(fn (Product $record) => $record->status->label())
                     ->color(fn (Product $record): string => $record->status->color())
                     ->sortable(),
-                Tables\Columns\TextColumn::make('seen')
+                TextColumn::make('seen')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -280,12 +297,12 @@ class ProductResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -300,9 +317,9 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProducts::route('/'),
-            'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'index' => ListProducts::route('/'),
+            'create' => CreateProduct::route('/create'),
+            'edit' => EditProduct::route('/{record}/edit'),
         ];
     }
 }

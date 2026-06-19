@@ -11,19 +11,19 @@ use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
 {
-    const string ADMIN_EMAIL = 'admin@shopFlow.dev';
-
     public function run(): void
     {
+        $admin = config('admin.account');
+
         $user = User::query()->firstOrCreate(
             [
-                'email' => self::ADMIN_EMAIL,
+                'email' => $admin['email'],
             ],
             [
-                'first_name' => 'john',
-                'last_name' => 'doe',
+                'first_name' => $admin['first_name'],
+                'last_name' => $admin['last_name'],
                 'email_verified_at' => now(),
-                'password' => 'password',
+                'password' => $admin['password'],
                 'status' => UserStatusEnum::ACTIVE->value,
             ]
         );

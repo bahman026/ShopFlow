@@ -4,35 +4,41 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AttributeGroupResource\Pages;
+use App\Filament\Resources\AttributeGroupResource\Pages\CreateAttributeGroup;
+use App\Filament\Resources\AttributeGroupResource\Pages\EditAttributeGroup;
+use App\Filament\Resources\AttributeGroupResource\Pages\ListAttributeGroups;
 use App\Models\AttributeGroup;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class AttributeGroupResource extends Resource
 {
     protected static ?string $model = AttributeGroup::class;
 
-    protected static ?string $navigationGroup = 'Attribute';
+    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('ancestor_id')
+        return $schema
+            ->components([
+                Select::make('ancestor_id')
                     ->relationship('ancestor', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('label')
+                TextInput::make('label')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('order')
+                TextInput::make('order')
                     ->numeric(),
             ]);
     }
@@ -41,21 +47,21 @@ class AttributeGroupResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('ancestor.name')
+                TextColumn::make('ancestor.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('label')
+                TextColumn::make('label')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('order')
+                TextColumn::make('order')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -63,11 +69,11 @@ class AttributeGroupResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     //                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -83,9 +89,9 @@ class AttributeGroupResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttributeGroups::route('/'),
-            'create' => Pages\CreateAttributeGroup::route('/create'),
-            'edit' => Pages\EditAttributeGroup::route('/{record}/edit'),
+            'index' => ListAttributeGroups::route('/'),
+            'create' => CreateAttributeGroup::route('/create'),
+            'edit' => EditAttributeGroup::route('/{record}/edit'),
         ];
     }
 }
