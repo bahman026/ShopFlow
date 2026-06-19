@@ -38,8 +38,6 @@ class BannerFactory extends Factory
                     'is_featured' => $i === 0,
                     'order' => $i,
                     'alt_text' => fake()->words(2, true),
-                    'imageable_type' => Banner::class,
-                    'imageable_id' => $banner->id,
                 ]);
             }
         });

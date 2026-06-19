@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property string|null $url
  * @property positive-int|null $sort
  * @property BannerStatusEnum $status
- * @property Image $featuredImage
+ * @property Image|null $featuredImage
  * @property Collection<Image> $images
  */
 class Banner extends Model
@@ -38,6 +38,13 @@ class Banner extends Model
     protected $casts = [
         'status' => BannerStatusEnum::class,
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Banner $banner): void {
+            $banner->images()->delete();
+        });
+    }
 
     public function images(): MorphMany
     {
