@@ -65,6 +65,8 @@ class VarietyResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('product.heading')
+                    ->limit(30)
+                    ->wrap()
                     ->searchable(),
                 TextColumn::make('attribute_value'),
                 TextColumn::make('color'),
