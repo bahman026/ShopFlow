@@ -187,7 +187,7 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `user_id`: Limits usage to a specific user.  
 * `user_creator_id`: The admin user who created the coupon, if created by an admin.  
 * `seller_creator_id`: The seller who created the coupon, if created by a seller.  
-* `status`: Has three states: "canceled", "used", and "under review".  
+* `status`: Has states "active" (default, usable), "canceled", "used", and "under review".  
 * `is_percent`: Indicates if the discount is a percentage or a fixed amount.  
 * `shipping`: Indicates if this coupon includes free shipping (applies only to free shipping, not to the price).  
 * `is_for`: Whether the coupon is usable by everyone, or only by users, or only by partners.  

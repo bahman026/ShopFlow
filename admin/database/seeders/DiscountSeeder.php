@@ -11,6 +11,7 @@ class DiscountSeeder extends Seeder
 {
     public function run(): void
     {
+        Discount::query()->truncate();
         Discount::factory()->count(20)->create();
     }
 }

@@ -40,10 +40,7 @@ Done. Variety has model, migration, factory, resource (+ pages), tests, and `var
 Builds on Products/Varieties; prerequisite for Orders.
 
 - [x] Discounts (auto-applied price rules per variety)
-- [ ] Coupons
-- [ ] `coupon_product`
-- [ ] `coupon_variety`
-- [ ] `category_coupon`
+- [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 
 ## Phase 2 - CMS / content (independent quick wins)
 
