@@ -11,6 +11,8 @@ use App\Filament\Resources\ProductResource\Pages\CreateProduct;
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Attribute;
+use App\Models\AttributeGroup;
+use App\Models\AttributeGroupCategory;
 use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -138,7 +140,6 @@ class ProductResource extends Resource
                         Checkbox::make('pivot.is_highlight')
                             ->label('Highlight'),
                     ])
-                    ->dehydrated(false)
                     ->afterStateHydrated(function (mixed $state, callable $set, Component $livewire): void {
                         if (isset($livewire->record) && $livewire->record) {
                             $attributes = $livewire->record->attributes()->get();
@@ -308,6 +309,38 @@ class ProductResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Returns names of required attribute groups that have no selected attribute.
+     *
+     * @param  array<mixed>  $attributeState
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    public static function missingRequiredGroups(array $attributeState, int $categoryId): \Illuminate\Support\Collection
+    {
+        $selectedAttributeIds = collect($attributeState)
+            ->filter(fn (array $item): bool => ! empty($item['attribute_id']))
+            ->pluck('attribute_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        $requiredGroupIds = AttributeGroupCategory::query()
+            ->where('category_id', $categoryId)
+            ->where('required', true)
+            ->pluck('attribute_group_id');
+
+        if ($requiredGroupIds->isEmpty()) {
+            return collect();
+        }
+
+        $selectedGroupIds = Attribute::query()
+            ->whereIn('id', $selectedAttributeIds)
+            ->pluck('attribute_group_id');
+
+        return AttributeGroup::query()
+            ->whereIn('id', $requiredGroupIds->diff($selectedGroupIds))
+            ->pluck('name');
     }
 
     public static function getRelations(): array

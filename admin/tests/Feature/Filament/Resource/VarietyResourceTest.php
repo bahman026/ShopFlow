@@ -106,3 +106,38 @@ it('can delete variety model.', function () {
 
     $this->assertModelMissing($variety);
 });
+
+it('auto-syncs variety_counts on product when a variety is created.', function () {
+    $product = Product::factory()->create();
+
+    expect($product->refresh())->variety_counts->toBe(0);
+
+    Variety::factory()->for($product)->create();
+
+    expect($product->refresh())->variety_counts->toBe(1);
+});
+
+it('auto-syncs variety_counts on product when a variety is deleted.', function () {
+    $product = Product::factory()->create();
+    $variety = Variety::factory()->for($product)->create();
+
+    expect($product->refresh())->variety_counts->toBe(1);
+
+    $variety->delete();
+
+    expect($product->refresh())->variety_counts->toBe(0);
+});
+
+it('auto-syncs variety_counts on product when a variety is deleted via the resource.', function () {
+    $product = Product::factory()->create();
+    $variety = Variety::factory()->for($product)->create();
+
+    expect($product->refresh())->variety_counts->toBe(1);
+
+    livewire(VarietyResource\Pages\EditVariety::class, [
+        'record' => $variety->getRouteKey(),
+    ])->callAction(DeleteAction::class);
+
+    $this->assertModelMissing($variety);
+    expect($product->refresh())->variety_counts->toBe(0);
+});
