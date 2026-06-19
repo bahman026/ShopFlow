@@ -173,6 +173,15 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - Before committing, run `composer test-dev` (Pest, Pint, type coverage, PHPStan) inside the container and make sure it passes.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
 
+## Implementation order
+
+When adding a new entity, build the files in this order, matching the existing files:
+
+1. Migration
+2. Model, factory, seeder
+3. Filament resource
+4. Pest test file
+
 ## Filament (v5)
 
 - Resources live in `app/Filament/Resources/{Name}Resource.php`. Page classes live in `app/Filament/Resources/{Name}Resource/Pages/`.
