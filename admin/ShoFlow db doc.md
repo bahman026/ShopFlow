@@ -49,28 +49,29 @@ The `attribute_groups` table is used to define groups of attributes that categor
 
 # **Attribute\_Group\_Category** 
 
-The **`attribute_group_categories`** table manages the relationship between attribute groups and categories. It defines whether an attribute group can be used as a filter in a category and whether it is mandatory for that category.
+The **`attribute_group_category`** table (singular) manages the relationship between attribute groups and categories. It defines whether an attribute group can be used as a filter in a category and whether it is mandatory for that category.
 
 * `attribute_group_id` indicates the current record's attribute group.  
 * `category_id` indicates the current record's category.  
-* `as_filter` Indicates if this attribute group can be used as a filter in the specified category (1 \= Yes, 0 \= No)..  
-* `required` Indicates if the attribute group is mandatory for products in the specified category (1 \= Yes, 0 \= No).
+* `as_filter` Indicates if this attribute group can be used as a filter in the specified category (1 \= Yes, 0 \= No). Boolean, defaults to false.  
+* `required` Indicates if the attribute group is mandatory for products in the specified category (1 \= Yes, 0 \= No). Boolean, defaults to false.
 
 # Attributes
 
  Used to store attributes.
 
-* `attribute_group_id` refers to the attribute group.  
+* `attribute_group_id` refers to the attribute group. Foreign key to `attribute_groups`; deleting a group cascades and deletes its attributes.  
 * `color` is used for filters with colors.  
-* `Content` Stores the value or name of the attribute (e.g., "8GB RAM," "Dual SIM").
+* `value` Stores the value or name of the attribute (e.g., "8GB RAM," "Dual SIM").
 
 # product\_attribute
 
  Used to store the relationship between filters and products.
 
-* product\_id refers to the id column in the products table.  
-* attribute\_id refers to the id column in the attributes table.  
-* is\_highlight indicates if the attribute should be highlighted for the product.
+* product\_id refers to the id column in the products table. Foreign key; cascades on product delete.  
+* attribute\_id refers to the id column in the attributes table. Foreign key; cascades on attribute delete.  
+* is\_highlight indicates if the attribute should be highlighted for the product (boolean, defaults to false).  
+* The pair `(product_id, attribute_id)` is unique, so a product cannot link the same attribute twice. Carries `created_at` / `updated_at`.
 
 # Brands
 
@@ -160,10 +161,10 @@ This table stores cards.
 
 # **Category\_Coupon** 
 
-Used to restrict discounts to specific categories.
+Scopes a coupon so it applies only to products in specific categories.
 
-* `category_id` specifies the category for the record.  
-* `coupon_id` specifies the coupon for the record.
+* `category_id` specifies the category the coupon is allowed for.  
+* `coupon_id` specifies the coupon this scope belongs to.
 
 # cities
 
@@ -174,51 +175,54 @@ Used to restrict discounts to specific categories.
 
 # coupons
 
-* Used to store discount coupons.  
+Stores discount coupons. Unlike discounts, a coupon is applied manually: the customer enters its `code` at checkout. A coupon can be limited by a minimum cart amount, capped by a maximum discount, restricted in how many times it is used, scoped to specific products, varieties, or categories (through the `coupon_product`, `coupon_variety`, and `category_coupon` tables), and can grant free shipping. When an order uses a coupon, its id and resulting amount fill `orders.coupon_id` and `orders.coupon_discount`.
+
 * `name`: Specifies the name of the coupon.  
-* `code`: Stores the discount code.  
-* `amount`: Specifies the discount amount or percentage, depending on the value of the `is_percent` column.  
-* `min_price`: Specifies the minimum purchase amount for the discount to apply.  
-* `max_discount`: Specifies the maximum discount amount.  
-* `total_used`: Indicates how many times this coupon has been used.  
-* `total_uses`: Indicates how many times this coupon can be used.  
+* `code`: The code the customer enters to apply the coupon.  
+* `amount`: The discount value, read as a percentage or a fixed amount depending on `is_percent`.  
+* `min_price`: The minimum purchase amount required before the coupon applies.  
+* `max_discount`: The maximum discount amount the coupon can give.  
+* `total_used`: How many times this coupon has already been used.  
+* `total_uses`: How many times this coupon is allowed to be used in total.  
 * `user_id`: Limits usage to a specific user.  
-* `user_creator_id`: Specifies the ID of the user who created the coupon if it was created by an admin.  
-* `seller_creator_id`: Specifies the ID of the seller who created the coupon if it was created by a seller.  
+* `user_creator_id`: The admin user who created the coupon, if created by an admin.  
+* `seller_creator_id`: The seller who created the coupon, if created by a seller.  
 * `status`: Has three states: "canceled", "used", and "under review".  
 * `is_percent`: Indicates if the discount is a percentage or a fixed amount.  
-* `shipping`: Indicates if this coupon includes free shipping or not (applies only to free shipping, not to the price).  
-* `is_for`: Specifies if the coupon is usable by everyone or only by users or partners.  
-* `started_at`: Specifies when the coupon becomes usable.  
-* `expired_at`: Specifies when the coupon can no longer be used.
+* `shipping`: Indicates if this coupon includes free shipping (applies only to free shipping, not to the price).  
+* `is_for`: Whether the coupon is usable by everyone, or only by users, or only by partners.  
+* `started_at`: When the coupon becomes usable.  
+* `expired_at`: When the coupon can no longer be used.
 
 # coupon\_product
 
-* Specifies that a particular coupon can only be applied to certain products.  
-* `coupon_id`: Specifies the relation to which coupon.  
-* `product_id`: Specifies the relation to which product.
+* Scopes a coupon so it can only be applied to certain products.  
+* `coupon_id`: The coupon this scope belongs to.  
+* `product_id`: A product the coupon is allowed for.
 
 # coupon\_variety
 
-* Specifies that this discount applies to certain varieties only, useful for sellers who want to create discount coupons for some of their products.  
-* `coupon_id`: Specifies the relation to which coupon.  
-* `variety_id`: Specifies the relation to which product.
+* Scopes a coupon so it applies to certain varieties only, useful for sellers who want a coupon for some of their varieties.  
+* `coupon_id`: The coupon this scope belongs to.  
+* `variety_id`: A variety the coupon is allowed for.
 
 # discounts
 
-* Stores special prices for each product.  
-* `quantity`: Applies this price if a specified number of this variety is purchased, useful for bulk purchase levels.  
-* `priority`: Specifies the priority of applying the discount.  
+Stores automatic special prices for product varieties. Unlike coupons, no code is entered: the discount is applied by itself whenever its conditions (variety, time window, quantity, audience, and remaining limits) are met. Each row belongs to one variety, so different varieties of the same product can have different discounts. The resulting discount amount is what later fills `orders.discount` and `order_varieties.discount`.
+
+* `variety_id`: Specifies the variety the discount applies to. Foreign key to `varieties`.  
+* `quantity`: Applies this price only if at least this number of the variety is purchased, useful for bulk purchase levels.  
+* `priority`: When several discounts could apply, this decides which one wins (the order of application).  
 * `is_percent`: Specifies if the discount is a percentage or a fixed amount.  
-* `amount`: Specifies the discount amount as a percentage or fixed amount.  
-* `started_at`: Specifies when the discount starts.  
-* `ended_at`: Specifies when the discount ends.  
-* `sold`: Specifies the number sold with this discount.  
-* `max_sell`: Limits the number of sales; the discount is removed after this amount.  
-* `max_sell_by_user`: Limits the number of sales per user; the discount is removed after this amount.  
-* `is_for`: Specifies if the discount is for everyone or only for users or partners.  
-* `variety_id`: Specifies the variety ID.  
-* This table is different from the coupon table; the price in this table is applied automatically based on conditions.
+* `amount`: The discount value, read as a percentage or a fixed amount depending on `is_percent`.  
+* `started_at`: When the discount becomes active.  
+* `ended_at`: When the discount stops being active.  
+* `sold`: How many units have already been sold under this discount.  
+* `max_sell`: Caps the total number of sales; once `sold` reaches it, the discount is removed.  
+* `max_sell_by_user`: Caps the number of sales per user; once a user reaches it, the discount no longer applies for that user.  
+* `is_for`: Whether the discount is for everyone, or only for users, or only for partners.  
+
+In short: discounts are automatic, per-variety, condition-based price rules. They are separate from coupons, which require a code.
 
 # email\_histories
 
@@ -542,9 +546,9 @@ Used to store products.
 * `no_index`: If true or 1, the corresponding product page should have a noindex meta tag.  
 * `canonical`: Used to prevent canonicalization issues.  
 * `image_id`: specifying the product's featured image.  
-* `attribute_group_id`: Specifies the filter group for the product variety. For example, this product varies in price by color, and sellers must specify which color they offer at what price in the `varieties` table.  
-* `category_id`: Specifies the category of the product. Each category must specify its subcategories, and these subcategories must specify their subcategories, and so on.  
-* `brand_id`: Specifies the brand of the product.  
+* `attribute_group_id`: Specifies the filter group for the product variety. For example, this product varies in price by color, and sellers must specify which color they offer at what price in the `varieties` table. Nullable foreign key to `attribute_groups`; set to null when the group is deleted.  
+* `category_id`: Specifies the category of the product. Each category must specify its subcategories, and these subcategories must specify their subcategories, and so on. Required foreign key to `categories`; deletion is restricted while products reference it.  
+* `brand_id`: Specifies the brand of the product. Nullable foreign key to `brands`; set to null when the brand is deleted.  
 * `minimum`: Specifies the minimum purchase quantity for a product.  
 * `maximum`: Specifies the maximum purchase quantity for a product.  
 * `step`: Specifies the increment step for purchasing the product, for example, if the product is sold in multiples of 3, this column should have a value of 3\.  
@@ -811,16 +815,14 @@ For storing user permissions and removing role-based permissions.
 
 Contains product variations entered by the seller on the site. This table creates a record depending on the selected variation and price.
 
-* `product_id`: Indicates which product this variety belongs to.  
-* `attribute_id`: Indicates which product this variety belongs to.  
-* Attribute\_value  
-* color  
-* `guarantee_name_id`:  
-* `warehouse_id`: Indicates the warehouse where this product is located.  
+* `product_id`: Indicates which product this variety belongs to. Foreign key to `products`; cascades on product delete.  
+* `attribute_value`: Free-text value of the selected variation (e.g., "Red", "8GB"). Currently not linked to the `attributes` table.  
+* `color`: Optional color value for the variation.  
 * `price`  
 * `sale_price`   
 * `inventory`: Number of ShopFlow inventory, the default value is 0\.  
-* `in_stock`: Indicates the stock status (default is 1). If this column is false or 0, the product is displayed as out of stock.
+* `has_stock`: Indicates the stock status (default is 1/true). If this column is false or 0, the variety is displayed as out of stock.  
+* `status`: Publication status of the variety.
 
 # varietie\_attribute
 
