@@ -172,6 +172,7 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - The app runs in Docker. Execute commands inside the container: `docker exec -it -u www-data shop_flow_admin_app bash`.
 - Before committing, run `composer test-dev` (Pest, Pint, type coverage, PHPStan) inside the container and make sure it passes.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
+- Always ask before committing.
 
 ## Implementation order
 
