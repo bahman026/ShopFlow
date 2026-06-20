@@ -28,6 +28,7 @@ Catalog layer and platform basics.
 - [x] Sliders + Slides (each slide has one polymorphic image via `images` table)
 - [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
+- [x] FAQs (question + answer; `order` and nullable `position` for placement context)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
@@ -35,6 +36,8 @@ Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed
 Cross-cutting improvements landed:
 - Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address.
 - `CACHE.md` added to track identified-but-not-implemented cache keys.
+- `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
+- Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`).
 
 ## Phase 0 - Finish current branch (`implement_variety`)
 
@@ -66,7 +69,7 @@ Depend mostly on Images only.
 - [x] Sliders + Slides
 - [x] Menus + Menu Items
 - [x] Pages
-- [ ] FAQs
+- [x] FAQs
 - [ ] Reviews
 - [ ] Wishlists
 - [ ] Tags

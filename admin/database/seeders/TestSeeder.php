@@ -21,6 +21,7 @@ class TestSeeder extends Seeder
             SliderSeeder::class,
             MenuSeeder::class,
             PageSeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }
