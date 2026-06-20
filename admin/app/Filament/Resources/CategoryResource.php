@@ -31,7 +31,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -76,6 +76,7 @@ class CategoryResource extends Resource
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

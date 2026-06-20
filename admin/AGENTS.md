@@ -98,6 +98,8 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Always use curly braces for control structures, even for single-line bodies.
 - Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
 - Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
+- **Closure parameters must also be typed** (e.g. `fn (mixed $id): int =>` not `fn ($id): int =>`). Untyped closure parameters drop type coverage below 100% and fail `composer test-dev`.
+- **Nullsafe operator**: only use `?->` on relations whose PHPDoc type is nullable. If the PHPDoc says `@property Product $product` (non-nullable), use `->` — PHPStan will flag `?->` as `nullsafe.neverNull`.
 - Follow existing application Enum naming conventions.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
@@ -172,7 +174,7 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - The app runs in Docker. Execute commands inside the container: `docker exec -it -u www-data shop_flow_admin_app bash`.
 - Before committing, run `composer test-dev` (Pest, Pint, type coverage, PHPStan) inside the container and make sure it passes.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
-- Always ask before committing.
+- Always ask before committing. NEVER commit without explicit user approval.
 
 ## Implementation order
 
@@ -194,11 +196,19 @@ When adding a new entity, build the files in this order, matching the existing f
 - Tables use `public static function table(Table $table): Table` with `->columns([])`, `->filters([])`, `->recordActions([...])`, `->toolbarActions([...])`.
 - Actions come from the `Filament\Actions\` namespace (`EditAction`, `CreateAction`, `DeleteAction`, `BulkActionGroup`, `DeleteBulkAction`).
 - Import individual components (`Filament\Forms\Components\TextInput`, `Filament\Tables\Columns\TextColumn`), not the parent `Forms`/`Tables` namespaces.
+- For reactive `->options()` or `->live()` closures that receive `Get $get`, import `Filament\Schemas\Components\Utilities\Get` (NOT `Filament\Forms\Get` - that will throw a type error at runtime).
 - Page classes set `protected static string $resource = {Name}Resource::class;`. List pages expose `CreateAction::make()` in `getHeaderActions()`. Create and Edit pages redirect with `getRedirectUrl(): string` returning `$this->getResource()::getUrl('index')`.
 - Rich text uses `AmidEsfahani\FilamentTinyEditor\TinyEditor`.
 - Select fields backed by an enum use `->options(SomeEnum::options())` and `->default(SomeEnum::CASE->value)`.
 - Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
 - Enum-backed table columns render via `->getStateUsing(fn ($record) => $record->field->label())` and `->color(fn ($record) => $record->field->color())`.
+- Manage many-to-many pivots with a relationship multi-select: `Select::make('products')->relationship('products', 'heading')->multiple()->searchable()->preload()` (see `CouponResource`). No separate resource for pure scoping pivots.
+- Control navigation order within a group with `protected static ?int $navigationSort = 1;` (lower = higher in the list).
+- Add an explanatory subheading to a list page with `protected ?string $subheading = 'Description here.';` on the `ListRecords` page class.
+- Add a tooltip to a form field with `->hintIcon('heroicon-o-information-circle')->hintIconTooltip('Explanation...')`. Use this instead of always-visible `->hint()` when the text is long.
+- Always add `->image()` to `FileUpload` fields that accept images. This restricts the file picker to image types only.
+- `mutateRelationshipDataBeforeSaveUsing` (and `BeforeCreateUsing`) MUST return `array`, never `null`. Returning `null` throws a `TypeError` at runtime. To skip saving, delete the related record inside the callback and still return the `$data` array.
+- Self-referential FK (e.g. `parent_id`): use `$table->foreignId('parent_id')->nullable()->constrained('table_name')->nullOnDelete()`. In the factory, default `parent_id` to `null` and provide a named state (e.g. `withParent(Model $parent)`) to set it. In the `parent_id` select options closure, exclude the current record to prevent circular references: `->when($record?->id, fn (Builder $q) => $q->where('id', '!=', $record->id))`.
 
 ## Models
 
@@ -217,8 +227,11 @@ When adding a new entity, build the files in this order, matching the existing f
 
 ## Migrations
 
+- **Development rule**: NEVER create a new migration to add a column to a table that already has a migration in this branch. Update the existing `create_*` migration directly to keep history clean. After editing, run `php artisan migrate:fresh` inside the container to re-apply everything from scratch. Only create additive migrations when the table already exists in production.
 - Anonymous class style: `return new class extends Migration`.
-- Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional).
+- Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional). Chain `->constrained()->cascadeOnDelete()` / `->nullOnDelete()` / `->restrictOnDelete()` to add the real FK constraint with its delete rule.
+- For a second FK to the same table, use a named column: `$table->foreignId('user_creator_id')->nullable()->constrained('users')->nullOnDelete()` (see `coupons`).
+- Pivot tables add `$table->unique([...])` on the key pair and `->cascadeOnDelete()` on both FKs (see `coupon_product`).
 - Default enum columns to a case value: `$table->unsignedTinyInteger('status')->default(ProductStatusEnum::PUBLISHED->value);`.
 - Always implement `down()` with `Schema::dropIfExists(...)`.
 
@@ -236,6 +249,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - `DatabaseSeeder::run()` calls all seeders via `$this->call([...])` in dependency order. It holds only necessary/reference data (roles, admin, cities, categories, ancestors, attributes, etc.).
 - `TestSeeder` holds factory-generated sample data (`Model::factory()->count(20)->create()`) for manual admin-panel testing. Run it separately with `php artisan db:seed --class=TestSeeder`. Add new sample-data seeders here, not in `DatabaseSeeder`.
 - Reference seeders use idempotent `updateOrCreate()` / `firstOrCreate()` so re-seeding is safe.
+- When truncating and re-seeding a table whose model has a `deleting` event (e.g. to cascade-delete related images), delete records one by one via `Model::all()->each->delete()` BEFORE truncating the parent. Use `->each->delete()` on a **Collection**, not a query builder — `Model::query()->each` does not exist and will throw an exception.
 - Read configurable values from config, not literals (see `AdminSeeder` reading `config('admin.account')`).
 
 ## Pest tests
@@ -250,7 +264,11 @@ When adding a new entity, build the files in this order, matching the existing f
 
 ## Roadmap & docs
 
-- The implementation status and priority order live in `IMPLEMENTATION.md`. When an entity is finished or the plan changes, update it.
-- The full schema reference is `ShoFlow db doc.md`. Treat it as the source of truth for table columns and relationships.
+- **Before starting any task**, read these three files to understand the current state of the project:
+  - `IMPLEMENTATION.md` — what is done, what is next, and the priority order.
+  - `ShoFlow db doc.md` — the full schema reference; treat it as the source of truth for table columns and relationships.
+  - `CACHE.md` — cache keys that have been identified but not yet implemented.
+- When an entity is finished or the plan changes, update `IMPLEMENTATION.md`.
+- When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
 - Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
 

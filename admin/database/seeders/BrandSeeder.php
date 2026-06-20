@@ -11,6 +11,7 @@ class BrandSeeder extends Seeder
 {
     public function run(): void
     {
+        Brand::query()->truncate();
         Brand::factory()->count(20)->create();
     }
 }

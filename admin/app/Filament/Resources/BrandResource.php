@@ -29,7 +29,7 @@ class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -67,6 +67,7 @@ class BrandResource extends Resource
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

@@ -24,6 +24,8 @@ class AttributeGroupResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
+    protected static ?int $navigationSort = 2;
+
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
@@ -32,11 +34,15 @@ class AttributeGroupResource extends Resource
             ->components([
                 Select::make('ancestor_id')
                     ->relationship('ancestor', 'name')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Groups attribute groups under a common ancestor (e.g. "Physical", "Technical"). Create ancestors first.')
                     ->required(),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
                 TextInput::make('label')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The label shown to the customer on the frontend (e.g. "Choose a color"). If empty, the name is used.')
                     ->maxLength(255),
                 TextInput::make('order')
                     ->numeric(),
