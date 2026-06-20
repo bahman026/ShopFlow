@@ -22,6 +22,7 @@ Legend: `[ ]` not started, `[x]` implemented.
 | 6 | `products.category.{category_id}` | Published products list for a category page | 15 min | Product saved / deleted |
 | 7 | `varieties.product.{product_id}` | All varieties for a product (price, inventory, status) | 15 min | Variety saved / deleted |
 | 9 | `pages.{slug}` | Single published page record | 1 hour | Page saved / deleted |
+| 10 | `faqs.{position}` | FAQs for a given position (null = main FAQ page) | 1 hour | FAQ saved / deleted |
 
 ---
 
