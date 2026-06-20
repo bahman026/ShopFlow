@@ -373,7 +373,7 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 
 * Stores images.  
 * `path`: Stores the relative path of the images, the absolute path can be specified using the `static_asset` function relative to the CDN.  
-* `imageable_type`: used for polymorphic relation — Attributes, Brand, Categories, Products, Banners.  
+* `imageable_type`: used for polymorphic relation — Attributes, Brand, Categories, Products, Banners, Slides, MenuItems.  
 * `imageable_id`: used for polymorphic relation.  
 * `order`: Display order of the image within its parent (default 0).  
 * `is_featured`: Marks the primary/featured image for the parent record (default false). Only one image per parent should have this set to true.  
@@ -392,20 +392,21 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 # menus
 
 * Contains various menus in the header, footer, etc., that will be cached by the application logic.  
-* `name`: Specifies the name of the menu, such as "header" or "footer column 1".  
-* `position`: Specifies the key position of the menu, such as "header" or "footer-column-1".  
-* `status`: Specifies the publication status of the menu. If this column has a value of 0 or false, the menu will not be displayed.
+* `name`: Human-readable label for the menu, e.g. "Header" or "Footer Column 1".  
+* `position`: The key used by the frontend to fetch this menu, e.g. "header" or "footer-column-1". Unique.  
+* `status`: Boolean. When false (0), the menu is hidden on the frontend. Default true.  
+* Deleting a menu cascades to all its menu items (and their images and child items).
 
 # menu\_items
 
 * Stores menu items.  
-* `menu_id`: Specifies which menu this record (link) is related to.  
-* `name`: Specifies the name of the item (link), for example, "About Us".  
-* `url`: Specifies the link related to the item. If the link is relative, it should be created relative to the homepage URL; otherwise, the same URL should be used.  
-* `image_id`: Stores the image ID if this item has an image.  
-* `parent_id`: Used to create nested menus.  
-* `label`: Created to handle cases where any link in the menu has a second text with a different appearance.  
-* `order`: Specifies the order of menu items.
+* `menu_id`: Specifies which menu this record belongs to. Foreign key; cascades on menu delete.  
+* `parent_id`: Nullable self-referential FK to `menu_items`. Used to create one level of nested menus. Set to null when the parent is deleted.  
+* `name`: The link text shown to the visitor, e.g. "About Us".  
+* `url`: The URL this item links to. Nullable. Use a relative path for internal pages or a full URL for external links.  
+* `label`: Optional secondary badge or tag shown beside the item name, e.g. "New". Nullable.  
+* `order`: Display order within the menu or under the parent. Default 0. Lower values appear first.  
+* Image is stored via the polymorphic `images` table (`imageable_type = MenuItem`) using a `MorphOne` relationship — no `image_id` column. Deleting an item cascades to its image and children.
 
 # mobile\_histories
 
@@ -662,9 +663,10 @@ Used to store products.
 # sliders
 
 * For creating various sliders.  
-* The `name` column specifies the slider name, for example, "Home Page Slider."  
-* The `position` column specifies the slider position, for example, "home-page."  
-* The `status` column specifies the publication status of the slider.
+* `name`: Human-readable label for the slider, e.g. "Home Page Main Slider." Not shown on the frontend.  
+* `position`: The key used by the frontend to fetch this slider, e.g. "home-main". Must be unique per placement.  
+* `status`: Publication status — 10 for deleted, 20 for published (default), 30 for draft.  
+* Deleting a slider cascades to its slides (and their images).
 
 # slides
 

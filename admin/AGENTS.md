@@ -206,6 +206,9 @@ When adding a new entity, build the files in this order, matching the existing f
 - Control navigation order within a group with `protected static ?int $navigationSort = 1;` (lower = higher in the list).
 - Add an explanatory subheading to a list page with `protected ?string $subheading = 'Description here.';` on the `ListRecords` page class.
 - Add a tooltip to a form field with `->hintIcon('heroicon-o-information-circle')->hintIconTooltip('Explanation...')`. Use this instead of always-visible `->hint()` when the text is long.
+- Always add `->image()` to `FileUpload` fields that accept images. This restricts the file picker to image types only.
+- `mutateRelationshipDataBeforeSaveUsing` (and `BeforeCreateUsing`) MUST return `array`, never `null`. Returning `null` throws a `TypeError` at runtime. To skip saving, delete the related record inside the callback and still return the `$data` array.
+- Self-referential FK (e.g. `parent_id`): use `$table->foreignId('parent_id')->nullable()->constrained('table_name')->nullOnDelete()`. In the factory, default `parent_id` to `null` and provide a named state (e.g. `withParent(Model $parent)`) to set it. In the `parent_id` select options closure, exclude the current record to prevent circular references: `->when($record?->id, fn (Builder $q) => $q->where('id', '!=', $record->id))`.
 
 ## Models
 
@@ -246,6 +249,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - `DatabaseSeeder::run()` calls all seeders via `$this->call([...])` in dependency order. It holds only necessary/reference data (roles, admin, cities, categories, ancestors, attributes, etc.).
 - `TestSeeder` holds factory-generated sample data (`Model::factory()->count(20)->create()`) for manual admin-panel testing. Run it separately with `php artisan db:seed --class=TestSeeder`. Add new sample-data seeders here, not in `DatabaseSeeder`.
 - Reference seeders use idempotent `updateOrCreate()` / `firstOrCreate()` so re-seeding is safe.
+- When truncating and re-seeding a table whose model has a `deleting` event (e.g. to cascade-delete related images), delete records one by one via `Model::all()->each->delete()` BEFORE truncating the parent. Use `->each->delete()` on a **Collection**, not a query builder — `Model::query()->each` does not exist and will throw an exception.
 - Read configurable values from config, not literals (see `AdminSeeder` reading `config('admin.account')`).
 
 ## Pest tests

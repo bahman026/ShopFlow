@@ -26,6 +26,7 @@ Catalog layer and platform basics.
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
 - [x] Banners (polymorphic images via `images` table)
 - [x] Sliders + Slides (each slide has one polymorphic image via `images` table)
+- [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
@@ -60,7 +61,7 @@ Depend mostly on Images only.
 
 - [x] Banners
 - [x] Sliders + Slides
-- [ ] Menus + Menu Items
+- [x] Menus + Menu Items
 - [ ] Pages
 - [ ] FAQs
 - [ ] Reviews
