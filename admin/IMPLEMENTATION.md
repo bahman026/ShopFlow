@@ -48,6 +48,10 @@ Builds on Products/Varieties; prerequisite for Orders.
 
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
+- [ ] Cron jobs for Discounts & Coupons:
+  - Auto-expire discounts when `ended_at` is passed (set status or filter in queries)
+  - Auto-expire coupons when `expired_at` is passed
+  - Optionally: reset `sold` / `total_used` counters on a schedule if needed
 
 ## Phase 2 - CMS / content (independent quick wins)
 

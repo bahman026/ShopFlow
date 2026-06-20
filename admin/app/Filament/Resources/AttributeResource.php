@@ -24,6 +24,8 @@ class AttributeResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
+    protected static ?int $navigationSort = 4;
+
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
@@ -32,11 +34,17 @@ class AttributeResource extends Resource
             ->components([
                 Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The group this attribute belongs to (e.g. "Color", "Size"). Create attribute groups first.')
                     ->required(),
                 TextInput::make('value')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The display value of this attribute (e.g. "Red", "XL"). Shown to customers and used as the variety label.')
                     ->required()
                     ->maxLength(255),
                 TextInput::make('color')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Optional hex or color name (e.g. #ff0000). Auto-copied to the variety\'s color when this attribute is selected.')
                     ->nullable()
                     ->maxLength(31),
             ]);

@@ -40,9 +40,13 @@ class VarietyResource extends Resource
                     ->relationship('product', 'heading')
                     ->searchable()
                     ->live()
-                    ->required(),
+                    ->required()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The product this variety belongs to. Changing it reloads the available attributes below.'),
                 Select::make('attribute_id')
                     ->label('Attribute')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The attribute that defines this variety (e.g. "Red" from the "Color" group). Auto-fills value and color on save. Options are filtered by the product\'s attribute group.')
                     ->options(function (Get $get, ?Variety $record): array {
                         $productId = $get('product_id') ?? $record?->product_id;
                         if (! $productId) {
@@ -64,15 +68,23 @@ class VarietyResource extends Resource
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('تومان'),
+                    ->prefix('تومان')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The selling price of this variety.'),
                 TextInput::make('sale_price')
-                    ->numeric(),
+                    ->numeric()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Discounted price shown instead of the regular price when set. Leave empty for no sale price.'),
                 TextInput::make('inventory')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Number of units available in stock.'),
                 Toggle::make('has_stock')
-                    ->required(),
+                    ->required()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('When off, this variety is shown as out of stock regardless of inventory count.'),
                 Select::make('status')
                     ->required()
                     ->options(VarietyStatusEnum::options())
