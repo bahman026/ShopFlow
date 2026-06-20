@@ -85,7 +85,7 @@ Depend mostly on Images only.
 - [ ] Warehouses (unblocks variety `warehouse_id`)
 - [x] Shipping Lines (carrier table; `name` + `cost`)
 - [x] Shipping Methods (`shipping_line_id` FK to Shipping Lines; service tier with rules)
-- [ ] Shipping Cities (per-city cost and availability overrides per shipping method)
+- [x] Shipping Cities (per-city cost and availability overrides per shipping method)
 - [ ] Guarantee Names
 - [x] `attribute_variety` pivot (done — moved up from Phase 3)
 - [ ] Variety extensions: `variety_serials`, `variety_details`

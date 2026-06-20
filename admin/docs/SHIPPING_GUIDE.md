@@ -177,7 +177,7 @@ At checkout the frontend receives the user's city. The resolution steps:
 |---|---|---|
 | `shipping_lines` | ✅ Done | Migration, model, factory, Filament resource, tests |
 | `shipping_methods` | ✅ Done | Migration, model, factory, Filament resource, tests. `ShippingMethodForEnum` for `for` field. |
-| `shipping_cities` | ⏳ Pending | Next to implement (Phase 3) |
+| `shipping_cities` | ✅ Done | Migration, model, factory, Filament resource, tests. Cascade-deletes when method is deleted. |
 
 ---
 
