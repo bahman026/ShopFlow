@@ -12,7 +12,13 @@ class ListAttributeGroups extends ListRecords
 {
     protected static string $resource = AttributeGroupResource::class;
 
-    protected ?string $subheading = 'An attribute group is a set of attributes that share a common property (e.g. "Color" contains Red, Blue, Green). Each group belongs to an ancestor and is linked to categories via Attribute Group Categories. Products then use a group to define their variety differentiator.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('attribute_group.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

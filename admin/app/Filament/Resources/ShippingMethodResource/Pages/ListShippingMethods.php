@@ -12,7 +12,13 @@ class ListShippingMethods extends ListRecords
 {
     protected static string $resource = ShippingMethodResource::class;
 
-    protected ?string $subheading = 'Service tiers offered by each shipping carrier (e.g. Standard Post, Overnight Express). Each method can then be configured per city.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('shipping_method.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

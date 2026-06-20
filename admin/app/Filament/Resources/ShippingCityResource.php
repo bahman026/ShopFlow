@@ -26,17 +26,31 @@ class ShippingCityResource extends Resource
 {
     protected static ?string $model = ShippingCity::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Logistics';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
 
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('shipping_city.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('shipping_city.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('shipping_city.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('shipping_method_id')
+                    ->label(trans('shipping_city.shipping_method_id'))
                     ->relationship('shippingMethod', 'name')
                     ->required()
                     ->searchable()
@@ -44,61 +58,71 @@ class ShippingCityResource extends Resource
                     ->native(false)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The shipping method this city config applies to.'),
+                    ->hintIconTooltip(trans('shipping_city.shipping_method_id_hint')),
                 Select::make('province_id')
+                    ->label(trans('shipping_city.province_id'))
                     ->relationship('province', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Set a province for a province-wide rule. Leave empty if targeting a specific city.'),
+                    ->hintIconTooltip(trans('shipping_city.province_id_hint')),
                 Select::make('city_id')
+                    ->label(trans('shipping_city.city_id'))
                     ->relationship('city', 'name')
                     ->searchable()
                     ->preload()
                     ->nullable()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Set a city for city-specific rules. City rules take priority over province rules. At least one of city or province must be set.'),
+                    ->hintIconTooltip(trans('shipping_city.city_id_hint')),
                 TextInput::make('amount')
+                    ->label(trans('shipping_city.amount'))
                     ->numeric()
                     ->nullable()
                     ->prefix('تومان')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Shipping cost for this location. Leave empty for postpaid. Set 0 for free shipping.'),
+                    ->hintIconTooltip(trans('shipping_city.amount_hint')),
                 Toggle::make('pay_on_delivery')
+                    ->label(trans('shipping_city.pay_on_delivery'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When on, the customer pays at delivery — no online payment required.'),
+                    ->hintIconTooltip(trans('shipping_city.pay_on_delivery_hint')),
                 TextInput::make('sending_days')
+                    ->label(trans('shipping_city.sending_days'))
                     ->nullable()
                     ->placeholder('e.g. 1,2,3,4,5')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Days this method ships for this location (comma-separated day numbers). Leave empty for every day.'),
+                    ->hintIconTooltip(trans('shipping_city.sending_days_hint')),
                 TextInput::make('delay')
+                    ->label(trans('shipping_city.delay'))
                     ->numeric()
                     ->nullable()
-                    ->suffix('days')
+                    ->suffix(trans('shipping_city.delay_suffix'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Extra delivery delay in days for this location (e.g. 1 for next-day).'),
+                    ->hintIconTooltip(trans('shipping_city.delay_hint')),
                 Textarea::make('description')
+                    ->label(trans('shipping_city.description'))
                     ->nullable()
                     ->rows(2)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Human-readable delivery details shown to the customer (e.g. "Delivered within 72 hours").'),
+                    ->hintIconTooltip(trans('shipping_city.description_hint')),
                 DateTimePicker::make('disable_from')
+                    ->label(trans('shipping_city.disable_from'))
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Start of a period when this method is unavailable in this location.'),
+                    ->hintIconTooltip(trans('shipping_city.disable_from_hint')),
                 DateTimePicker::make('disable_to')
+                    ->label(trans('shipping_city.disable_to'))
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('End of the unavailability period.'),
+                    ->hintIconTooltip(trans('shipping_city.disable_to_hint')),
                 Toggle::make('status')
+                    ->label(trans('shipping_city.status'))
                     ->default(true)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When off, this entry is ignored at checkout.'),
+                    ->hintIconTooltip(trans('shipping_city.status_hint')),
             ]);
     }
 
@@ -107,27 +131,32 @@ class ShippingCityResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('shippingMethod.name')
-                    ->label('Method')
+                    ->label(trans('shipping_city.method'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('province.name')
-                    ->label('Province')
+                    ->label(trans('shipping_city.province'))
                     ->placeholder('—'),
                 TextColumn::make('city.name')
-                    ->label('City')
+                    ->label(trans('shipping_city.city'))
                     ->placeholder('—')
                     ->searchable(),
                 TextColumn::make('amount')
+                    ->label(trans('shipping_city.amount'))
                     ->money()
-                    ->placeholder('Postpaid'),
+                    ->placeholder(trans('shipping_city.postpaid')),
                 IconColumn::make('pay_on_delivery')
+                    ->label(trans('shipping_city.pay_on_delivery'))
                     ->boolean(),
                 TextColumn::make('delay')
+                    ->label(trans('shipping_city.delay'))
                     ->suffix(' d')
                     ->placeholder('—'),
                 IconColumn::make('status')
+                    ->label(trans('shipping_city.status'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(trans('shipping_city.created_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

@@ -17,9 +17,9 @@ enum DiscountForEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::EVERYONE => 'Everyone',
-            self::USERS => 'Users',
-            self::PARTNERS => 'Partners',
+            self::EVERYONE => trans('discount.for_everyone'),
+            self::USERS => trans('discount.for_users'),
+            self::PARTNERS => trans('discount.for_partners'),
         };
     }
 
