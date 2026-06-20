@@ -30,6 +30,7 @@ Catalog layer and platform basics.
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
 - [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
+- [x] Wishlists (`user_id` + `product_id` pivot; cascades on user/product delete; list + delete resource)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
@@ -72,7 +73,7 @@ Depend mostly on Images only.
 - [x] Pages
 - [x] FAQs
 - [x] Reviews
-- [ ] Wishlists
+- [x] Wishlists
 - [ ] Tags
 - [ ] Brand-Category pages
 - [ ] Redirects

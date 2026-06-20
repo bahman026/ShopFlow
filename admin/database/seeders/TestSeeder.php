@@ -23,6 +23,7 @@ class TestSeeder extends Seeder
             PageSeeder::class,
             FaqSeeder::class,
             ReviewSeeder::class,
+            WishlistSeeder::class,
         ]);
     }
 }
