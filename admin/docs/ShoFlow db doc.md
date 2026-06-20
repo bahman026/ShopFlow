@@ -643,20 +643,23 @@ Used to store products.
 
 # shipping\_lines
 
-* A separate line must be specified for each shipping method.  
-* The `name` column specifies the name.  
-* The `cost` column specifies the cost.
+Represents a shipping carrier or company (e.g. Post Office, Express Courier, Same-day Delivery). Acts as the top level of the shipping hierarchy: `shipping_lines → shipping_methods → shipping_cities`.
+
+* `name`: The carrier name shown to admins (e.g. "Post", "Express Courier").
+* `cost`: Base cost for this carrier. Can be overridden per city in `shipping_cities`.
 
 # shipping\_methods
 
-* For storing product shipping methods.  
-* The `name` column specifies the shipping method name, such as Post, Snap, etc.  
-* The `type` column specifies the shipping method type, such as Express, Special, etc.  
-* The `min_count` column specifies the minimum purchase quantity for shipping via this method.  
-* The `min_amount` column specifies the minimum purchase amount for shipping via this method.  
-* The `for` column specifies if this shipping method is for a partner, customer, or employee.  
-* The `disable_from` and `disable_to` columns specify the period when shipping is not available.  
-* The `status` column specifies whether the shipping method is active or inactive.
+A specific service tier offered by a shipping carrier. References `shipping_lines` and is further scoped per city via `shipping_cities`.
+
+* `shipping_line_id`: The carrier this method belongs to (FK to `shipping_lines`). Added during ShopFlow implementation — not in the original doc.
+* `name`: The service name, e.g. "Standard Post", "Overnight Express".
+* `type`: Service type, e.g. Express, Special, Economy.
+* `min_count`: Minimum purchase quantity required to use this method.
+* `min_amount`: Minimum purchase amount required to use this method.
+* `for`: Audience — `CUSTOMER=10` (default), `PARTNER=20`, `EMPLOYEE=30`. Implemented as `ShippingMethodForEnum`.
+* `disable_from` / `disable_to`: Period during which this method is unavailable.
+* `status`: Active or inactive.
 
 # sliders
 

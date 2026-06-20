@@ -83,9 +83,9 @@ Depend mostly on Images only.
 ## Phase 3 - Inventory & logistics (Orders prerequisites)
 
 - [ ] Warehouses (unblocks variety `warehouse_id`)
-- [ ] Shipping Lines
-- [ ] Shipping Methods
-- [ ] Shipping Cities
+- [x] Shipping Lines (carrier table; `name` + `cost`)
+- [x] Shipping Methods (`shipping_line_id` FK to Shipping Lines; service tier with rules)
+- [x] Shipping Cities (per-city cost and availability overrides per shipping method)
 - [ ] Guarantee Names
 - [x] `attribute_variety` pivot (done — moved up from Phase 3)
 - [ ] Variety extensions: `variety_serials`, `variety_details`
