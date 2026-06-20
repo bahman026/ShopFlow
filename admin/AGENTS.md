@@ -272,6 +272,10 @@ When adding a new entity, build the files in this order, matching the existing f
 - Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())->field->toBe(...)`.
 - Do not assert computed fields against a fresh factory value; assert the expected computed result.
 
+## Business constraints
+
+- **No seller / marketplace system.** ShopFlow is a single-vendor store. There are no sellers, seller accounts, or seller-scoped entities. Never add `seller_id`, `seller_creator_id`, or any seller relation to models, migrations, or resources.
+
 ## Roadmap & docs
 
 - **Before starting any task**, read these three files to understand the current state of the project:

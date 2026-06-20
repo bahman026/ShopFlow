@@ -29,6 +29,7 @@ Catalog layer and platform basics.
 - [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
+- [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
@@ -70,7 +71,7 @@ Depend mostly on Images only.
 - [x] Menus + Menu Items
 - [x] Pages
 - [x] FAQs
-- [ ] Reviews
+- [x] Reviews
 - [ ] Wishlists
 - [ ] Tags
 - [ ] Brand-Category pages

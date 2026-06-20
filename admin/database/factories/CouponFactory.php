@@ -32,7 +32,6 @@ class CouponFactory extends Factory
             'total_uses' => fake()->numberBetween(1, 100),
             'user_id' => null,
             'user_creator_id' => null,
-            'seller_creator_id' => null,
             'status' => fake()->randomElement(CouponStatusEnum::cases()),
             'is_percent' => fake()->boolean(),
             'shipping' => fake()->boolean(),

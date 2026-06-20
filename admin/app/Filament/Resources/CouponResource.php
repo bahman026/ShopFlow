@@ -109,13 +109,6 @@ class CouponResource extends Resource
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip('The admin user who created this coupon.'),
-                Select::make('seller_creator_id')
-                    ->relationship('sellerCreator', 'email')
-                    ->searchable()
-                    ->preload()
-                    ->native(false)
-                    ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The seller who created this coupon, if applicable.'),
                 Select::make('products')
                     ->relationship('products', 'heading')
                     ->multiple()

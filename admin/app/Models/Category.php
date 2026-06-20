@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -28,6 +30,10 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Collection<Product> $products
+ * @property Collection<AttributeGroup> $attributeGroups
+ * @property Collection<Coupon> $coupons
+ * @property Category|null $parent
+ * @property Collection<Category> $children
  *
  * @method static Builder|Category active()
  */
@@ -74,5 +80,27 @@ class Category extends Model
     public function attributeGroupCategories(): HasMany
     {
         return $this->hasMany(AttributeGroupCategory::class);
+    }
+
+    public function attributeGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(AttributeGroup::class, 'attribute_group_category')
+            ->withPivot(['as_filter', 'required', 'order'])
+            ->withTimestamps();
+    }
+
+    public function coupons(): BelongsToMany
+    {
+        return $this->belongsToMany(Coupon::class, 'category_coupon')->withTimestamps();
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Category::class, 'parent_id');
     }
 }

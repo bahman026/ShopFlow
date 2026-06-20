@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Attribute
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $value
  * @property AttributeGroup $attributeGroup
  * @property Collection<Variety> $varieties
+ * @property Collection<Variety> $directVarieties
+ * @property Collection<Product> $products
  */
 class Attribute extends Model
 {
@@ -35,8 +38,22 @@ class Attribute extends Model
         return $this->belongsTo(AttributeGroup::class);
     }
 
+    /** Varieties linked via the attribute_variety pivot (additional attributes). */
     public function varieties(): BelongsToMany
     {
         return $this->belongsToMany(Variety::class)->withTimestamps();
+    }
+
+    /** Varieties where this attribute is the primary one (attribute_id FK). */
+    public function directVarieties(): HasMany
+    {
+        return $this->hasMany(Variety::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_attribute')
+            ->withPivot('is_highlight')
+            ->withTimestamps();
     }
 }
