@@ -11,13 +11,13 @@ use App\Filament\Resources\ProductResource\Pages\CreateProduct;
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Attribute;
+use App\Models\Attribute as AttributeModel;
 use App\Models\AttributeGroup;
 use App\Models\AttributeGroupCategory;
 use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use App\Models\Attribute as AttributeModel;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -25,14 +25,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -229,40 +230,40 @@ class ProductResource extends Resource
                     ->relationship('varieties')
                     ->columnSpanFull()
                     ->schema([
-                                Select::make('attribute_id')
-                                    ->label('Attribute')
-                                    ->options(function (Get $get): array {
-                                        $groupId = $get('../../attribute_group_id');
-                                        if (! $groupId) {
-                                            return [];
-                                        }
+                        Select::make('attribute_id')
+                            ->label('Attribute')
+                            ->options(function (Get $get): array {
+                                $groupId = $get('../../attribute_group_id');
+                                if (! $groupId) {
+                                    return [];
+                                }
 
-                                        return AttributeModel::query()
-                                            ->where('attribute_group_id', $groupId)
-                                            ->pluck('value', 'id')
-                                            ->toArray();
-                                    })
-                                    ->searchable()
-                                    ->nullable()
-                                    ->helperText('Selecting an attribute auto-fills the value and color.'),
-                                TextInput::make('price')
-                                    ->required()
-                                    ->numeric(),
-                                TextInput::make('sale_price')
-                                    ->numeric()
-                                    ->nullable(),
-                                TextInput::make('inventory')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(0),
-                                Toggle::make('has_stock')
-                                    ->default(true)
-                                    ->required(),
-                                Select::make('status')
-                                    ->required()
-                                    ->options(VarietyStatusEnum::options())
-                                    ->default(VarietyStatusEnum::PUBLISHED->value),
-                            ])
+                                return AttributeModel::query()
+                                    ->where('attribute_group_id', $groupId)
+                                    ->pluck('value', 'id')
+                                    ->toArray();
+                            })
+                            ->searchable()
+                            ->nullable()
+                            ->helperText('Selecting an attribute auto-fills the value and color.'),
+                        TextInput::make('price')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('sale_price')
+                            ->numeric()
+                            ->nullable(),
+                        TextInput::make('inventory')
+                            ->required()
+                            ->numeric()
+                            ->default(0),
+                        Toggle::make('has_stock')
+                            ->default(true)
+                            ->required(),
+                        Select::make('status')
+                            ->required()
+                            ->options(VarietyStatusEnum::options())
+                            ->default(VarietyStatusEnum::PUBLISHED->value),
+                    ])
                     ->columnSpanFull(),
             ]);
     }
@@ -357,14 +358,14 @@ class ProductResource extends Resource
      * Returns names of required attribute groups that have no selected attribute.
      *
      * @param  array<mixed>  $attributeState
-     * @return \Illuminate\Support\Collection<int, string>
+     * @return Collection<int, string>
      */
-    public static function missingRequiredGroups(array $attributeState, int $categoryId): \Illuminate\Support\Collection
+    public static function missingRequiredGroups(array $attributeState, int $categoryId): Collection
     {
         $selectedAttributeIds = collect($attributeState)
             ->filter(fn (array $item): bool => ! empty($item['attribute_id']))
             ->pluck('attribute_id')
-            ->map(fn ($id): int => (int) $id)
+            ->map(fn (mixed $id): int => (int) $id)
             ->all();
 
         $requiredGroupIds = AttributeGroupCategory::query()

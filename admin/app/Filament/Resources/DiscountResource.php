@@ -40,7 +40,7 @@ class DiscountResource extends Resource
                     ->hintIconTooltip('The specific variety this discount applies to. Label shows: Product — Variety.')
                     ->relationship('variety', 'attribute_value')
                     ->getOptionLabelFromRecordUsing(fn (Variety $record): string => implode(' — ', array_filter([
-                        $record->product?->heading,
+                        $record->product->heading,
                         $record->attribute_value ?? ('Variety #' . $record->id),
                     ])))
                     ->searchable()
