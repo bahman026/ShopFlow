@@ -98,6 +98,8 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Always use curly braces for control structures, even for single-line bodies.
 - Use PHP 8 constructor property promotion: `public function __construct(public GitHub $github) { }`. Do not leave empty zero-parameter `__construct()` methods unless the constructor is private.
 - Use explicit return type declarations and type hints for all method parameters: `function isAccessible(User $user, ?string $path = null): bool`
+- **Closure parameters must also be typed** (e.g. `fn (mixed $id): int =>` not `fn ($id): int =>`). Untyped closure parameters drop type coverage below 100% and fail `composer test-dev`.
+- **Nullsafe operator**: only use `?->` on relations whose PHPDoc type is nullable. If the PHPDoc says `@property Product $product` (non-nullable), use `->` — PHPStan will flag `?->` as `nullsafe.neverNull`.
 - Follow existing application Enum naming conventions.
 - Prefer PHPDoc blocks over inline comments. Only add inline comments for exceptionally complex logic.
 - Use array shape type definitions in PHPDoc blocks.
