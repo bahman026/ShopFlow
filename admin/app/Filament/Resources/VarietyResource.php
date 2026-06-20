@@ -14,12 +14,14 @@ use App\Models\Variety;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -66,6 +68,10 @@ class VarietyResource extends Resource
                     ->searchable()
                     ->nullable()
                     ->helperText('Selecting an attribute auto-fills the value and color.'),
+                ColorPicker::make('color')
+                    ->nullable()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Hex color for this variety (e.g. #ff8516). Auto-filled from the selected attribute — override here if needed.'),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
@@ -103,7 +109,7 @@ class VarietyResource extends Resource
                     ->preload()
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Secondary attributes for this variety from other groups, e.g. Color when the primary group is Size. Stored in the variety_attribute pivot table.'),
+                    ->hintIconTooltip('Secondary attributes for this variety from other groups, e.g. Color when the primary group is Size. Stored in the attribute_variety pivot table.'),
             ]);
     }
 
@@ -120,7 +126,8 @@ class VarietyResource extends Resource
                     ->searchable(),
                 TextColumn::make('attribute_value')
                     ->label('Value'),
-                TextColumn::make('color'),
+                ColorColumn::make('color')
+                    ->copyable(),
                 TextColumn::make('price')
                     ->money(),
                 TextColumn::make('sale_price')

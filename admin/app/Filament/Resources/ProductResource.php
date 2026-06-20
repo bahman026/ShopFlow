@@ -19,6 +19,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -269,6 +270,10 @@ class ProductResource extends Resource
                             ->searchable()
                             ->nullable()
                             ->helperText('Selecting an attribute auto-fills the value and color.'),
+                        ColorPicker::make('color')
+                            ->nullable()
+                            ->hintIcon('heroicon-o-information-circle')
+                            ->hintIconTooltip('Hex color for this variety (e.g. #ff8516). Auto-filled from the selected attribute — override here if needed.'),
                         Select::make('attributes')
                             ->label('Additional Attributes')
                             ->multiple()

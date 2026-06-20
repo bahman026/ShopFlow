@@ -50,7 +50,7 @@ class Variety extends Model
     protected static function booted(): void
     {
         static::saving(function (Variety $variety): void {
-            if ($variety->attribute_id === null) {
+            if ($variety->attribute_id === null || ! $variety->isDirty('attribute_id')) {
                 return;
             }
             $attribute = Attribute::find($variety->attribute_id);
