@@ -552,7 +552,7 @@ Used to store products.
 * `no_index`: If true or 1, the corresponding product page should have a noindex meta tag.  
 * `canonical`: Used to prevent canonicalization issues.  
 * `image_id`: specifying the product's featured image.  
-* `attribute_group_id`: Specifies the filter group for the product variety. For example, this product varies in price by color, and sellers must specify which color they offer at what price in the `varieties` table. Nullable foreign key to `attribute_groups`; set to null when the group is deleted.  
+* `attribute_group_id`: Specifies the **primary** attribute group that differentiates the varieties of this product (e.g. "Size"). In the admin panel, the available groups are filtered to those linked to the product's category via `attribute_group_category`. Nullable foreign key to `attribute_groups`; set to null when the group is deleted. Additional variation dimensions (e.g. Color) are stored per variety in the `attribute_variety` pivot.  
 * `category_id`: Specifies the category of the product. Each category must specify its subcategories, and these subcategories must specify their subcategories, and so on. Required foreign key to `categories`; deletion is restricted while products reference it.  
 * `brand_id`: Specifies the brand of the product. Nullable foreign key to `brands`; set to null when the brand is deleted.  
 * `minimum`: Specifies the minimum purchase quantity for a product.  
@@ -832,9 +832,16 @@ Contains product variations entered by the seller on the site. This table create
 * `has_stock`: Indicates the stock status (default is 1/true). If this column is false or 0, the variety is displayed as out of stock.  
 * `status`: Publication status of the variety.
 
-# varietie\_attribute
+# attribute\_variety (variety\_attribute pivot)
 
-> **Not implemented.** The original plan for a `variety_attribute` pivot was replaced by adding `attribute_id` directly to the `varieties` table. Each variety links to exactly one attribute; `attribute_value` and `color` are auto-populated from the linked attribute when the record is saved. No separate pivot table exists.
+Stores additional attribute associations for each variety, enabling multi-dimensional varieties (e.g. Size as primary + Color as secondary).
+
+* Table name is `attribute_variety` (Laravel alphabetical convention).
+* `variety_id`: FK to `varieties`; cascades on variety delete.
+* `attribute_id`: FK to `attributes`; cascades on attribute delete.
+* The pair `(variety_id, attribute_id)` is unique. Carries `created_at` / `updated_at`.
+* The primary attribute is still on `varieties.attribute_id` (drives `attribute_value` and `color` auto-population). This pivot holds **additional** attributes from other groups (e.g. when the product's `attribute_group_id` is "Size", color attributes are attached here).
+* **Frontend query pattern:** to find a specific Size+Color combination, join `varieties` with `attribute_variety` filtering on both `varieties.attribute_id` (size) and `attribute_variety.attribute_id` (color). Cache all varieties with their pivot attributes under `varieties.product.{product_id}` and resolve combinations in memory to avoid N+1.
 
 # variety\_serials
 

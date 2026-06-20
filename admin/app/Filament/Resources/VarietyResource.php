@@ -23,6 +23,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class VarietyResource extends Resource
 {
@@ -89,6 +90,20 @@ class VarietyResource extends Resource
                     ->required()
                     ->options(VarietyStatusEnum::options())
                     ->default(VarietyStatusEnum::PUBLISHED->value),
+                Select::make('attributes')
+                    ->label('Additional Attributes')
+                    ->multiple()
+                    ->relationship(
+                        name: 'attributes',
+                        titleAttribute: 'value',
+                        modifyQueryUsing: fn (Builder $query): Builder => $query->with('attributeGroup'),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn (Attribute $record): string => $record->attributeGroup->name . ' / ' . $record->value)
+                    ->searchable()
+                    ->preload()
+                    ->columnSpanFull()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Secondary attributes for this variety from other groups, e.g. Color when the primary group is Size. Stored in the variety_attribute pivot table.'),
             ]);
     }
 
@@ -115,7 +130,7 @@ class VarietyResource extends Resource
                 IconColumn::make('has_stock')
                     ->boolean(),
                 TextColumn::make('status')
-                    ->getStateUsing(fn (Variety $record) => $record->status->label())
+                    ->getStateUsing(fn (Variety $record): string => $record->status->label())
                     ->color(fn (Variety $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('created_at')

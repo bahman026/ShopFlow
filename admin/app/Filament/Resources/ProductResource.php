@@ -33,6 +33,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -110,21 +111,42 @@ class ProductResource extends Resource
                     ])
                     ->columnSpanFull(),
 
-                Select::make('attribute_group_id')
-                    ->relationship('attributeGroup', 'name')
-                    ->searchable()
-                    ->native(false)
-                    ->live()
-                    ->preload()
-                    ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Defines which attribute group differentiates the varieties of this product (e.g. "Color"). Changing this reloads the attribute options in the variety rows below.'),
                 Select::make('category_id')
                     ->relationship('category', 'heading')
                     ->required()
                     ->native(false)
+                    ->searchable()
                     ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('attribute_group_id', null))
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip('The category this product belongs to. Required attribute groups for this category will be enforced on save.'),
+                Select::make('attribute_group_id')
+                    ->label('Attribute Group')
+                    ->options(function (Get $get, ?Product $record): array {
+                        $categoryId = $get('category_id');
+                        if (! $categoryId) {
+                            return AttributeGroup::query()->pluck('name', 'id')->toArray();
+                        }
+
+                        $groupIds = AttributeGroupCategory::query()
+                            ->where('category_id', $categoryId)
+                            ->pluck('attribute_group_id');
+
+                        if ($record?->attribute_group_id) {
+                            $groupIds = $groupIds->push($record->attribute_group_id)->unique();
+                        }
+
+                        return AttributeGroup::query()
+                            ->whereIn('id', $groupIds)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->native(false)
+                    ->live()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Defines which attribute group differentiates the varieties of this product (e.g. "Color"). Filtered by the selected category. Changing this reloads attribute options in the variety rows below.'),
                 Select::make('brand_id')
                     ->relationship('brand', 'heading')
                     ->required()
@@ -247,6 +269,27 @@ class ProductResource extends Resource
                             ->searchable()
                             ->nullable()
                             ->helperText('Selecting an attribute auto-fills the value and color.'),
+                        Select::make('attributes')
+                            ->label('Additional Attributes')
+                            ->multiple()
+                            ->relationship(
+                                name: 'attributes',
+                                titleAttribute: 'value',
+                                modifyQueryUsing: function (Builder $query, Get $get): Builder {
+                                    $groupId = $get('../../attribute_group_id');
+                                    $query->with('attributeGroup');
+                                    if ($groupId) {
+                                        $query->where('attribute_group_id', '!=', (int) $groupId);
+                                    }
+
+                                    return $query;
+                                },
+                            )
+                            ->getOptionLabelFromRecordUsing(fn (AttributeModel $record): string => $record->attributeGroup->name . ' / ' . $record->value)
+                            ->searchable()
+                            ->preload()
+                            ->hintIcon('heroicon-o-information-circle')
+                            ->hintIconTooltip('Additional attributes from other groups, e.g. Color when the primary group is Size.'),
                         TextInput::make('price')
                             ->required()
                             ->numeric(),

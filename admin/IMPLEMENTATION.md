@@ -42,6 +42,8 @@ Done. Variety has model, migration, factory, resource (+ pages), tests, and `var
 
 - [x] Fix `VarietyResource` table: `product.heading` column (was `product.title` with `->numeric()` on a string)
 - [x] `attribute_id` FK on varieties - links each variety to one attribute; auto-populates `attribute_value` and `color` from the attribute on save
+- [x] `attribute_variety` pivot — each variety can link to multiple attributes from different groups (e.g. Size as primary + Color via pivot); "Additional Attributes" multi-select added to both VarietyResource and the ProductResource inline variety repeater
+- [x] `attribute_group_id` in ProductResource filtered by selected category (via `attribute_group_category`); changing category clears the group selection
 - [ ] Variety extensions (`warehouse_id`, `guarantee_name_id`, `variety_serials`, `variety_details`) - deferred to Phase 3, they need Warehouses / Guarantees first
 - [x] Attribute `required` flag enforced in `ProductResource`: if a category has required attribute groups, saving a product without them shows a danger notification and skips the sync
 
@@ -80,7 +82,8 @@ Depend mostly on Images only.
 - [ ] Shipping Methods
 - [ ] Shipping Cities
 - [ ] Guarantee Names
-- [ ] Variety extensions: `variety_attribute`, `variety_serials`, `variety_details`
+- [x] `attribute_variety` pivot (done — moved up from Phase 3)
+- [ ] Variety extensions: `variety_serials`, `variety_details`
 
 ## Phase 4 - Commerce core
 

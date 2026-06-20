@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * App\Models\Attribute
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $color
  * @property string $value
  * @property AttributeGroup $attributeGroup
+ * @property Collection<Variety> $varieties
  */
 class Attribute extends Model
 {
@@ -30,5 +33,10 @@ class Attribute extends Model
     public function attributeGroup(): BelongsTo
     {
         return $this->belongsTo(AttributeGroup::class);
+    }
+
+    public function varieties(): BelongsToMany
+    {
+        return $this->belongsToMany(Variety::class)->withTimestamps();
     }
 }
