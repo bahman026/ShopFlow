@@ -39,7 +39,7 @@ Done. Variety has model, migration, factory, resource (+ pages), tests, and `var
 
 - [x] Fix `VarietyResource` table: `product.heading` column (was `product.title` with `->numeric()` on a string)
 - [x] `attribute_id` FK on varieties - links each variety to one attribute; auto-populates `attribute_value` and `color` from the attribute on save
-- [ ] Variety extensions (`warehouse_id`, `guarantee_name_id`, `variety_attribute`, `variety_serials`, `variety_details`) - deferred to Phase 3, they need Warehouses / Guarantees first
+- [ ] Variety extensions (`warehouse_id`, `guarantee_name_id`, `variety_serials`, `variety_details`) - deferred to Phase 3, they need Warehouses / Guarantees first
 - [x] Attribute `required` flag enforced in `ProductResource`: if a category has required attribute groups, saving a product without them shows a danger notification and skips the sync
 
 ## Phase 1 - Pricing & promotions (recommended next)
