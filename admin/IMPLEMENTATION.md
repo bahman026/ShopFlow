@@ -24,17 +24,23 @@ Catalog layer and platform basics.
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
+- [x] Banners (polymorphic images via `images` table)
 - [~] Addresses (model only, no resource yet)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
+
+Cross-cutting improvements landed:
+- Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address.
+- `CACHE.md` added to track identified-but-not-implemented cache keys.
 
 ## Phase 0 - Finish current branch (`implement_variety`)
 
 Done. Variety has model, migration, factory, resource (+ pages), tests, and `variety_counts` auto-sync.
 
 - [x] Fix `VarietyResource` table: `product.heading` column (was `product.title` with `->numeric()` on a string)
-- [ ] Variety extensions (`warehouse_id`, `guarantee_name_id`, `attribute_id`, `variety_attribute`, `variety_serials`, `variety_details`) - deferred to Phase 3, they need Warehouses / Guarantees first
-- [ ] Attribute `as_filter` / `required` flags into the product/category flow (open `// todo` in the attribute-group-category migration) - moved to its own branch; it is an attribute/category feature, not variety
+- [x] `attribute_id` FK on varieties - links each variety to one attribute; auto-populates `attribute_value` and `color` from the attribute on save
+- [ ] Variety extensions (`warehouse_id`, `guarantee_name_id`, `variety_serials`, `variety_details`) - deferred to Phase 3, they need Warehouses / Guarantees first
+- [x] Attribute `required` flag enforced in `ProductResource`: if a category has required attribute groups, saving a product without them shows a danger notification and skips the sync
 
 ## Phase 1 - Pricing & promotions (recommended next)
 
@@ -42,12 +48,16 @@ Builds on Products/Varieties; prerequisite for Orders.
 
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
+- [ ] Cron jobs for Discounts & Coupons:
+  - Auto-expire discounts when `ended_at` is passed (set status or filter in queries)
+  - Auto-expire coupons when `expired_at` is passed
+  - Optionally: reset `sold` / `total_used` counters on a schedule if needed
 
 ## Phase 2 - CMS / content (independent quick wins)
 
 Depend mostly on Images only.
 
-- [ ] Banners
+- [x] Banners
 - [ ] Sliders + Slides
 - [ ] Menus + Menu Items
 - [ ] Pages

@@ -11,6 +11,9 @@ use App\Filament\Resources\ProductResource\Pages\CreateProduct;
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Models\Attribute;
+use App\Models\Attribute as AttributeModel;
+use App\Models\AttributeGroup;
+use App\Models\AttributeGroupCategory;
 use App\Models\Product;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -23,13 +26,14 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -37,7 +41,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
 
@@ -59,22 +63,34 @@ class ProductResource extends Resource
                     ->dehydrated()
                     ->required()
                     ->maxLength(255)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Auto-generated from the heading on create. Cannot be changed after creation.')
                     ->unique(Product::class, 'slug', ignoreRecord: true),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Base price shown when no variety is selected.')
                     ->prefix('تومان'),
                 TinyEditor::make('content')
                     ->columnSpanFull()
                     ->required(),
                 TextInput::make('title')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('SEO <title> tag. If empty, the heading is used.')
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('SEO meta description shown in search results.')
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Toggle::make('no_index')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('When on, adds a noindex meta tag so search engines skip this page.')
                     ->required(),
                 TextInput::make('canonical')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Canonical URL to prevent duplicate content. Leave empty unless this product mirrors another page.')
                     ->maxLength(255),
                 Repeater::make('images')
                     ->relationship('images')
@@ -95,13 +111,19 @@ class ProductResource extends Resource
 
                 Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
+                    ->searchable()
                     ->native(false)
-                    ->preload(),
+                    ->live()
+                    ->preload()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Defines which attribute group differentiates the varieties of this product (e.g. "Color"). Changing this reloads the attribute options in the variety rows below.'),
                 Select::make('category_id')
                     ->relationship('category', 'heading')
                     ->required()
                     ->native(false)
-                    ->preload(),
+                    ->preload()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The category this product belongs to. Required attribute groups for this category will be enforced on save.'),
                 Select::make('brand_id')
                     ->relationship('brand', 'heading')
                     ->required()
@@ -110,20 +132,30 @@ class ProductResource extends Resource
                 TextInput::make('minimum')
                     ->required()
                     ->numeric()
-                    ->default(1),
+                    ->default(1)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Minimum quantity a customer can add to their cart.'),
                 TextInput::make('maximum')
-                    ->numeric(),
+                    ->numeric()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Maximum quantity per order. Leave empty for no limit.'),
                 TextInput::make('step')
                     ->required()
                     ->numeric()
-                    ->default(1),
+                    ->default(1)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Quantity increment step (e.g. 2 means customers can add 2, 4, 6...).'),
                 TextInput::make('profit_percent')
                     ->required()
                     ->numeric()
                     ->suffix('%')
-                    ->default(0),
+                    ->default(0)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('ShopFlow\'s commission percentage from each sale of this product.'),
 
                 Repeater::make('attributes')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Product-level attributes that describe this product (e.g. material, dimensions). These are not varieties — they are shared across all varieties. Mark an attribute as Highlight to feature it prominently on the product page.')
                     ->schema([
                         Select::make('attribute_id')
                             ->label('Attribute')
@@ -138,7 +170,6 @@ class ProductResource extends Resource
                         Checkbox::make('pivot.is_highlight')
                             ->label('Highlight'),
                     ])
-                    ->dehydrated(false)
                     ->afterStateHydrated(function (mixed $state, callable $set, Component $livewire): void {
                         if (isset($livewire->record) && $livewire->record) {
                             $attributes = $livewire->record->attributes()->get();
@@ -192,35 +223,48 @@ class ProductResource extends Resource
                     ->required()
                     ->numeric()
                     ->default(0),
-                Fieldset::make('Variety Details')
+                Repeater::make('varieties')
+                    ->label('Variety Details')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Each row is a variety of this product. The attribute options depend on the Attribute Group selected above — set that first.')
+                    ->relationship('varieties')
+                    ->columnSpanFull()
                     ->schema([
-                        Repeater::make('varieties')
-                            ->relationship('varieties')
-                            ->schema([
-                                TextInput::make('attribute_value')
-                                    ->maxLength(255),
-                                TextInput::make('color')
-                                    ->maxLength(255),
-                                TextInput::make('price')
-                                    ->required()
-                                    ->numeric(),
-                                TextInput::make('sale_price')
-                                    ->numeric()
-                                    ->nullable(),
-                                TextInput::make('inventory')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(0),
-                                Toggle::make('has_stock')
-                                    ->default(true)
-                                    ->required(),
-                                Select::make('status')
-                                    ->required()
-                                    ->options(VarietyStatusEnum::options())
-                                    ->default(VarietyStatusEnum::PUBLISHED->value),
-                            ])
-                            ->columnSpanFull(),
-                    ]),
+                        Select::make('attribute_id')
+                            ->label('Attribute')
+                            ->options(function (Get $get): array {
+                                $groupId = $get('../../attribute_group_id');
+                                if (! $groupId) {
+                                    return [];
+                                }
+
+                                return AttributeModel::query()
+                                    ->where('attribute_group_id', $groupId)
+                                    ->pluck('value', 'id')
+                                    ->toArray();
+                            })
+                            ->searchable()
+                            ->nullable()
+                            ->helperText('Selecting an attribute auto-fills the value and color.'),
+                        TextInput::make('price')
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('sale_price')
+                            ->numeric()
+                            ->nullable(),
+                        TextInput::make('inventory')
+                            ->required()
+                            ->numeric()
+                            ->default(0),
+                        Toggle::make('has_stock')
+                            ->default(true)
+                            ->required(),
+                        Select::make('status')
+                            ->required()
+                            ->options(VarietyStatusEnum::options())
+                            ->default(VarietyStatusEnum::PUBLISHED->value),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -308,6 +352,38 @@ class ProductResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Returns names of required attribute groups that have no selected attribute.
+     *
+     * @param  array<mixed>  $attributeState
+     * @return Collection<int, string>
+     */
+    public static function missingRequiredGroups(array $attributeState, int $categoryId): Collection
+    {
+        $selectedAttributeIds = collect($attributeState)
+            ->filter(fn (array $item): bool => ! empty($item['attribute_id']))
+            ->pluck('attribute_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        $requiredGroupIds = AttributeGroupCategory::query()
+            ->where('category_id', $categoryId)
+            ->where('required', true)
+            ->pluck('attribute_group_id');
+
+        if ($requiredGroupIds->isEmpty()) {
+            return collect();
+        }
+
+        $selectedGroupIds = Attribute::query()
+            ->whereIn('id', $selectedAttributeIds)
+            ->pluck('attribute_group_id');
+
+        return AttributeGroup::query()
+            ->whereIn('id', $requiredGroupIds->diff($selectedGroupIds))
+            ->pluck('name');
     }
 
     public static function getRelations(): array

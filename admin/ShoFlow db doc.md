@@ -94,11 +94,10 @@ Used to store banners.
 * `position` specifies the advertisement location, which is an arbitrary name to retrieve the corresponding record from the database.  
 * `heading` specifies the banner item title or the alt text of the image.  
 * `url` specifies the item link, which redirects when the image or title is clicked.  
-* `image_id1` specifies the item's image.  
-* `image_id2` specifies the item's image.  
-* `image_id3` specifies the item's image.  
 * `sort` specifies the item order.  
-* `status` specifies the publication and draft status of the banner.
+* `status` stores the publication status of the banner, with values 10 for deleted, 20 for published, and 30 for draft.
+
+Images are attached through the polymorphic `images` table (`imageable_type` / `imageable_id`), so a banner can have one or more images instead of fixed `image_id` columns. The featured image is the one with `is_featured` set to true.
 
 # Brand\_Category
 
@@ -374,7 +373,7 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 
 * Stores images.  
 * `path`: Stores the relative path of the images, the absolute path can be specified using the `static_asset` function relative to the CDN.  
-* `imageable_type:` used for polymorphic relation Attributes Brand Categories  
+* `imageable_type:` used for polymorphic relation Attributes, Brand, Categories, Products, Banners  
 * `imageable_id:` used for polymorphic relation  
 * `created_at`: Specifies the record creation date.
 
@@ -818,9 +817,10 @@ For storing user permissions and removing role-based permissions.
 
 Contains product variations entered by the seller on the site. This table creates a record depending on the selected variation and price.
 
-* `product_id`: Indicates which product this variety belongs to. Foreign key to `products`; cascades on product delete.  
-* `attribute_value`: Free-text value of the selected variation (e.g., "Red", "8GB"). Currently not linked to the `attributes` table.  
-* `color`: Optional color value for the variation.  
+* `product_id`: Indicates which product this variety belongs to. Foreign key to `products`; cascades on product delete.
+* `attribute_id`: Links to the `attributes` table - the specific attribute that defines this variety (e.g. "Red", "XL"). Nullable FK; set to null when the attribute is deleted. When set, `attribute_value` and `color` are auto-populated from the linked attribute via model saving event.
+* `attribute_value`: Display label for the variation, auto-populated from `attribute.value` when `attribute_id` is set. Can also be set manually when no attribute is linked.
+* `color`: Hex or name color for the variation, auto-populated from `attribute.color` when `attribute_id` is set.
 * `price`  
 * `sale_price`   
 * `inventory`: Number of ShopFlow inventory, the default value is 0\.  

@@ -25,6 +25,8 @@ class AttributeGroupCategoryResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
 
+    protected static ?int $navigationSort = 3;
+
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
@@ -33,13 +35,21 @@ class AttributeGroupCategoryResource extends Resource
             ->components([
                 Select::make('attribute_group_id')
                     ->relationship('attributeGroup', 'name')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The attribute group to attach to the category (e.g. "Color", "Size").')
                     ->required(),
                 Select::make('category_id')
                     ->relationship('category', 'title')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The category this attribute group will be available for.')
                     ->required(),
                 Toggle::make('as_filter')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('When enabled, this group appears as a filter panel on the category\'s product listing page.')
                     ->required(),
                 Toggle::make('required')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('When enabled, admins must select at least one attribute from this group before saving a product in this category.')
                     ->required(),
             ]);
     }

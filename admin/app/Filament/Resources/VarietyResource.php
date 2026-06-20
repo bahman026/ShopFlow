@@ -8,6 +8,8 @@ use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\VarietyResource\Pages\CreateVariety;
 use App\Filament\Resources\VarietyResource\Pages\EditVariety;
 use App\Filament\Resources\VarietyResource\Pages\ListVarieties;
+use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\Variety;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -16,6 +18,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -25,7 +28,7 @@ class VarietyResource extends Resource
 {
     protected static ?string $model = Variety::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Product';
+    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
 
@@ -36,23 +39,52 @@ class VarietyResource extends Resource
                 Select::make('product_id')
                     ->relationship('product', 'heading')
                     ->searchable()
-                    ->required(),
-                TextInput::make('attribute_value')
-                    ->maxLength(255),
-                TextInput::make('color')
-                    ->maxLength(255),
+                    ->live()
+                    ->required()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The product this variety belongs to. Changing it reloads the available attributes below.'),
+                Select::make('attribute_id')
+                    ->label('Attribute')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The attribute that defines this variety (e.g. "Red" from the "Color" group). Auto-fills value and color on save. Options are filtered by the product\'s attribute group.')
+                    ->options(function (Get $get, ?Variety $record): array {
+                        $productId = $get('product_id') ?? $record?->product_id;
+                        if (! $productId) {
+                            return [];
+                        }
+                        $product = Product::find($productId);
+                        if (! $product?->attribute_group_id) {
+                            return [];
+                        }
+
+                        return Attribute::query()
+                            ->where('attribute_group_id', $product->attribute_group_id)
+                            ->pluck('value', 'id')
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->nullable()
+                    ->helperText('Selecting an attribute auto-fills the value and color.'),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('تومان')
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('The selling price of this variety.'),
                 TextInput::make('sale_price')
-                    ->numeric(),
+                    ->numeric()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Discounted price shown instead of the regular price when set. Leave empty for no sale price.'),
                 TextInput::make('inventory')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('Number of units available in stock.'),
                 Toggle::make('has_stock')
-                    ->required(),
+                    ->required()
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip('When off, this variety is shown as out of stock regardless of inventory count.'),
                 Select::make('status')
                     ->required()
                     ->options(VarietyStatusEnum::options())
@@ -68,7 +100,11 @@ class VarietyResource extends Resource
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
-                TextColumn::make('attribute_value'),
+                TextColumn::make('attribute.value')
+                    ->label('Attribute')
+                    ->searchable(),
+                TextColumn::make('attribute_value')
+                    ->label('Value'),
                 TextColumn::make('color'),
                 TextColumn::make('price')
                     ->money(),

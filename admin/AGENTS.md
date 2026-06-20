@@ -194,12 +194,16 @@ When adding a new entity, build the files in this order, matching the existing f
 - Tables use `public static function table(Table $table): Table` with `->columns([])`, `->filters([])`, `->recordActions([...])`, `->toolbarActions([...])`.
 - Actions come from the `Filament\Actions\` namespace (`EditAction`, `CreateAction`, `DeleteAction`, `BulkActionGroup`, `DeleteBulkAction`).
 - Import individual components (`Filament\Forms\Components\TextInput`, `Filament\Tables\Columns\TextColumn`), not the parent `Forms`/`Tables` namespaces.
+- For reactive `->options()` or `->live()` closures that receive `Get $get`, import `Filament\Schemas\Components\Utilities\Get` (NOT `Filament\Forms\Get` - that will throw a type error at runtime).
 - Page classes set `protected static string $resource = {Name}Resource::class;`. List pages expose `CreateAction::make()` in `getHeaderActions()`. Create and Edit pages redirect with `getRedirectUrl(): string` returning `$this->getResource()::getUrl('index')`.
 - Rich text uses `AmidEsfahani\FilamentTinyEditor\TinyEditor`.
 - Select fields backed by an enum use `->options(SomeEnum::options())` and `->default(SomeEnum::CASE->value)`.
 - Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
 - Enum-backed table columns render via `->getStateUsing(fn ($record) => $record->field->label())` and `->color(fn ($record) => $record->field->color())`.
 - Manage many-to-many pivots with a relationship multi-select: `Select::make('products')->relationship('products', 'heading')->multiple()->searchable()->preload()` (see `CouponResource`). No separate resource for pure scoping pivots.
+- Control navigation order within a group with `protected static ?int $navigationSort = 1;` (lower = higher in the list).
+- Add an explanatory subheading to a list page with `protected ?string $subheading = 'Description here.';` on the `ListRecords` page class.
+- Add a tooltip to a form field with `->hintIcon('heroicon-o-information-circle')->hintIconTooltip('Explanation...')`. Use this instead of always-visible `->hint()` when the text is long.
 
 ## Models
 
@@ -218,6 +222,7 @@ When adding a new entity, build the files in this order, matching the existing f
 
 ## Migrations
 
+- **Development rule**: NEVER create a new migration to add a column to a table that already has a migration in this branch. Update the existing `create_*` migration directly to keep history clean. After editing, run `php artisan migrate:fresh` inside the container to re-apply everything from scratch. Only create additive migrations when the table already exists in production.
 - Anonymous class style: `return new class extends Migration`.
 - Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional). Chain `->constrained()->cascadeOnDelete()` / `->nullOnDelete()` / `->restrictOnDelete()` to add the real FK constraint with its delete rule.
 - For a second FK to the same table, use a named column: `$table->foreignId('user_creator_id')->nullable()->constrained('users')->nullOnDelete()` (see `coupons`).
@@ -255,5 +260,6 @@ When adding a new entity, build the files in this order, matching the existing f
 
 - The implementation status and priority order live in `IMPLEMENTATION.md`. When an entity is finished or the plan changes, update it.
 - The full schema reference is `ShoFlow db doc.md`. Treat it as the source of truth for table columns and relationships.
+- Cache keys that have been identified but not yet implemented are tracked in `CACHE.md`. When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
 - Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
 

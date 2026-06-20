@@ -11,14 +11,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property positive-int $id
- * @property Product $product
- * @property string $attribute_value
+ * @property positive-int $product_id
+ * @property positive-int|null $attribute_id
+ * @property string|null $attribute_value
  * @property string|null $color
  * @property positive-int $price
  * @property positive-int|null $sale_price
  * @property positive-int $inventory
  * @property bool $has_stock
  * @property VarietyStatusEnum $status
+ * @property Product $product
+ * @property Attribute|null $attribute
  */
 class Variety extends Model
 {
@@ -26,6 +29,7 @@ class Variety extends Model
 
     protected $fillable = [
         'product_id',
+        'attribute_id',
         'attribute_value',
         'color',
         'price',
@@ -42,6 +46,18 @@ class Variety extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (Variety $variety): void {
+            if ($variety->attribute_id === null) {
+                return;
+            }
+            $attribute = Attribute::find($variety->attribute_id);
+            if ($attribute === null) {
+                return;
+            }
+            $variety->attribute_value = $attribute->value;
+            $variety->color = $attribute->color;
+        });
+
         static::saved(fn (Variety $variety) => $variety->syncProductVarietyCount());
         static::deleted(fn (Variety $variety) => $variety->syncProductVarietyCount());
     }
@@ -60,10 +76,13 @@ class Variety extends Model
         ])->saveQuietly();
     }
 
-    // Relationships
-
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function attribute(): BelongsTo
+    {
+        return $this->belongsTo(Attribute::class);
     }
 }
