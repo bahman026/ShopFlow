@@ -12,7 +12,6 @@
 Used to store user addresses.
 
 * `user_id` refers to the user who owns the address.  
-* `seller_id` refers to the seller who owns the address; either `user_id` or `seller_id` must have a value.  
 * `city_id` selects the city code and is mandatory.  
 * `name` specifies the address name, such as home, office, or any user-defined name.  
 * `phone` specifies the phone number associated with the address.  
@@ -185,9 +184,8 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `total_used`: How many times this coupon has already been used.  
 * `total_uses`: How many times this coupon is allowed to be used in total.  
 * `user_id`: Limits usage to a specific user. Nullable foreign key to `users`; set to null when the user is deleted.  
-* `user_creator_id`: The admin user who created the coupon, if created by an admin. Nullable foreign key to `users`.  
-* `seller_creator_id`: The seller who created the coupon, if created by a seller. Nullable foreign key to `users`.  
-* `status`: Has states "active" (default, usable), "canceled", "used", and "under review".  
+* `user_creator_id`: The admin user who created the coupon. Nullable foreign key to `users`.
+* `status`: Has states "active" (default, usable), "canceled", "used", and "under review".
 * `is_percent`: Indicates if the discount is a percentage or a fixed amount.  
 * `shipping`: Indicates if this coupon includes free shipping (applies only to free shipping, not to the price).  
 * `is_for`: Whether the coupon is usable by everyone, or only by users, or only by partners.  
@@ -243,11 +241,11 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 
 # faqs
 
-* This table is used to store frequently asked questions (FAQ stands for Frequently Asked Questions).  
-* `heading`: Specifies the title of each question.  
-* `content`: Provides the answer to each question.  
-* `order`: Specifies the display order of the FAQs.  
-* `position`: Added to the FAQs table. All records with a null value in the `position` column are displayed on the FAQ page. Other records with a position are displayed in their respective positions, for example on the homepage or the products page (not the product details, but the page displaying all products regardless of category).
+* Stores frequently asked questions shown on the storefront.
+* `heading`: The question text shown to the visitor.
+* `content`: The answer to the question.
+* `order`: Display order — lower numbers appear first.
+* `position`: Placement context. Null = shown on the main FAQ page. Any value (e.g. `"homepage"`, `"products"`) shows the FAQ in that specific section of the site.
 
 # transactions
 
@@ -601,15 +599,15 @@ Used to store products.
 
 # reviews
 
-* Contains user reviews for each product.  
-* The `heading` column is the title of the review, for example, "Good product, I recommend it."  
-* The `content` column stores the content of the user's review.  
-* The `user_id` column specifies which user submitted the review.  
-* The `seller_id` column specifies which seller submitted the review. Only one of the columns `user_id` or `seller_id` can have a value at any time.  
-* The `product_id` column specifies which product the review is related to.  
-* The `variety_id` column specifies which product variant the review is related to. If not null, it means the review is for a purchased product variant.  
-* The `parent_id` column is used for replying to a review.  
-* The `status` column specifies the status of the review.
+* Contains user reviews for each product.
+* `heading`: The review title written by the user (e.g. "Great product!").
+* `content`: The full review text.
+* `user_id`: The user who submitted the review. Nullable; set to null if the user is deleted.
+* `product_id`: The product being reviewed. Cascade-deletes the review when the product is deleted.
+* `variety_id`: The specific variety (e.g. size/color) the user purchased. Nullable; set to null if the variety is deleted.
+* `parent_id`: Used to reply to another review (self-referential FK). Set to null when the parent is deleted.
+* `status`: Moderation state — `PENDING` (default, hidden from storefront), `APPROVED` (visible), `REJECTED`, `DELETED`.
+* Note: no `seller_id` — ShopFlow is single-vendor, there are no sellers.
 
 # roles
 
@@ -872,11 +870,12 @@ For storing warehouses. Warehouses can determine the location of each product, a
 
 # wishlists
 
-Stores the products added to user wishlists.
+Stores the products saved to user wishlists.
 
-* `user_id`: Indicates which user this record belongs to.  
-* `product_id`: Indicates which product this record belongs to.  
-* `created_at`: Indicates when this record was created.
+* `user_id`: The user who saved the product. Cascade-deletes the entry when the user is deleted.
+* `product_id`: The saved product. Cascade-deletes the entry when the product is deleted.
+* Unique constraint on `(user_id, product_id)` — a user can only save each product once.
+* Admin resource is read-only (list + delete); entries are created by users on the storefront.
 
 # working\_hours
 
