@@ -67,12 +67,20 @@ class SlideResource extends Resource
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')
                             ->nullable()
                             ->maxLength(255),
                     ])
+                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Slide $record): array {
+                        if (empty($data['path'])) {
+                            $record->image?->delete();
+                        }
+
+                        return $data;
+                    })
                     ->columnSpanFull(),
             ]);
     }

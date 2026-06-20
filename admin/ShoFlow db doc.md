@@ -669,12 +669,12 @@ Used to store products.
 # slides
 
 * Contains the slides for each slider.  
-* The `slider_id` column specifies which slider each slide belongs to.  
-* The `heading` column specifies the title or alt text (for images) of the slide.  
-* The `label` column can be used for a secondary text or alt text for the image if each slide has a title.  
-* The `url` column specifies the link that opens when clicking on the slider slides.  
-* The `image_id` column refers to the `id` column in the `images` table and specifies the image for each slide.  
-* The `order` column specifies the slide execution order. If not specified, slides are shown based on the order they were inserted into the database.
+* The `slider_id` column specifies which slider each slide belongs to. Foreign key; cascades on slider delete.  
+* The `heading` column specifies the title or alt text (for images) of the slide. Nullable.  
+* The `label` column can be used for a secondary text or alt text for the image if each slide has a title. Nullable.  
+* The `url` column specifies the link that opens when clicking on the slider slides. Nullable.  
+* The `order` column specifies the slide execution order (default 0). Lower values appear first.  
+* The image is stored via the polymorphic `images` table (`imageable_type = Slide`, `imageable_id = slide.id`) using a `MorphOne` relationship — no `image_id` column on slides. Deleting a slide cascades to its image.
 
 # sources
 

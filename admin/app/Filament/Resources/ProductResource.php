@@ -96,6 +96,7 @@ class ProductResource extends Resource
                     ->relationship('images')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

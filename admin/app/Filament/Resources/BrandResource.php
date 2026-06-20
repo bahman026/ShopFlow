@@ -67,6 +67,7 @@ class BrandResource extends Resource
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
