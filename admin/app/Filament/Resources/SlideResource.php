@@ -25,52 +25,72 @@ class SlideResource extends Resource
 {
     protected static ?string $model = Slide::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('slide.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('slide.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('slide.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('slider_id')
+                    ->label(trans('slide.slider_id'))
                     ->relationship('slider', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The slider this slide belongs to.'),
+                    ->hintIconTooltip(trans('slide.slider_id_hint')),
                 TextInput::make('heading')
+                    ->label(trans('slide.heading'))
                     ->nullable()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Title or alt text of the slide image shown to customers.'),
+                    ->hintIconTooltip(trans('slide.heading_hint')),
                 TextInput::make('label')
+                    ->label(trans('slide.label_field'))
                     ->nullable()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Optional secondary text shown on the slide, e.g. a subtitle or call-to-action label.'),
+                    ->hintIconTooltip(trans('slide.label_field_hint')),
                 TextInput::make('url')
+                    ->label(trans('slide.url'))
                     ->url()
                     ->nullable()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The link the slide points to when clicked.'),
+                    ->hintIconTooltip(trans('slide.url_hint')),
                 TextInput::make('order')
+                    ->label(trans('slide.order'))
                     ->numeric()
                     ->default(0)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Display order within the slider. Lower numbers appear first.'),
-                Fieldset::make('Image')
+                    ->hintIconTooltip(trans('slide.order_hint')),
+                Fieldset::make(trans('slide.image'))
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->label(trans('slide.path'))
                             ->image()
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')
+                            ->label(trans('slide.alt_text'))
                             ->nullable()
                             ->maxLength(255),
                     ])
@@ -90,28 +110,33 @@ class SlideResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('slider.name')
-                    ->label('Slider')
+                    ->label(trans('slide.slider'))
                     ->limit(30)
                     ->wrap()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('heading')
+                    ->label(trans('slide.heading'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 ImageColumn::make('image.path')
-                    ->label('Image')
+                    ->label(trans('slide.image'))
                     ->square(),
                 TextColumn::make('url')
+                    ->label(trans('slide.url'))
                     ->limit(30),
                 TextColumn::make('order')
+                    ->label(trans('slide.order'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('slide.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('slide.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

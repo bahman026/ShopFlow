@@ -40,6 +40,7 @@ Cross-cutting improvements landed:
 - `CACHE.md` added to track identified-but-not-implemented cache keys.
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
 - Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`).
+- **Locale switching** (`en` / `fa`): `SetLocale` middleware reads the locale from session and calls `App::setLocale()`. A `/locale/{locale}` route stores the choice. Two user-menu items (English / فارسی) in `AdminPanelProvider` let admins switch. All Filament sub-package translations (`filament`, `filament-forms`, `filament-tables`, `filament-actions`, `filament-notifications`) are published to `lang/vendor/`.
 
 ## Phase 0 - Finish current branch (`implement_variety`)
 

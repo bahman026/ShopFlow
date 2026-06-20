@@ -27,45 +27,65 @@ class BannerResource extends Resource
 {
     protected static ?string $model = Banner::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-photo';
 
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('banner.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('banner.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('banner.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('position')
+                    ->label(trans('banner.position'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('heading')
+                    ->label(trans('banner.heading'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('url')
+                    ->label(trans('banner.url'))
                     ->url()
                     ->maxLength(255),
                 TextInput::make('sort')
+                    ->label(trans('banner.sort'))
                     ->numeric()
                     ->nullable(),
                 Select::make('status')
+                    ->label(trans('banner.status'))
                     ->required()
                     ->options(BannerStatusEnum::options())
                     ->default(BannerStatusEnum::PUBLISHED->value),
                 Repeater::make('images')
+                    ->label(trans('banner.images'))
                     ->relationship('images')
                     ->schema([
                         FileUpload::make('path')
+                            ->label(trans('banner.path'))
                             ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
                         Toggle::make('is_featured')
-                            ->label('Featured Image')
+                            ->label(trans('banner.is_featured'))
                             ->reactive(),
                         TextInput::make('alt_text')
-                            ->label('Alt Text'),
+                            ->label(trans('banner.alt_text')),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -76,28 +96,35 @@ class BannerResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('position')
+                    ->label(trans('banner.position'))
                     ->searchable(),
                 TextColumn::make('heading')
+                    ->label(trans('banner.heading'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 ImageColumn::make('featuredImage.path')
-                    ->label('Featured')
+                    ->label(trans('banner.featured'))
                     ->square(),
                 TextColumn::make('url')
+                    ->label(trans('banner.url'))
                     ->limit(30),
                 TextColumn::make('sort')
+                    ->label(trans('banner.sort'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(trans('banner.status'))
                     ->getStateUsing(fn (Banner $record): string => $record->status->label())
                     ->color(fn (Banner $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('banner.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('banner.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

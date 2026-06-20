@@ -12,7 +12,13 @@ class ListProducts extends ListRecords
 {
     protected static string $resource = ProductResource::class;
 
-    protected ?string $subheading = 'Products are the items sold on ShopFlow. Each product belongs to a category and brand, has a base price, and can have multiple varieties (e.g. different colors or sizes) each with their own price and inventory. Set an attribute group to define which attribute type differentiates the varieties. Product-level attributes describe shared specifications shown on the product page.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('product.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

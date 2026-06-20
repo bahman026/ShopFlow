@@ -27,29 +27,45 @@ class ReviewResource extends Resource
 {
     protected static ?string $model = Review::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?int $navigationSort = 8;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('review.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('review.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('review.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('heading')
+                    ->label(trans('review.heading'))
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The review title written by the user (e.g. "Great product!").'),
+                    ->hintIconTooltip(trans('review.heading_hint')),
                 Textarea::make('content')
+                    ->label(trans('review.content'))
                     ->required()
                     ->rows(5)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The full review text.'),
+                    ->hintIconTooltip(trans('review.content_hint')),
                 Select::make('product_id')
+                    ->label(trans('review.product_id'))
                     ->relationship('product', 'heading')
                     ->required()
                     ->searchable()
@@ -57,9 +73,9 @@ class ReviewResource extends Resource
                     ->live()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The product this review is about.'),
+                    ->hintIconTooltip(trans('review.product_id_hint')),
                 Select::make('variety_id')
-                    ->label('Variety (optional)')
+                    ->label(trans('review.variety_id'))
                     ->options(function (Get $get): array {
                         $productId = $get('product_id');
                         if (! $productId) {
@@ -75,17 +91,18 @@ class ReviewResource extends Resource
                     ->nullable()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The specific variety (e.g. size/color) the user purchased, if known.'),
+                    ->hintIconTooltip(trans('review.variety_id_hint')),
                 Select::make('user_id')
+                    ->label(trans('review.user_id'))
                     ->relationship('user', 'email')
                     ->searchable()
                     ->preload()
                     ->nullable()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The user who wrote this review. Leave empty for anonymous/admin-entered reviews.'),
+                    ->hintIconTooltip(trans('review.user_id_hint')),
                 Select::make('parent_id')
-                    ->label('Reply to')
+                    ->label(trans('review.parent_id'))
                     ->options(function (?Review $record): array {
                         return Review::query()
                             ->whereNull('parent_id')
@@ -98,14 +115,15 @@ class ReviewResource extends Resource
                     ->searchable()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Set this to make the review a reply to another review.'),
+                    ->hintIconTooltip(trans('review.parent_id_hint')),
                 Select::make('status')
+                    ->label(trans('review.status'))
                     ->required()
                     ->options(ReviewStatusEnum::options())
                     ->default(ReviewStatusEnum::PENDING->value)
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Pending reviews are hidden from the storefront until approved.'),
+                    ->hintIconTooltip(trans('review.status_hint')),
             ]);
     }
 
@@ -114,25 +132,28 @@ class ReviewResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('product.heading')
-                    ->label('Product')
+                    ->label(trans('review.product'))
                     ->limit(30)
                     ->searchable(),
                 TextColumn::make('heading')
+                    ->label(trans('review.heading'))
                     ->limit(40)
                     ->searchable(),
                 TextColumn::make('user.email')
-                    ->label('User')
-                    ->placeholder('Anonymous')
+                    ->label(trans('review.user'))
+                    ->placeholder(trans('review.anonymous'))
                     ->searchable(),
                 TextColumn::make('parent_id')
-                    ->label('Reply to')
+                    ->label(trans('review.parent_id'))
                     ->placeholder('—')
                     ->formatStateUsing(fn (?int $state): string => $state ? "#{$state}" : '—'),
                 TextColumn::make('status')
+                    ->label(trans('review.status'))
                     ->getStateUsing(fn (Review $record): string => $record->status->label())
                     ->color(fn (Review $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('review.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

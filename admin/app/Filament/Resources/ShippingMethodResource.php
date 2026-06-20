@@ -26,64 +26,86 @@ class ShippingMethodResource extends Resource
 {
     protected static ?string $model = ShippingMethod::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Logistics';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('shipping_method.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('shipping_method.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('shipping_method.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('shipping_line_id')
+                    ->label(trans('shipping_method.shipping_line_id'))
                     ->relationship('shippingLine', 'name')
                     ->required()
                     ->searchable()
                     ->preload()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The carrier this method belongs to (e.g. Post Office, Tap30).'),
+                    ->hintIconTooltip(trans('shipping_method.shipping_line_id_hint')),
                 TextInput::make('name')
+                    ->label(trans('shipping_method.name'))
                     ->required()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The service name shown to admins (e.g. "Standard Post", "Overnight Express").'),
+                    ->hintIconTooltip(trans('shipping_method.name_hint')),
                 TextInput::make('type')
+                    ->label(trans('shipping_method.type'))
                     ->nullable()
                     ->maxLength(100)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Service category, e.g. Express, Economy, Special.'),
+                    ->hintIconTooltip(trans('shipping_method.type_hint')),
                 TextInput::make('min_count')
+                    ->label(trans('shipping_method.min_count'))
                     ->numeric()
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Minimum item quantity required to use this method. Leave empty for no minimum.'),
+                    ->hintIconTooltip(trans('shipping_method.min_count_hint')),
                 TextInput::make('min_amount')
+                    ->label(trans('shipping_method.min_amount'))
                     ->numeric()
                     ->nullable()
                     ->prefix('تومان')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Minimum order amount required to use this method. Leave empty for no minimum.'),
+                    ->hintIconTooltip(trans('shipping_method.min_amount_hint')),
                 Select::make('for')
+                    ->label(trans('shipping_method.for'))
                     ->required()
                     ->options(ShippingMethodForEnum::options())
                     ->default(ShippingMethodForEnum::CUSTOMER->value)
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Who can use this method — Customer, Partner, or Employee.'),
+                    ->hintIconTooltip(trans('shipping_method.for_hint')),
                 DateTimePicker::make('disable_from')
+                    ->label(trans('shipping_method.disable_from'))
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Start of the period when this method is unavailable (e.g. holiday blackout).'),
+                    ->hintIconTooltip(trans('shipping_method.disable_from_hint')),
                 DateTimePicker::make('disable_to')
+                    ->label(trans('shipping_method.disable_to'))
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('End of the unavailability period.'),
+                    ->hintIconTooltip(trans('shipping_method.disable_to_hint')),
                 Toggle::make('status')
+                    ->label(trans('shipping_method.status'))
                     ->default(true)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When off, this method is hidden from all users.'),
+                    ->hintIconTooltip(trans('shipping_method.status_hint')),
             ]);
     }
 
@@ -92,23 +114,29 @@ class ShippingMethodResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('shippingLine.name')
-                    ->label('Carrier')
+                    ->label(trans('shipping_method.carrier'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('name')
+                    ->label(trans('shipping_method.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('type')
+                    ->label(trans('shipping_method.type'))
                     ->placeholder('—'),
                 TextColumn::make('for')
+                    ->label(trans('shipping_method.for'))
                     ->getStateUsing(fn (ShippingMethod $record): string => $record->for->label())
                     ->color(fn (ShippingMethod $record): string => $record->for->color()),
                 TextColumn::make('min_amount')
+                    ->label(trans('shipping_method.min_amount'))
                     ->money()
-                    ->placeholder('No minimum'),
+                    ->placeholder(trans('shipping_method.no_minimum')),
                 IconColumn::make('status')
+                    ->label(trans('shipping_method.status'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(trans('shipping_method.created_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

@@ -20,32 +20,47 @@ class WishlistResource extends Resource
 {
     protected static ?string $model = Wishlist::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-heart';
 
     protected static ?int $navigationSort = 9;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('wishlist.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('wishlist.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('wishlist.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('user_id')
+                    ->label(trans('wishlist.user_id'))
                     ->relationship('user', 'email')
                     ->required()
                     ->searchable()
                     ->preload()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The user who saved this product.'),
+                    ->hintIconTooltip(trans('wishlist.user_id_hint')),
                 Select::make('product_id')
+                    ->label(trans('wishlist.product_id'))
                     ->relationship('product', 'heading')
                     ->required()
                     ->searchable()
                     ->preload()
                     ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The product saved to this wishlist.'),
+                    ->hintIconTooltip(trans('wishlist.product_id_hint')),
             ]);
     }
 
@@ -54,15 +69,15 @@ class WishlistResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('user.email')
-                    ->label('User')
+                    ->label(trans('wishlist.user'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('product.heading')
-                    ->label('Product')
+                    ->label(trans('wishlist.product'))
                     ->limit(40)
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->label('Saved at')
+                    ->label(trans('wishlist.saved_at'))
                     ->dateTime()
                     ->sortable(),
             ])

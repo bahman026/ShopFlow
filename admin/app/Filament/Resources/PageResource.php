@@ -32,17 +32,31 @@ class PageResource extends Resource
 {
     protected static ?string $model = PageModel::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?int $navigationSort = 6;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('page.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('page.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('page.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('heading')
+                    ->label(trans('page.heading'))
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -52,57 +66,67 @@ class PageResource extends Resource
                         }
                     })
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The page title shown to visitors, e.g. "About Us".'),
+                    ->hintIconTooltip(trans('page.heading_hint')),
                 TextInput::make('slug')
+                    ->label(trans('page.slug'))
                     ->disabled()
                     ->dehydrated()
                     ->required()
                     ->maxLength(255)
                     ->unique(PageModel::class, 'slug', ignoreRecord: true)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Auto-generated from the heading. Used as the URL path, e.g. /about-us.'),
+                    ->hintIconTooltip(trans('page.slug_hint')),
                 TinyEditor::make('content')
+                    ->label(trans('page.content'))
                     ->nullable()
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The main body content of the page, edited with the rich text editor.'),
+                    ->hintIconTooltip(trans('page.content_hint')),
                 TextInput::make('title')
+                    ->label(trans('page.title'))
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('SEO page title shown in the browser tab and search results. Leave blank to use the heading.'),
+                    ->hintIconTooltip(trans('page.title_hint')),
                 TextInput::make('description')
+                    ->label(trans('page.description'))
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Meta description shown in search engine results. Aim for 150-160 characters.'),
+                    ->hintIconTooltip(trans('page.description_hint')),
                 Toggle::make('no_index')
+                    ->label(trans('page.no_index'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When enabled, search engines are instructed not to index this page.'),
+                    ->hintIconTooltip(trans('page.no_index_hint')),
                 TextInput::make('canonical')
+                    ->label(trans('page.canonical'))
                     ->maxLength(255)
                     ->url()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Canonical URL to prevent duplicate content issues. Leave blank unless this page should point to another URL.'),
+                    ->hintIconTooltip(trans('page.canonical_hint')),
                 Select::make('status')
+                    ->label(trans('page.status'))
                     ->required()
                     ->live()
                     ->options(PageStatusEnum::options())
                     ->default(PageStatusEnum::PUBLISHED->value)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Published: visible on the frontend. Draft: hidden. Scheduled: published on the date set below. Deleted: removed from listings.'),
+                    ->hintIconTooltip(trans('page.status_hint')),
                 DateTimePicker::make('published_at')
+                    ->label(trans('page.published_at'))
                     ->nullable()
                     ->required(fn (Get $get): bool => (int) $get('status') === PageStatusEnum::SCHEDULED->value)
                     ->hidden(fn (Get $get): bool => (int) $get('status') !== PageStatusEnum::SCHEDULED->value)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The date and time this page will be made public. Only applies when status is Scheduled.'),
-                Fieldset::make('Image')
+                    ->hintIconTooltip(trans('page.published_at_hint')),
+                Fieldset::make(trans('page.image'))
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->label(trans('page.path'))
                             ->image()
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')
+                            ->label(trans('page.alt_text'))
                             ->nullable()
                             ->maxLength(255),
                     ])
@@ -122,28 +146,35 @@ class PageResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('heading')
+                    ->label(trans('page.heading'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('slug')
+                    ->label(trans('page.slug'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 IconColumn::make('no_index')
+                    ->label(trans('page.no_index'))
                     ->boolean(),
                 TextColumn::make('status')
+                    ->label(trans('page.status'))
                     ->getStateUsing(fn (PageModel $record): string => $record->status->label())
                     ->color(fn (PageModel $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('published_at')
+                    ->label(trans('page.published_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
+                    ->label(trans('page.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('page.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

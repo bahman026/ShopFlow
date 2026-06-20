@@ -18,10 +18,10 @@ enum ReviewStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'Deleted',
-            self::PENDING => 'Pending',
-            self::APPROVED => 'Approved',
-            self::REJECTED => 'Rejected',
+            self::DELETED => trans('review.status_deleted'),
+            self::PENDING => trans('review.status_pending'),
+            self::APPROVED => trans('review.status_approved'),
+            self::REJECTED => trans('review.status_rejected'),
         };
     }
 

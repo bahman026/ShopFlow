@@ -12,7 +12,13 @@ class ListAttributeGroupCategories extends ListRecords
 {
     protected static string $resource = AttributeGroupCategoryResource::class;
 
-    protected ?string $subheading = 'Links an attribute group to a category. This tells the system which attributes are relevant for products in that category. Use "As Filter" to show the group as a filter panel on the category page, and "Required" to force admins to pick an attribute from this group when creating a product in that category.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('attribute_group_category.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

@@ -21,25 +21,40 @@ class ShippingLineResource extends Resource
 {
     protected static ?string $model = ShippingLine::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Logistics';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('shipping_line.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('shipping_line.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('shipping_line.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(trans('shipping_line.name'))
                     ->required()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The shipping carrier or line name (e.g. Post, Express, Same-day Courier).'),
+                    ->hintIconTooltip(trans('shipping_line.name_hint')),
                 TextInput::make('cost')
+                    ->label(trans('shipping_line.cost'))
                     ->required()
                     ->numeric()
                     ->prefix('تومان')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Base shipping cost for this line. Use 0 for free shipping.'),
+                    ->hintIconTooltip(trans('shipping_line.cost_hint')),
             ]);
     }
 
@@ -48,15 +63,19 @@ class ShippingLineResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(trans('shipping_line.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('cost')
+                    ->label(trans('shipping_line.cost'))
                     ->money()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('shipping_line.created_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('shipping_line.updated_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

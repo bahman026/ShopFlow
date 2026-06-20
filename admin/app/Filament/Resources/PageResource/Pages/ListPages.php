@@ -12,7 +12,13 @@ class ListPages extends ListRecords
 {
     protected static string $resource = PageResource::class;
 
-    protected ?string $subheading = 'Manage static content pages such as About Us, Contact, and FAQ.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('page.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

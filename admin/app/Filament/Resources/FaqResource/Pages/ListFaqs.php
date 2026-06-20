@@ -12,7 +12,13 @@ class ListFaqs extends ListRecords
 {
     protected static string $resource = FaqResource::class;
 
-    protected ?string $subheading = 'Manage frequently asked questions shown on the FAQ page and other positions (e.g. homepage).';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('faq.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

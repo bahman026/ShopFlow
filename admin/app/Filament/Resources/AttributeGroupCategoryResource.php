@@ -23,33 +23,50 @@ class AttributeGroupCategoryResource extends Resource
 {
     protected static ?string $model = AttributeGroupCategory::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
-
     protected static ?int $navigationSort = 3;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('attribute_group_category.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('attribute_group_category.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('attribute_group_category.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('attribute_group_id')
+                    ->label(trans('attribute_group_category.attribute_group_id'))
                     ->relationship('attributeGroup', 'name')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The attribute group to attach to the category (e.g. "Color", "Size").')
+                    ->hintIconTooltip(trans('attribute_group_category.attribute_group_id_hint'))
                     ->required(),
                 Select::make('category_id')
+                    ->label(trans('attribute_group_category.category_id'))
                     ->relationship('category', 'title')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The category this attribute group will be available for.')
+                    ->hintIconTooltip(trans('attribute_group_category.category_id_hint'))
                     ->required(),
                 Toggle::make('as_filter')
+                    ->label(trans('attribute_group_category.as_filter'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When enabled, this group appears as a filter panel on the category\'s product listing page.')
+                    ->hintIconTooltip(trans('attribute_group_category.as_filter_hint'))
                     ->required(),
                 Toggle::make('required')
+                    ->label(trans('attribute_group_category.required'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When enabled, admins must select at least one attribute from this group before saving a product in this category.')
+                    ->hintIconTooltip(trans('attribute_group_category.required_hint'))
                     ->required(),
             ]);
     }
@@ -59,20 +76,26 @@ class AttributeGroupCategoryResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('attributeGroup.name')
+                    ->label(trans('attribute_group_category.attribute_group'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('category.title')
+                    ->label(trans('attribute_group_category.category'))
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('as_filter')
+                    ->label(trans('attribute_group_category.as_filter'))
                     ->boolean(),
                 IconColumn::make('required')
+                    ->label(trans('attribute_group_category.required'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(trans('attribute_group_category.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('attribute_group_category.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

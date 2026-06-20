@@ -12,7 +12,13 @@ class ListCoupons extends ListRecords
 {
     protected static string $resource = CouponResource::class;
 
-    protected ?string $subheading = 'Coupons are manual discount codes entered by the customer at checkout. Unlike auto-applied discounts, a coupon requires a code. You can limit a coupon by minimum cart price, maximum discount cap, total usage, audience, and time window. Optionally scope it to specific products, varieties, or categories.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('coupon.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

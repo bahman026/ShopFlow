@@ -21,20 +21,35 @@ class AncestorResource extends Resource
 {
     protected static ?string $model = Ancestor::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
-
     protected static ?int $navigationSort = 1;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('ancestor.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('ancestor.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('ancestor.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(trans('ancestor.name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('order')
+                    ->label(trans('ancestor.order'))
                     ->numeric(),
             ]);
     }
@@ -44,15 +59,19 @@ class AncestorResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(trans('ancestor.name'))
                     ->searchable(),
                 TextColumn::make('order')
+                    ->label(trans('ancestor.order'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('ancestor.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('ancestor.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

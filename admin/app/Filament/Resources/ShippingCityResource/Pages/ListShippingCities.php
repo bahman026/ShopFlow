@@ -12,7 +12,13 @@ class ListShippingCities extends ListRecords
 {
     protected static string $resource = ShippingCityResource::class;
 
-    protected ?string $subheading = 'Per-city (or per-province) shipping availability, cost overrides, and delivery schedules for each shipping method.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('shipping_city.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

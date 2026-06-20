@@ -21,15 +21,29 @@ class ProvinceResource extends Resource
 {
     protected static ?string $model = Province::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Address';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('province.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('province.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('province.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Textarea::make('name')
+                    ->label(trans('province.name'))
                     ->required()
                     ->columnSpanFull(),
             ]);
@@ -39,12 +53,15 @@ class ProvinceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->label(trans('province.name')),
                 TextColumn::make('created_at')
+                    ->label(trans('province.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('province.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

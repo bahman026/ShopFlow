@@ -17,9 +17,9 @@ enum ShippingMethodForEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::CUSTOMER => 'Customer',
-            self::PARTNER => 'Partner',
-            self::EMPLOYEE => 'Employee',
+            self::CUSTOMER => trans('shipping_method.for_customer'),
+            self::PARTNER => trans('shipping_method.for_partner'),
+            self::EMPLOYEE => trans('shipping_method.for_employee'),
         };
     }
 

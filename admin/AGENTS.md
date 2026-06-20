@@ -190,8 +190,8 @@ When adding a new entity, build the files in this order, matching the existing f
 - Resources live in `app/Filament/Resources/{Name}Resource.php`. Page classes live in `app/Filament/Resources/{Name}Resource/Pages/`.
 - Static properties use the v5 union types:
   - `protected static ?string $model = Product::class;`
-  - `protected static string | \UnitEnum | null $navigationGroup = 'Product';`
   - `protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';`
+- **Do NOT use the `$navigationGroup` static property.** Override `getNavigationGroup()`, `getModelLabel()`, and `getPluralModelLabel()` as methods that call `trans()` so labels switch with the active locale (see `BrandResource`, `CategoryResource`).
 - Forms use the schema signature: `public static function form(Schema $schema): Schema` returning `$schema->components([...])`. Import `Filament\Schemas\Schema`.
 - Tables use `public static function table(Table $table): Table` with `->columns([])`, `->filters([])`, `->recordActions([...])`, `->toolbarActions([...])`.
 - Actions come from the `Filament\Actions\` namespace (`EditAction`, `CreateAction`, `DeleteAction`, `BulkActionGroup`, `DeleteBulkAction`).
@@ -271,6 +271,15 @@ When adding a new entity, build the files in this order, matching the existing f
 - Build expected data with `Model::factory()->make()` (unsaved) and seed existing rows with `->create()`.
 - Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())->field->toBe(...)`.
 - Do not assert computed fields against a fresh factory value; assert the expected computed result.
+
+## Localisation (fa / en)
+
+- The admin panel supports Persian (`fa`) and English (`en`). The active locale is stored in the session and applied by `App\Http\Middleware\SetLocale` on every request.
+- Admins switch locale via the user-menu items ("English" / "فارسی") which hit the `GET /locale/{locale}` route.
+- **Translation files**: one PHP file per resource, at `lang/en/{resource}.php` and `lang/fa/{resource}.php`. Keys are flat strings (`heading`, `status`, `status_active`, `created_at`, …).
+- Every form field and table column in a resource MUST call `->label(trans('{resource}.key'))`. Never hard-code English labels in a resource after this pattern is established.
+- Enum `label()` methods MUST call `trans()` (e.g. `trans('brand.status_active')`) so dropdown options and table badges switch language automatically.
+- Filament's own UI strings (buttons, pagination, etc.) are covered by the published vendor translations in `lang/vendor/filament*`.
 
 ## Business constraints
 

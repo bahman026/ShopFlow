@@ -12,7 +12,13 @@ class ListShippingLines extends ListRecords
 {
     protected static string $resource = ShippingLineResource::class;
 
-    protected ?string $subheading = 'Manage shipping carriers and their base costs (e.g. Post, Express, Same-day).';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('shipping_line.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

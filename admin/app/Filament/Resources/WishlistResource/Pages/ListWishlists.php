@@ -12,7 +12,13 @@ class ListWishlists extends ListRecords
 {
     protected static string $resource = WishlistResource::class;
 
-    protected ?string $subheading = 'View and manage products saved to user wishlists.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('wishlist.subheading');
+    }
 
     protected function getHeaderActions(): array
     {
