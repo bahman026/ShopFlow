@@ -24,6 +24,7 @@ class TestSeeder extends Seeder
             FaqSeeder::class,
             ReviewSeeder::class,
             WishlistSeeder::class,
+            ShippingLineSeeder::class,
         ]);
     }
 }
