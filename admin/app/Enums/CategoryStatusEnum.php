@@ -16,8 +16,8 @@ enum CategoryStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => 'Active',
-            self::INACTIVE => 'Inactive',
+            self::ACTIVE => trans('category.status_active'),
+            self::INACTIVE => trans('category.status_inactive'),
         };
     }
 

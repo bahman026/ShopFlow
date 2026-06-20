@@ -284,7 +284,11 @@ return [
 
     'markdown_editor' => [
 
-        'toolbar_buttons' => [
+        'file_attachments_accepted_file_types_message' => 'Uploaded files must be of type: :values.',
+
+        'file_attachments_max_size_message' => 'Uploaded files must not be greater than :max kilobytes.',
+
+        'tools' => [
             'attach_files' => 'Attach files',
             'blockquote' => 'Blockquote',
             'bold' => 'Bold',
@@ -298,6 +302,28 @@ return [
             'strike' => 'Strikethrough',
             'table' => 'Table',
             'undo' => 'Undo',
+        ],
+
+    ],
+
+    'modal_table_select' => [
+
+        'actions' => [
+
+            'select' => [
+
+                'label' => 'Select',
+
+                'actions' => [
+
+                    'select' => [
+                        'label' => 'Select',
+                    ],
+
+                ],
+
+            ],
+
         ],
 
     ],
@@ -365,40 +391,272 @@ return [
 
     'rich_editor' => [
 
-        'dialogs' => [
+        'actions' => [
+
+            'attach_files' => [
+
+                'label' => 'Upload file',
+
+                'modal' => [
+
+                    'heading' => 'Upload file',
+
+                    'form' => [
+
+                        'file' => [
+
+                            'label' => [
+                                'new' => 'File',
+                                'existing' => 'Replace file',
+                            ],
+
+                        ],
+
+                        'alt' => [
+
+                            'label' => [
+                                'new' => 'Alt text',
+                                'existing' => 'Change alt text',
+                            ],
+
+                        ],
+
+                    ],
+
+                ],
+
+            ],
+
+            'custom_block' => [
+
+                'modal' => [
+
+                    'actions' => [
+
+                        'insert' => [
+                            'label' => 'Insert',
+                        ],
+
+                        'save' => [
+                            'label' => 'Save',
+                        ],
+
+                    ],
+
+                ],
+
+            ],
+
+            'grid' => [
+
+                'label' => 'Grid',
+
+                'modal' => [
+
+                    'heading' => 'Grid',
+
+                    'form' => [
+
+                        'preset' => [
+
+                            'label' => 'Preset',
+
+                            'placeholder' => 'None',
+
+                            'options' => [
+                                'two' => 'Two',
+                                'three' => 'Three',
+                                'four' => 'Four',
+                                'five' => 'Five',
+                                'two_start_third' => 'Two (Start Third)',
+                                'two_end_third' => 'Two (End Third)',
+                                'two_start_fourth' => 'Two (Start Fourth)',
+                                'two_end_fourth' => 'Two (End Fourth)',
+                            ],
+                        ],
+
+                        'columns' => [
+                            'label' => 'Columns',
+                        ],
+
+                        'from_breakpoint' => [
+
+                            'label' => 'From breakpoint',
+
+                            'options' => [
+                                'default' => 'All',
+                                'sm' => 'Small',
+                                'md' => 'Medium',
+                                'lg' => 'Large',
+                                'xl' => 'Extra large',
+                                '2xl' => 'Two extra large',
+                            ],
+
+                        ],
+
+                        'is_asymmetric' => [
+                            'label' => 'Two asymmetric columns',
+                        ],
+
+                        'start_span' => [
+                            'label' => 'Start span',
+                        ],
+
+                        'end_span' => [
+                            'label' => 'End span',
+                        ],
+
+                    ],
+
+                ],
+
+            ],
 
             'link' => [
 
-                'actions' => [
-                    'link' => 'Link',
-                    'unlink' => 'Unlink',
+                'label' => 'Link',
+
+                'modal' => [
+
+                    'heading' => 'Link',
+
+                    'form' => [
+
+                        'url' => [
+                            'label' => 'URL',
+                        ],
+
+                        'should_open_in_new_tab' => [
+                            'label' => 'Open in new tab',
+                        ],
+
+                    ],
+
                 ],
 
-                'label' => 'URL',
+            ],
 
-                'placeholder' => 'Enter a URL',
+            'text_color' => [
+
+                'label' => 'Text color',
+
+                'modal' => [
+
+                    'heading' => 'Text color',
+
+                    'form' => [
+
+                        'color' => [
+                            'label' => 'Color',
+
+                            'options' => [
+                                'slate' => 'Slate',
+                                'gray' => 'Gray',
+                                'zinc' => 'Zinc',
+                                'neutral' => 'Neutral',
+                                'stone' => 'Stone',
+                                'mauve' => 'Mauve',
+                                'olive' => 'Olive',
+                                'mist' => 'Mist',
+                                'taupe' => 'Taupe',
+                                'red' => 'Red',
+                                'orange' => 'Orange',
+                                'amber' => 'Amber',
+                                'yellow' => 'Yellow',
+                                'lime' => 'Lime',
+                                'green' => 'Green',
+                                'emerald' => 'Emerald',
+                                'teal' => 'Teal',
+                                'cyan' => 'Cyan',
+                                'sky' => 'Sky',
+                                'blue' => 'Blue',
+                                'indigo' => 'Indigo',
+                                'violet' => 'Violet',
+                                'purple' => 'Purple',
+                                'fuchsia' => 'Fuchsia',
+                                'pink' => 'Pink',
+                                'rose' => 'Rose',
+                            ],
+                        ],
+
+                        'custom_color' => [
+                            'label' => 'Custom color',
+                        ],
+
+                    ],
+
+                ],
 
             ],
 
         ],
 
-        'toolbar_buttons' => [
+        'file_attachments_accepted_file_types_message' => 'Uploaded files must be of type: :values.',
+
+        'file_attachments_max_size_message' => 'Uploaded files must not be greater than :max kilobytes.',
+
+        'no_merge_tag_search_results_message' => 'No merge tag results.',
+
+        'mentions' => [
+            'no_options_message' => 'No options available.',
+            'no_search_results_message' => 'No results match your search.',
+            'search_prompt' => 'Start typing to search...',
+            'searching_message' => 'Searching...',
+        ],
+
+        'tools' => [
+            'align_center' => 'Align center',
+            'align_end' => 'Align end',
+            'align_justify' => 'Align justify',
+            'align_start' => 'Align start',
             'attach_files' => 'Attach files',
             'blockquote' => 'Blockquote',
             'bold' => 'Bold',
             'bullet_list' => 'Bullet list',
+            'clear_formatting' => 'Clear formatting',
+            'code' => 'Code',
             'code_block' => 'Code block',
+            'custom_blocks' => 'Blocks',
+            'details' => 'Details',
             'h1' => 'Title',
-            'h2' => 'Heading',
-            'h3' => 'Subheading',
+            'h2' => 'Heading 2',
+            'h3' => 'Heading 3',
+            'h4' => 'Heading 4',
+            'h5' => 'Heading 5',
+            'h6' => 'Heading 6',
+            'grid' => 'Grid',
+            'grid_delete' => 'Delete grid',
+            'highlight' => 'Highlight',
+            'horizontal_rule' => 'Horizontal rule',
             'italic' => 'Italic',
+            'lead' => 'Lead text',
             'link' => 'Link',
+            'merge_tags' => 'Merge tags',
             'ordered_list' => 'Numbered list',
+            'paragraph' => 'Paragraph',
             'redo' => 'Redo',
+            'small' => 'Small text',
             'strike' => 'Strikethrough',
+            'subscript' => 'Subscript',
+            'superscript' => 'Superscript',
+            'table' => 'Table',
+            'table_delete' => 'Delete table',
+            'table_add_column_before' => 'Add column before',
+            'table_add_column_after' => 'Add column after',
+            'table_delete_column' => 'Delete column',
+            'table_add_row_before' => 'Add row above',
+            'table_add_row_after' => 'Add row below',
+            'table_delete_row' => 'Delete row',
+            'table_merge_cells' => 'Merge cells',
+            'table_split_cell' => 'Split cell',
+            'table_toggle_header_row' => 'Toggle header row',
+            'table_toggle_header_cell' => 'Toggle header cell',
+            'text_color' => 'Text color',
             'underline' => 'Underline',
             'undo' => 'Undo',
         ],
+
+        'uploading_file_message' => 'Uploading file...',
 
     ],
 
@@ -407,6 +665,8 @@ return [
         'actions' => [
 
             'create_option' => [
+
+                'label' => 'Create',
 
                 'modal' => [
 
@@ -429,6 +689,8 @@ return [
             ],
 
             'edit_option' => [
+
+                'label' => 'Edit',
 
                 'modal' => [
 
@@ -457,6 +719,8 @@ return [
 
         'max_items_message' => 'Only :count can be selected.',
 
+        'no_options_message' => 'No options available.',
+
         'no_search_results_message' => 'No options match your search.',
 
         'placeholder' => 'Select an option',
@@ -468,12 +732,27 @@ return [
     ],
 
     'tags_input' => [
+
+        'actions' => [
+
+            'delete' => [
+                'label' => 'Delete',
+            ],
+
+        ],
+
         'placeholder' => 'New tag',
+
     ],
 
     'text_input' => [
 
         'actions' => [
+
+            'copy' => [
+                'label' => 'Copy',
+                'message' => 'Copied',
+            ],
 
             'hide_password' => [
                 'label' => 'Hide password',
@@ -492,22 +771,6 @@ return [
         'boolean' => [
             'true' => 'Yes',
             'false' => 'No',
-        ],
-
-    ],
-
-    'wizard' => [
-
-        'actions' => [
-
-            'previous_step' => [
-                'label' => 'Back',
-            ],
-
-            'next_step' => [
-                'label' => 'Next',
-            ],
-
         ],
 
     ],

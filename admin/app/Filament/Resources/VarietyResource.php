@@ -31,25 +31,39 @@ class VarietyResource extends Resource
 {
     protected static ?string $model = Variety::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('variety.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('variety.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('variety.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('product_id')
+                    ->label(trans('variety.product_id'))
                     ->relationship('product', 'heading')
                     ->searchable()
                     ->live()
                     ->required()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The product this variety belongs to. Changing it reloads the available attributes below.'),
+                    ->hintIconTooltip(trans('variety.product_id_hint')),
                 Select::make('attribute_id')
-                    ->label('Attribute')
+                    ->label(trans('variety.attribute_id'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The attribute that defines this variety (e.g. "Red" from the "Color" group). Auto-fills value and color on save. Options are filtered by the product\'s attribute group.')
+                    ->hintIconTooltip(trans('variety.attribute_id_hint'))
                     ->options(function (Get $get, ?Variety $record): array {
                         $productId = $get('product_id') ?? $record?->product_id;
                         if (! $productId) {
@@ -67,37 +81,43 @@ class VarietyResource extends Resource
                     })
                     ->searchable()
                     ->nullable()
-                    ->helperText('Selecting an attribute auto-fills the value and color.'),
+                    ->helperText(trans('variety.attribute_id_helper')),
                 ColorPicker::make('color')
+                    ->label(trans('variety.color'))
                     ->nullable()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Hex color for this variety (e.g. #ff8516). Auto-filled from the selected attribute — override here if needed.'),
+                    ->hintIconTooltip(trans('variety.color_hint')),
                 TextInput::make('price')
+                    ->label(trans('variety.price'))
                     ->required()
                     ->numeric()
                     ->prefix('تومان')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The selling price of this variety.'),
+                    ->hintIconTooltip(trans('variety.price_hint')),
                 TextInput::make('sale_price')
+                    ->label(trans('variety.sale_price'))
                     ->numeric()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Discounted price shown instead of the regular price when set. Leave empty for no sale price.'),
+                    ->hintIconTooltip(trans('variety.sale_price_hint')),
                 TextInput::make('inventory')
+                    ->label(trans('variety.inventory'))
                     ->required()
                     ->numeric()
                     ->default(0)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Number of units available in stock.'),
+                    ->hintIconTooltip(trans('variety.inventory_hint')),
                 Toggle::make('has_stock')
+                    ->label(trans('variety.has_stock'))
                     ->required()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When off, this variety is shown as out of stock regardless of inventory count.'),
+                    ->hintIconTooltip(trans('variety.has_stock_hint')),
                 Select::make('status')
+                    ->label(trans('variety.status'))
                     ->required()
                     ->options(VarietyStatusEnum::options())
                     ->default(VarietyStatusEnum::PUBLISHED->value),
                 Select::make('attributes')
-                    ->label('Additional Attributes')
+                    ->label(trans('variety.additional_attributes'))
                     ->multiple()
                     ->relationship(
                         name: 'attributes',
@@ -109,7 +129,7 @@ class VarietyResource extends Resource
                     ->preload()
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Secondary attributes for this variety from other groups, e.g. Color when the primary group is Size. Stored in the attribute_variety pivot table.'),
+                    ->hintIconTooltip(trans('variety.additional_attributes_hint')),
             ]);
     }
 
@@ -118,32 +138,41 @@ class VarietyResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('product.heading')
+                    ->label(trans('variety.product'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('attribute.value')
-                    ->label('Attribute')
+                    ->label(trans('variety.attribute_id'))
                     ->searchable(),
                 TextColumn::make('attribute_value')
-                    ->label('Value'),
+                    ->label(trans('variety.attribute_value')),
                 ColorColumn::make('color')
+                    ->label(trans('variety.color'))
                     ->copyable(),
                 TextColumn::make('price')
+                    ->label(trans('variety.price'))
                     ->money(),
                 TextColumn::make('sale_price')
+                    ->label(trans('variety.sale_price'))
                     ->numeric(),
                 TextColumn::make('inventory')
+                    ->label(trans('variety.inventory'))
                     ->numeric(),
                 IconColumn::make('has_stock')
+                    ->label(trans('variety.has_stock'))
                     ->boolean(),
                 TextColumn::make('status')
+                    ->label(trans('variety.status'))
                     ->getStateUsing(fn (Variety $record): string => $record->status->label())
                     ->color(fn (Variety $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('variety.created_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('variety.updated_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

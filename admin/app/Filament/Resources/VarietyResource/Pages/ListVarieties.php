@@ -12,7 +12,13 @@ class ListVarieties extends ListRecords
 {
     protected static string $resource = VarietyResource::class;
 
-    protected ?string $subheading = 'Varieties are the purchasable options of a product (e.g. a T-shirt in Red or Blue, each with its own price and inventory). Each variety belongs to one product and is linked to one attribute from the product\'s attribute group. Selecting an attribute auto-fills the variety\'s label and color.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('variety.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

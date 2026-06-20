@@ -43,15 +43,29 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('product.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('product.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('product.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('heading')
+                    ->label(trans('product.heading'))
                     ->required()
                     ->live(onBlur: true)
                     ->maxLength(255)
@@ -61,58 +75,68 @@ class ProductResource extends Resource
                         }
                     }),
                 TextInput::make('slug')
+                    ->label(trans('product.slug'))
                     ->disabled()
                     ->dehydrated()
                     ->required()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Auto-generated from the heading on create. Cannot be changed after creation.')
+                    ->hintIconTooltip(trans('product.slug_hint'))
                     ->unique(Product::class, 'slug', ignoreRecord: true),
                 TextInput::make('price')
+                    ->label(trans('product.price'))
                     ->required()
                     ->numeric()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Base price shown when no variety is selected.')
+                    ->hintIconTooltip(trans('product.price_hint'))
                     ->prefix('تومان'),
                 TinyEditor::make('content')
+                    ->label(trans('product.content'))
                     ->columnSpanFull()
                     ->required(),
                 TextInput::make('title')
+                    ->label(trans('product.title'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('SEO <title> tag. If empty, the heading is used.')
+                    ->hintIconTooltip(trans('product.title_hint'))
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->label(trans('product.description'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('SEO meta description shown in search results.')
+                    ->hintIconTooltip(trans('product.description_hint'))
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Toggle::make('no_index')
+                    ->label(trans('product.no_index'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When on, adds a noindex meta tag so search engines skip this page.')
+                    ->hintIconTooltip(trans('product.no_index_hint'))
                     ->required(),
                 TextInput::make('canonical')
+                    ->label(trans('product.canonical'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Canonical URL to prevent duplicate content. Leave empty unless this product mirrors another page.')
+                    ->hintIconTooltip(trans('product.canonical_hint'))
                     ->maxLength(255),
                 Repeater::make('images')
+                    ->label(trans('product.images'))
                     ->relationship('images')
                     ->schema([
                         FileUpload::make('path')
+                            ->label(trans('product.path'))
                             ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
 
                         Toggle::make('is_featured')
-                            ->label('Featured Image')
+                            ->label(trans('product.is_featured'))
                             ->reactive(),
 
                         TextInput::make('alt_text')
-                            ->label('Alt Text'),
+                            ->label(trans('product.alt_text')),
                     ])
                     ->columnSpanFull(),
 
                 Select::make('category_id')
+                    ->label(trans('product.category_id'))
                     ->relationship('category', 'heading')
                     ->required()
                     ->native(false)
@@ -121,9 +145,9 @@ class ProductResource extends Resource
                     ->live()
                     ->afterStateUpdated(fn (Set $set) => $set('attribute_group_id', null))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The category this product belongs to. Required attribute groups for this category will be enforced on save.'),
+                    ->hintIconTooltip(trans('product.category_id_hint')),
                 Select::make('attribute_group_id')
-                    ->label('Attribute Group')
+                    ->label(trans('product.attribute_group_id'))
                     ->options(function (Get $get, ?Product $record): array {
                         $categoryId = $get('category_id');
                         if (! $categoryId) {
@@ -147,42 +171,48 @@ class ProductResource extends Resource
                     ->native(false)
                     ->live()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Defines which attribute group differentiates the varieties of this product (e.g. "Color"). Filtered by the selected category. Changing this reloads attribute options in the variety rows below.'),
+                    ->hintIconTooltip(trans('product.attribute_group_id_hint')),
                 Select::make('brand_id')
+                    ->label(trans('product.brand_id'))
                     ->relationship('brand', 'heading')
                     ->required()
                     ->native(false)
                     ->preload(),
                 TextInput::make('minimum')
+                    ->label(trans('product.minimum'))
                     ->required()
                     ->numeric()
                     ->default(1)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Minimum quantity a customer can add to their cart.'),
+                    ->hintIconTooltip(trans('product.minimum_hint')),
                 TextInput::make('maximum')
+                    ->label(trans('product.maximum'))
                     ->numeric()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Maximum quantity per order. Leave empty for no limit.'),
+                    ->hintIconTooltip(trans('product.maximum_hint')),
                 TextInput::make('step')
+                    ->label(trans('product.step'))
                     ->required()
                     ->numeric()
                     ->default(1)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Quantity increment step (e.g. 2 means customers can add 2, 4, 6...).'),
+                    ->hintIconTooltip(trans('product.step_hint')),
                 TextInput::make('profit_percent')
+                    ->label(trans('product.profit_percent'))
                     ->required()
                     ->numeric()
                     ->suffix('%')
                     ->default(0)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('ShopFlow\'s commission percentage from each sale of this product.'),
+                    ->hintIconTooltip(trans('product.profit_percent_hint')),
 
                 Repeater::make('attributes')
+                    ->label(trans('product.attributes'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Product-level attributes that describe this product (e.g. material, dimensions). These are not varieties — they are shared across all varieties. Mark an attribute as Highlight to feature it prominently on the product page.')
+                    ->hintIconTooltip(trans('product.attributes_hint'))
                     ->schema([
                         Select::make('attribute_id')
-                            ->label('Attribute')
+                            ->label(trans('product.attribute_id'))
                             ->options(
                                 Attribute::with('attributeGroup')->get()->mapWithKeys(function (Attribute $attribute): array {
                                     return [
@@ -192,7 +222,7 @@ class ProductResource extends Resource
                             )
                             ->searchable(),
                         Checkbox::make('pivot.is_highlight')
-                            ->label('Highlight'),
+                            ->label(trans('product.is_highlight')),
                     ])
                     ->afterStateHydrated(function (mixed $state, callable $set, Component $livewire): void {
                         if (isset($livewire->record) && $livewire->record) {
@@ -220,42 +250,50 @@ class ProductResource extends Resource
                         $record->attributes()->sync($syncData);
                     }),
                 Toggle::make('has_stock')
+                    ->label(trans('product.has_stock'))
                     ->default(true)
                     ->required(),
                 TextInput::make('variety_counts')
+                    ->label(trans('product.variety_counts'))
                     ->numeric()
                     ->disabled()
                     ->dehydrated(false)
-                    ->helperText('Calculated automatically from the varieties below.'),
+                    ->helperText(trans('product.variety_counts_helper')),
                 TextInput::make('weight')
+                    ->label(trans('product.weight'))
                     ->numeric()
                     ->nullable(),
                 TextInput::make('length')
+                    ->label(trans('product.length'))
                     ->numeric()
                     ->nullable(),
                 TextInput::make('width')
+                    ->label(trans('product.width'))
                     ->numeric()
                     ->nullable(),
                 TextInput::make('height')
+                    ->label(trans('product.height'))
                     ->numeric()
                     ->nullable(),
                 Select::make('status')
+                    ->label(trans('product.status'))
                     ->required()
                     ->options(ProductStatusEnum::options())
                     ->default(ProductStatusEnum::PUBLISHED->value),
                 TextInput::make('seen')
+                    ->label(trans('product.seen'))
                     ->required()
                     ->numeric()
                     ->default(0),
                 Repeater::make('varieties')
-                    ->label('Variety Details')
+                    ->label(trans('product.varieties'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Each row is a variety of this product. The attribute options depend on the Attribute Group selected above — set that first.')
+                    ->hintIconTooltip(trans('product.varieties_hint'))
                     ->relationship('varieties')
                     ->columnSpanFull()
                     ->schema([
                         Select::make('attribute_id')
-                            ->label('Attribute')
+                            ->label(trans('product.variety_attribute_id'))
                             ->options(function (Get $get): array {
                                 $groupId = $get('../../attribute_group_id');
                                 if (! $groupId) {
@@ -269,13 +307,14 @@ class ProductResource extends Resource
                             })
                             ->searchable()
                             ->nullable()
-                            ->helperText('Selecting an attribute auto-fills the value and color.'),
+                            ->helperText(trans('product.variety_attribute_helper')),
                         ColorPicker::make('color')
+                            ->label(trans('product.variety_color'))
                             ->nullable()
                             ->hintIcon('heroicon-o-information-circle')
-                            ->hintIconTooltip('Hex color for this variety (e.g. #ff8516). Auto-filled from the selected attribute — override here if needed.'),
+                            ->hintIconTooltip(trans('product.variety_color_hint')),
                         Select::make('attributes')
-                            ->label('Additional Attributes')
+                            ->label(trans('product.variety_additional_attributes'))
                             ->multiple()
                             ->relationship(
                                 name: 'attributes',
@@ -294,21 +333,26 @@ class ProductResource extends Resource
                             ->searchable()
                             ->preload()
                             ->hintIcon('heroicon-o-information-circle')
-                            ->hintIconTooltip('Additional attributes from other groups, e.g. Color when the primary group is Size.'),
+                            ->hintIconTooltip(trans('product.variety_additional_attributes_hint')),
                         TextInput::make('price')
+                            ->label(trans('product.variety_price'))
                             ->required()
                             ->numeric(),
                         TextInput::make('sale_price')
+                            ->label(trans('product.variety_sale_price'))
                             ->numeric()
                             ->nullable(),
                         TextInput::make('inventory')
+                            ->label(trans('product.variety_inventory'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         Toggle::make('has_stock')
+                            ->label(trans('product.variety_has_stock'))
                             ->default(true)
                             ->required(),
                         Select::make('status')
+                            ->label(trans('product.variety_status'))
                             ->required()
                             ->options(VarietyStatusEnum::options())
                             ->default(VarietyStatusEnum::PUBLISHED->value),
@@ -322,70 +366,93 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('heading')
+                    ->label(trans('product.heading'))
                     ->limit(30)
                     ->wrap(),
                 TextColumn::make('slug')
+                    ->label(trans('product.slug'))
                     ->limit(30)
                     ->wrap(),
                 ImageColumn::make('featuredImage.path')
-                    ->label('Featured')
+                    ->label(trans('product.featured'))
                     ->square(),
                 TextColumn::make('price')
+                    ->label(trans('product.price'))
                     ->money()
                     ->sortable(),
                 TextColumn::make('title')
+                    ->label(trans('product.title'))
                     ->searchable(),
                 IconColumn::make('no_index')
+                    ->label(trans('product.no_index'))
                     ->boolean(),
                 TextColumn::make('canonical')
+                    ->label(trans('product.canonical'))
                     ->searchable(),
                 TextColumn::make('attributeGroup.name')
+                    ->label(trans('product.attribute_group'))
                     ->sortable(),
                 TextColumn::make('category.heading')
+                    ->label(trans('product.category'))
                     ->limit(60),
                 TextColumn::make('brand.heading')
+                    ->label(trans('product.brand'))
                     ->sortable(),
                 TextColumn::make('minimum')
+                    ->label(trans('product.minimum'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('maximum')
+                    ->label(trans('product.maximum'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('step')
+                    ->label(trans('product.step'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('profit_percent')
+                    ->label(trans('product.profit_percent'))
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('has_stock')
+                    ->label(trans('product.has_stock'))
                     ->boolean(),
                 TextColumn::make('variety_counts')
+                    ->label(trans('product.variety_counts'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('weight')
+                    ->label(trans('product.weight'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('length')
+                    ->label(trans('product.length'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('width')
+                    ->label(trans('product.width'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('height')
+                    ->label(trans('product.height'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label(trans('product.status'))
                     ->getStateUsing(fn (Product $record) => $record->status->label())
                     ->color(fn (Product $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('seen')
+                    ->label(trans('product.seen'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('product.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('product.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

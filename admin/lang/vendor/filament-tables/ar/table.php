@@ -2,13 +2,45 @@
 
 return [
 
-    'column_toggle' => [
+    'column_manager' => [
 
         'heading' => 'الأعمدة',
+
+        'actions' => [
+
+            'apply' => [
+                'label' => 'تطبيق الأعمدة',
+            ],
+
+            'reset' => [
+                'label' => 'إعادة ضبط التصفيات',
+            ],
+
+        ],
 
     ],
 
     'columns' => [
+
+        'actions' => [
+            'label' => 'إجراء | إجراءات',
+        ],
+
+        'select' => [
+
+            'loading_message' => 'جاري التحميل...',
+
+            'no_options_message' => 'لا توجد خيارات متاحة.',
+
+            'no_search_results_message' => 'لا توجد خيارات مطابقة لبحثك.',
+
+            'placeholder' => 'اختر',
+
+            'searching_message' => 'جاري البحث...',
+
+            'search_prompt' => 'ابدأ الكتابة للبحث...',
+
+        ],
 
         'text' => [
 
@@ -95,7 +127,7 @@ return [
             'label' => 'الإجراءات',
         ],
 
-        'toggle_columns' => [
+        'column_manager' => [
             'label' => 'تبديل الأعمدة',
         ],
 
@@ -141,7 +173,13 @@ return [
         ],
 
         'select' => [
+
             'placeholder' => 'الكل',
+
+            'relationship' => [
+                'empty_option_label' => 'لا يوجد اختيار',
+            ],
+
         ],
 
         'trashed' => [
@@ -164,7 +202,6 @@ return [
 
             'group' => [
                 'label' => 'تجميع حسب',
-                'placeholder' => 'تجميع حسب',
             ],
 
             'direction' => [
@@ -224,5 +261,7 @@ return [
         ],
 
     ],
+
+    'default_model_label' => 'سجل',
 
 ];
