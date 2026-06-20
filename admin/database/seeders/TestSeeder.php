@@ -20,6 +20,7 @@ class TestSeeder extends Seeder
             BannerSeeder::class,
             SliderSeeder::class,
             MenuSeeder::class,
+            PageSeeder::class,
         ]);
     }
 }

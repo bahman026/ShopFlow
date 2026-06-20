@@ -21,6 +21,7 @@ Legend: `[ ]` not started, `[x]` implemented.
 | 5 | `products.slug.{slug}` | Single product record (with images, attributes, brand, category) | 30 min | Product saved / deleted |
 | 6 | `products.category.{category_id}` | Published products list for a category page | 15 min | Product saved / deleted |
 | 7 | `varieties.product.{product_id}` | All varieties for a product (price, inventory, status) | 15 min | Variety saved / deleted |
+| 9 | `pages.{slug}` | Single published page record | 1 hour | Page saved / deleted |
 
 ---
 
