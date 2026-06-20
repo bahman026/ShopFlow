@@ -130,6 +130,40 @@ it('auto-syncs variety_counts on product when a variety is deleted.', function (
     expect($product->refresh())->variety_counts->toBe(0);
 });
 
+it('can attach additional attributes to a variety via the resource.', function () {
+    $variety = Variety::factory()->create();
+    $attribute = Attribute::factory()->create();
+
+    livewire(VarietyResource\Pages\EditVariety::class, [
+        'record' => $variety->getRouteKey(),
+    ])
+        ->fillForm([
+            'attributes' => [$attribute->id],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($variety->refresh()->attributes)->toHaveCount(1)
+        ->first()->id->toBe($attribute->id);
+});
+
+it('cascade-deletes variety_attribute pivot rows when variety is deleted.', function () {
+    $variety = Variety::factory()->create();
+    $attribute = Attribute::factory()->create();
+    $variety->attributes()->attach($attribute);
+
+    $this->assertDatabaseHas('attribute_variety', [
+        'variety_id' => $variety->id,
+        'attribute_id' => $attribute->id,
+    ]);
+
+    $variety->delete();
+
+    $this->assertDatabaseMissing('attribute_variety', [
+        'variety_id' => $variety->id,
+    ]);
+});
+
 it('auto-syncs variety_counts on product when a variety is deleted via the resource.', function () {
     $product = Product::factory()->create();
     $variety = Variety::factory()->for($product)->create();

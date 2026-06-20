@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\VarietyStatusEnum;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property positive-int $id
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property VarietyStatusEnum $status
  * @property Product $product
  * @property Attribute|null $attribute
+ * @property Collection<Attribute> $attributes
  */
 class Variety extends Model
 {
@@ -47,7 +50,7 @@ class Variety extends Model
     protected static function booted(): void
     {
         static::saving(function (Variety $variety): void {
-            if ($variety->attribute_id === null) {
+            if ($variety->attribute_id === null || ! $variety->isDirty('attribute_id')) {
                 return;
             }
             $attribute = Attribute::find($variety->attribute_id);
@@ -84,5 +87,10 @@ class Variety extends Model
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class);
+    }
+
+    public function attributes(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class)->withTimestamps();
     }
 }

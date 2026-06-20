@@ -23,7 +23,7 @@ class PageFactory extends Factory
     {
         return [
             'heading' => fake()->words(4, true),
-            'slug' => fn (array $attributes): string => Str::slug($attributes['heading']) . '-' . fake()->unique()->numberBetween(1, 9999),
+            'slug' => fn (array $attributes): string => Str::slug($attributes['heading']) . '-' . Str::uuid(),
             'content' => fake()->paragraphs(3, true),
             'title' => fake()->words(5, true),
             'description' => fake()->sentence(),

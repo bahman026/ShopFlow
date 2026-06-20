@@ -201,14 +201,22 @@ When adding a new entity, build the files in this order, matching the existing f
 - Rich text uses `AmidEsfahani\FilamentTinyEditor\TinyEditor`.
 - Select fields backed by an enum use `->options(SomeEnum::options())` and `->default(SomeEnum::CASE->value)`.
 - Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
-- Enum-backed table columns render via `->getStateUsing(fn ($record) => $record->field->label())` and `->color(fn ($record) => $record->field->color())`.
+- Enum-backed table columns render via `->getStateUsing(fn (ModelName $record): string => $record->field->label())` and `->color(fn (ModelName $record): string => $record->field->color())`. Always type the `$record` parameter and return type to satisfy 100% type coverage.
 - Manage many-to-many pivots with a relationship multi-select: `Select::make('products')->relationship('products', 'heading')->multiple()->searchable()->preload()` (see `CouponResource`). No separate resource for pure scoping pivots.
+- To filter relationship select options by another form field (reactive options): switch from `->relationship()` to `->options(fn (Get $get, ?Model $record): array => [...])`. Always include the current record's value in the options to prevent validation failures on edit: `if ($record?->field_id) { $ids = $ids->push($record->field_id)->unique(); }`.
+- To reset a dependent field when its parent changes: add `->afterStateUpdated(fn (Set $set) => $set('dependent_field', null))` to the parent select alongside `->live()`.
+- To show options immediately without typing, add `->preload()` to any `->multiple()` relationship select.
+- `modifyQueryUsing` for relationship selects is the **3rd parameter** of `->relationship()`, not a chainable method: `->relationship('name', 'title', fn (Builder $q): Builder => $q->with('relation'))`. Calling `->modifyQueryUsing()` as a separate method throws `BadMethodCallException`.
+- `->getOptionLabelFromRecordUsing(fn (Model $record): string => ...)` customises the label shown for each option in a relationship select. Pair with eager-loading in the `modifyQueryUsing` closure to avoid N+1.
 - Control navigation order within a group with `protected static ?int $navigationSort = 1;` (lower = higher in the list).
 - Add an explanatory subheading to a list page with `protected ?string $subheading = 'Description here.';` on the `ListRecords` page class.
 - Add a tooltip to a form field with `->hintIcon('heroicon-o-information-circle')->hintIconTooltip('Explanation...')`. Use this instead of always-visible `->hint()` when the text is long.
 - Always add `->image()` to `FileUpload` fields that accept images. This restricts the file picker to image types only.
 - `mutateRelationshipDataBeforeSaveUsing` (and `BeforeCreateUsing`) MUST return `array`, never `null`. Returning `null` throws a `TypeError` at runtime. To skip saving, delete the related record inside the callback and still return the `$data` array.
 - Self-referential FK (e.g. `parent_id`): use `$table->foreignId('parent_id')->nullable()->constrained('table_name')->nullOnDelete()`. In the factory, default `parent_id` to `null` and provide a named state (e.g. `withParent(Model $parent)`) to set it. In the `parent_id` select options closure, exclude the current record to prevent circular references: `->when($record?->id, fn (Builder $q) => $q->where('id', '!=', $record->id))`.
+- If a model name clashes with a Filament concept (e.g. `Page`), alias the import in the resource file: `use App\Models\Page as PageModel`. This prevents naming ambiguity without renaming the model.
+- Conditionally required fields: pair `->hidden()` and `->required()` with the same closure so the field is only required when visible. Example: `->required(fn (Get $get): bool => $get('status') === SomeEnum::CASE->value)->hidden(fn (Get $get): bool => $get('status') !== SomeEnum::CASE->value)`.
+- Auto-generated slug fields use `->disabled()->dehydrated()` with `->unique(Model::class, 'slug', ignoreRecord: true)` to prevent duplicates while keeping the field read-only in the form.
 
 ## Models
 
@@ -232,6 +240,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Use `$table->foreignIdFor(Model::class)` for foreign keys (add `->nullable()` when optional). Chain `->constrained()->cascadeOnDelete()` / `->nullOnDelete()` / `->restrictOnDelete()` to add the real FK constraint with its delete rule.
 - For a second FK to the same table, use a named column: `$table->foreignId('user_creator_id')->nullable()->constrained('users')->nullOnDelete()` (see `coupons`).
 - Pivot tables add `$table->unique([...])` on the key pair and `->cascadeOnDelete()` on both FKs (see `coupon_product`).
+- **Pivot table naming**: Laravel derives the name alphabetically from the two model names (singular). e.g. `Attribute` + `Variety` → `attribute_variety`, NOT `variety_attribute`. Always verify with this rule before writing migration or assertions.
 - Default enum columns to a case value: `$table->unsignedTinyInteger('status')->default(ProductStatusEnum::PUBLISHED->value);`.
 - Always implement `down()` with `Schema::dropIfExists(...)`.
 
@@ -243,6 +252,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Random enum values via `fake()->randomElement(SomeEnum::cases())`.
 - Counts/relations that are computed at runtime (like `variety_counts`) default to `0`, not random.
 - Optional related data goes in named states using `afterCreating()` (e.g. `withImage()`, `withImages()`, `withAttributes()`).
+- For unique slug fields, use `Str::uuid()` not `fake()->unique()->numberBetween()`. The `unique()` state accumulates across all tests in a suite and can cause cross-test collisions.
 
 ## Seeders
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PageStatusEnum;
 use App\Filament\Resources\PageResource;
 use App\Models\Page;
 use Filament\Actions\DeleteAction;
@@ -34,7 +35,7 @@ it('can render edit page.', function () {
 
 it('can update page model.', function () {
     $page = Page::factory()->create();
-    $newPage = Page::factory()->make();
+    $newPage = Page::factory()->make(['status' => PageStatusEnum::PUBLISHED]);
 
     livewire(PageResource\Pages\EditPage::class, [
         'record' => $page->getRouteKey(),
@@ -45,7 +46,7 @@ it('can update page model.', function () {
             'title' => $newPage->title,
             'description' => $newPage->description,
             'no_index' => $newPage->no_index,
-            'status' => $newPage->status->value,
+            'status' => PageStatusEnum::PUBLISHED->value,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -53,11 +54,11 @@ it('can update page model.', function () {
     expect($page->refresh())
         ->heading->toBe($newPage->heading)
         ->slug->toBe($newPage->slug)
-        ->status->toBe($newPage->status);
+        ->status->toBe(PageStatusEnum::PUBLISHED);
 });
 
 it('can create page model.', function () {
-    $newPage = Page::factory()->make();
+    $newPage = Page::factory()->make(['status' => PageStatusEnum::PUBLISHED]);
 
     livewire(PageResource\Pages\CreatePage::class)
         ->fillForm([
@@ -66,7 +67,7 @@ it('can create page model.', function () {
             'title' => $newPage->title,
             'description' => $newPage->description,
             'no_index' => $newPage->no_index,
-            'status' => $newPage->status->value,
+            'status' => PageStatusEnum::PUBLISHED->value,
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -74,7 +75,7 @@ it('can create page model.', function () {
     $this->assertDatabaseHas(Page::class, [
         'heading' => $newPage->heading,
         'slug' => $newPage->slug,
-        'status' => $newPage->status->value,
+        'status' => PageStatusEnum::PUBLISHED->value,
     ]);
 });
 
