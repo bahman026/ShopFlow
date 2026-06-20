@@ -22,38 +22,55 @@ class FaqResource extends Resource
 {
     protected static ?string $model = Faq::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-question-mark-circle';
 
     protected static ?int $navigationSort = 7;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('faq.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('faq.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('faq.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('heading')
+                    ->label(trans('faq.heading'))
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The question text shown to the visitor.'),
+                    ->hintIconTooltip(trans('faq.heading_hint')),
                 Textarea::make('content')
+                    ->label(trans('faq.content'))
                     ->required()
                     ->rows(5)
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The answer to the question.'),
+                    ->hintIconTooltip(trans('faq.content_hint')),
                 TextInput::make('order')
+                    ->label(trans('faq.order'))
                     ->numeric()
                     ->default(0)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Display order — lower numbers appear first.'),
+                    ->hintIconTooltip(trans('faq.order_hint')),
                 TextInput::make('position')
+                    ->label(trans('faq.position'))
                     ->nullable()
                     ->maxLength(100)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Leave empty to show on the main FAQ page. Set a value (e.g. "homepage", "products") to display in that specific position.'),
+                    ->hintIconTooltip(trans('faq.position_hint')),
             ]);
     }
 
@@ -62,18 +79,23 @@ class FaqResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('heading')
+                    ->label(trans('faq.heading'))
                     ->limit(50)
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('order')
+                    ->label(trans('faq.order'))
                     ->sortable(),
                 TextColumn::make('position')
-                    ->placeholder('FAQ page')
+                    ->label(trans('faq.position'))
+                    ->placeholder(trans('faq.position_placeholder'))
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('faq.created_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('faq.updated_at'))
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

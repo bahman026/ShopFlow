@@ -12,7 +12,13 @@ class ListReviews extends ListRecords
 {
     protected static string $resource = ReviewResource::class;
 
-    protected ?string $subheading = 'Moderate user reviews for products. Approve, reject, or reply to reviews from here.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('review.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

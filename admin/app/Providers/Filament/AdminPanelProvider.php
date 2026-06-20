@@ -12,6 +12,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Css;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
@@ -35,6 +36,15 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->assets([
+                Css::make('persian-font', asset('css/persian-font.css')),
+            ])
+            ->renderHook(
+                'panels::body.start',
+                fn (): string => app()->getLocale() === 'fa'
+                    ? '<style>*{font-family:"A Iranian Sans",ui-sans-serif,system-ui,sans-serif!important}</style>'
+                    : '',
+            )
             ->userMenuItems([
                 MenuItem::make()
                     ->label('English')

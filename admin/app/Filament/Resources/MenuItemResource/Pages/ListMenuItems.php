@@ -12,7 +12,13 @@ class ListMenuItems extends ListRecords
 {
     protected static string $resource = MenuItemResource::class;
 
-    protected ?string $subheading = 'Menu items are the individual links inside a menu. Each item belongs to one menu and can optionally be nested under a top-level item as a child. Use the Order field to control their display sequence.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('menu_item.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

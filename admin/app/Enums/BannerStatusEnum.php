@@ -17,9 +17,9 @@ enum BannerStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'Deleted',
-            self::PUBLISHED => 'Published',
-            self::DRAFT => 'Draft',
+            self::DELETED => trans('banner.status_deleted'),
+            self::PUBLISHED => trans('banner.status_published'),
+            self::DRAFT => trans('banner.status_draft'),
         };
     }
 

@@ -18,10 +18,10 @@ enum PageStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'Deleted',
-            self::PUBLISHED => 'Published',
-            self::DRAFT => 'Draft',
-            self::SCHEDULED => 'Scheduled',
+            self::DELETED => trans('page.status_deleted'),
+            self::PUBLISHED => trans('page.status_published'),
+            self::DRAFT => trans('page.status_draft'),
+            self::SCHEDULED => trans('page.status_scheduled'),
         };
     }
 
