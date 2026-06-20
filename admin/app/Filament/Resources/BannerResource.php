@@ -31,6 +31,8 @@ class BannerResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-photo';
 
+    protected static ?int $navigationSort = 3;
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -55,6 +57,7 @@ class BannerResource extends Resource
                     ->relationship('images')
                     ->schema([
                         FileUpload::make('path')
+                            ->image()
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
