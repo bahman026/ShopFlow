@@ -27,7 +27,6 @@ return new class extends Migration
             $table->unsignedInteger('total_uses')->nullable();
             $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_creator_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('seller_creator_id')->nullable()->constrained('users')->nullOnDelete();
             $table->unsignedTinyInteger('status')->default(CouponStatusEnum::ACTIVE->value);
             $table->boolean('is_percent')->default(false);
             $table->boolean('shipping')->default(false);
