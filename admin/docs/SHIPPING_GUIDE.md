@@ -48,10 +48,10 @@ A service tier belonging to a carrier. Defines who can use it, minimum order req
 | `type` | string | Service category (e.g. Express, Special, Economy) |
 | `min_count` | unsigned int (nullable) | Minimum item quantity required to use this method |
 | `min_amount` | unsigned int (nullable) | Minimum order amount required to use this method |
-| `for` | enum | Audience restriction: `customer`, `partner`, `employee` |
+| `for` | `ShippingMethodForEnum` (int) | Audience: `CUSTOMER=10` (default), `PARTNER=20`, `EMPLOYEE=30` |
 | `disable_from` | datetime (nullable) | Start of unavailability window |
 | `disable_to` | datetime (nullable) | End of unavailability window |
-| `status` | boolean | Active / inactive |
+| `status` | boolean | `true` = active (default), `false` = hidden from all users |
 
 ---
 
@@ -168,6 +168,16 @@ At checkout the frontend receives the user's city. The resolution steps:
 ```
 
 **Priority rule:** city-level `shipping_cities` records take priority over province-level records for the same method.
+
+---
+
+## Implementation Status
+
+| Table | Status | Notes |
+|---|---|---|
+| `shipping_lines` | ✅ Done | Migration, model, factory, Filament resource, tests |
+| `shipping_methods` | ✅ Done | Migration, model, factory, Filament resource, tests. `ShippingMethodForEnum` for `for` field. |
+| `shipping_cities` | ⏳ Pending | Next to implement (Phase 3) |
 
 ---
 

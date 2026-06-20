@@ -657,7 +657,7 @@ A specific service tier offered by a shipping carrier. References `shipping_line
 * `type`: Service type, e.g. Express, Special, Economy.
 * `min_count`: Minimum purchase quantity required to use this method.
 * `min_amount`: Minimum purchase amount required to use this method.
-* `for`: Audience — customer, partner, or employee.
+* `for`: Audience — `CUSTOMER=10` (default), `PARTNER=20`, `EMPLOYEE=30`. Implemented as `ShippingMethodForEnum`.
 * `disable_from` / `disable_to`: Period during which this method is unavailable.
 * `status`: Active or inactive.
 
