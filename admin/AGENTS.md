@@ -174,7 +174,7 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - The app runs in Docker. Execute commands inside the container: `docker exec -it -u www-data shop_flow_admin_app bash`.
 - Before committing, run `composer test-dev` (Pest, Pint, type coverage, PHPStan) inside the container and make sure it passes.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
-- Always ask before committing.
+- Always ask before committing. NEVER commit without explicit user approval.
 
 ## Implementation order
 
@@ -260,8 +260,11 @@ When adding a new entity, build the files in this order, matching the existing f
 
 ## Roadmap & docs
 
-- The implementation status and priority order live in `IMPLEMENTATION.md`. When an entity is finished or the plan changes, update it.
-- The full schema reference is `ShoFlow db doc.md`. Treat it as the source of truth for table columns and relationships.
-- Cache keys that have been identified but not yet implemented are tracked in `CACHE.md`. When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
+- **Before starting any task**, read these three files to understand the current state of the project:
+  - `IMPLEMENTATION.md` — what is done, what is next, and the priority order.
+  - `ShoFlow db doc.md` — the full schema reference; treat it as the source of truth for table columns and relationships.
+  - `CACHE.md` — cache keys that have been identified but not yet implemented.
+- When an entity is finished or the plan changes, update `IMPLEMENTATION.md`.
+- When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
 - Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
 

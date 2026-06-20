@@ -15,6 +15,7 @@ Legend: `[ ]` not started, `[x]` implemented.
 |---|---------------------|----------------|---------------|-----------------|
 | 1 | `categories.tree` | Full nested category tree | 1 hour | Category saved / deleted |
 | 2 | `banners.{position}` | Published banners for a given position | 30 min | Banner saved / deleted |
+| 8 | `sliders.{position}` | Published slider with its slides for a given position | 30 min | Slider or Slide saved / deleted |
 | 3 | `menus.{slug}` | Rendered menu tree for a given slug | 1 hour | Menu or MenuItem saved / deleted |
 | 4 | `attributes.group.{group_id}` | Attributes belonging to a group | 1 hour | Attribute saved / deleted |
 | 5 | `products.slug.{slug}` | Single product record (with images, attributes, brand, category) | 30 min | Product saved / deleted |

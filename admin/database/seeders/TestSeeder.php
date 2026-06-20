@@ -18,6 +18,7 @@ class TestSeeder extends Seeder
             DiscountSeeder::class,
             CouponSeeder::class,
             BannerSeeder::class,
+            SliderSeeder::class,
         ]);
     }
 }

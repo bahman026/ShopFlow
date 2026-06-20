@@ -373,9 +373,12 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 
 * Stores images.  
 * `path`: Stores the relative path of the images, the absolute path can be specified using the `static_asset` function relative to the CDN.  
-* `imageable_type:` used for polymorphic relation Attributes, Brand, Categories, Products, Banners  
-* `imageable_id:` used for polymorphic relation  
-* `created_at`: Specifies the record creation date.
+* `imageable_type`: used for polymorphic relation — Attributes, Brand, Categories, Products, Banners.  
+* `imageable_id`: used for polymorphic relation.  
+* `order`: Display order of the image within its parent (default 0).  
+* `is_featured`: Marks the primary/featured image for the parent record (default false). Only one image per parent should have this set to true.  
+* `alt_text`: Optional alt text for accessibility and SEO.  
+* `created_at` / `updated_at`: Record timestamps.
 
 # jobs
 
@@ -829,14 +832,7 @@ Contains product variations entered by the seller on the site. This table create
 
 # varietie\_attribute
 
-**`variety_attribute`** is used to store attributes for product variations. It links product varieties to specific attributes (e.g., color, RAM size) with the following columns:
-
-* **id**: Unique identifier for each record.  
-* **variety\_id**: Links to the `id` of the `varieties` table, defining which product variety the attributes belong to.  
-* **attribute\_id**: Links to the `id` of the `attributes` table, specifying the attribute (e.g., color, RAM).  
-* **content**: Stores the value of the attribute for the specific variety (e.g., "Red", "8GB").  
-* **created\_at**: Timestamp for when the record was created.  
-* **updated\_at**: Timestamp for when the record was last updated.
+> **Not implemented.** The original plan for a `variety_attribute` pivot was replaced by adding `attribute_id` directly to the `varieties` table. Each variety links to exactly one attribute; `attribute_value` and `color` are auto-populated from the linked attribute when the record is saved. No separate pivot table exists.
 
 # variety\_serials
 
