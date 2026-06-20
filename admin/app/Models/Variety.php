@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\VarietyStatusEnum;
+use Database\Factories\VarietyFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
@@ -25,9 +27,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property Product $product
  * @property Attribute|null $attribute
  * @property Collection<Attribute> $attributes
+ * @property Collection<Discount> $discounts
+ * @property Collection<Review> $reviews
  */
 class Variety extends Model
 {
+    /** @use HasFactory<VarietyFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -92,5 +97,15 @@ class Variety extends Model
     public function attributes(): BelongsToMany
     {
         return $this->belongsToMany(Attribute::class)->withTimestamps();
+    }
+
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(Discount::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }
