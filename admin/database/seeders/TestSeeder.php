@@ -32,6 +32,7 @@ class TestSeeder extends Seeder
             ReceiptSeeder::class,
             TransactionSeeder::class,
             GatewaySeeder::class,
+            UserConfigSeeder::class,
             ShippingLineSeeder::class,
             ShippingMethodSeeder::class,
             ShippingCitySeeder::class,

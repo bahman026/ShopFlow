@@ -120,7 +120,10 @@ The main goal; depends on most of phases 1-3.
 
 ## Phase 6 - Users extended & misc
 
-- [ ] `user_configs`, `user_roles`, `user_sources`, `user_statuses`, `user_permissions`
+- [x] `user_configs` (per-user key/value settings: model, migration, factory, seeder, Filament resource (+ pages), tests. `cascadeOnDelete` with the user; unique on `user_id`+`key`)
+- [~] `user_roles`, `user_permissions` — NOT NEEDED (covered by spatie's own user↔role / user↔permission pivots; their `seller_id` is irrelevant single-vendor)
+- [ ] `user_sources` — defer to accounting Sources (Phase 5)
+- [ ] `user_statuses` (per-user status restriction) — niche, not needed now
 - [ ] Category Partner, Partner Requests, Organizational Requests, Contact Us
 - [ ] Points, Newsletters, Notifications, System Notifications
 - [ ] `email_histories`, `mobile_histories`, `mobile_password_resets`

@@ -839,6 +839,13 @@ This table is used to store user-related settings.
 * `content`: Used to store the settings value.  
 * `autoload`: If any settings are not needed globally, this column should be false, and this column should be cached.
 
+Implementation notes:
+
+* `user_id`: FK to `users`, `cascadeOnDelete` (settings are meaningless without the user).
+* Unique on (`user_id`, `key`) so a user has one value per key.
+* `label` and `content` are nullable; `autoload` is a boolean default `false`.
+* Standalone Filament resource under the Users navigation group.
+
 # user\_roles
 
 For storing each user's role.
