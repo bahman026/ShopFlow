@@ -199,6 +199,9 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
 - Extract repeated logic into composables under `resources/js/composables/` (e.g. `useCart.ts`).
 - Style with Tailwind utility classes, RTL-first (see fonts/RTL section). No inline styles, no copy-pasted markup; reuse components.
 - **Brand color is `#ff8615`.** It is registered in `resources/css/app.css` as `--color-brand`, so use the Tailwind `brand` utilities (`bg-brand`, `text-brand`, `border-brand`, ...) for primary actions and accents. Do not hardcode the hex in components.
+- **Icons: FontAwesome only, for a uniform icon set.** Always render icons through the shared `<Icon>` component (`resources/js/Components/Icon.vue`). Never use raw SVGs, emoji, or another icon library, and do not place `<FontAwesomeIcon>` directly in components.
+  - Register every icon as an object in `resources/js/fontawesome.js` (solid from `@fortawesome/free-solid-svg-icons`, brands from `@fortawesome/free-brands-svg-icons`) and pass the imported icon object: `<Icon :icon="..." />`.
+  - Do NOT use string names with `library.add` (e.g. `['fab','instagram']`). Inertia turns FontAwesome's missing-icon `console.error` into an SSR exception, so string lookups break SSR. Passing icon objects is the SSR-safe, tree-shakeable pattern.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
 
 ## Language, RTL & fonts

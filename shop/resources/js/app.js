@@ -1,4 +1,5 @@
 import '../css/app.css';
+import './fontawesome';
 
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';

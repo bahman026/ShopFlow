@@ -6,6 +6,10 @@ import FooterNewsletter from '@/Components/Footer/FooterNewsletter.vue';
 import FooterCopyright from '@/Components/Footer/FooterCopyright.vue';
 
 defineProps({
+    about: {
+        type: String,
+        default: '',
+    },
     columns: {
         type: Array,
         default: () => [],
@@ -34,6 +38,13 @@ const emit = defineEmits(['subscribe']);
 <template>
     <footer class="mt-12 bg-white">
         <div class="mx-auto max-w-6xl px-4 py-10">
+            <p
+                v-if="about"
+                class="mb-8 max-w-3xl text-sm leading-7 text-gray-600"
+            >
+                {{ about }}
+            </p>
+
             <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
                 <FooterLinkColumn
                     v-for="(column, index) in columns"

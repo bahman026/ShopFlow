@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 defineProps({
@@ -11,9 +11,10 @@ defineProps({
 </script>
 
 <template>
-    <Head title="خانه">
-        <meta name="description" content="فروشگاه آنلاین ShopFlow">
-    </Head>
+    <AppHead
+        title="خانه"
+        description="فروشگاه آنلاین ShopFlow"
+    />
 
     <AppLayout>
         <section class="rounded-xl bg-white p-10 text-center shadow-sm">
