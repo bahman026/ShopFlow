@@ -455,6 +455,17 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 * `send_description`: Provides the shipping description.  
 * `receive_from` and `receive_to`: Specify the time range the user chose for delivery (e.g., from 9 to 12 or from 15 to 18).
 
+Implementation notes:
+
+* `status`: Added column (not in the original doc). `OrderStatusEnum`: `PENDING=10` (default), `PAID=20`, `PROCESSING=30`, `SHIPPED=40`, `DELIVERED=50`, `CANCELED=60`, `RETURNED=70`. Stock is decremented only when an order is paid (see `ORDER.md`).
+* `src`: Implemented as `OrderSrcEnum` (`PWA=1`, `WEB=2` default, `APP=3`, `OLD=4`).
+* `user_id`: Nullable FK to `users`, `nullOnDelete` so orders survive user deletion.
+* `confirmed_id`, `collector_id`, `notifier_id`: Nullable FKs to `users` (`nullOnDelete`).
+* `accounting_id`, `bijack_image_id`: Plain nullable columns with no FK constraint, because the accounting table is not built yet and images are stored polymorphically elsewhere.
+* Money columns (`coupon_discount`, `discount`, `shipping_cost`, `total_products_price`, `tax`, `total_price`): `decimal(12,2)`, default `0`.
+* No `seller_id` (single-vendor). The seller-centric `sub_orders` / `sub_order_logs` tables are intentionally not implemented.
+* Only the `orders` table is implemented so far; `order_varieties` and the other order_* tables are not built yet.
+
 # order\_call\_logs
 
 * Stores call logs to the customer.  
@@ -492,6 +503,14 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 * `description`: Provides the order check description.  
 * `payment_type`: Specifies the payment type: cash, POS, online.
 
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete`.
+* `checker_id`, `pack_user`, `sender_id`, `courier_id`, `courier2_id`: Nullable FKs to `users` (`nullOnDelete`) — staff handling the shipment.
+* `payment_type`: `OrderShippingPaymentTypeEnum` (`CASH=10`, `POS=20`, `ONLINE=30`), nullable.
+* `cheque_is_require`: boolean, default false. Date columns are nullable.
+* Editable inline on the Order edit page via `OrderShippingsRelationManager`.
+
 # order\_varieties
 
 * Used to store product varieties in orders.  
@@ -506,6 +525,13 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 * `discount`: Specifies the discount amount applied through the discounts table.  
 * `coupon_discount`: Specifies the discount amount applied through the coupon.  
 * `final_price`: Specifies the price multiplied by quantity.
+
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete` (deleting an order removes its line items).
+* `product_id`, `variety_id`: Nullable FKs (`nullOnDelete`) so historical line items survive product/variety deletion. The line keeps its own price snapshot.
+* `sub_order_id`: Plain nullable column with no FK; `sub_orders` is seller-centric and intentionally not implemented (single-vendor).
+* Quantity columns (`quantity` default 1, `gather_quantity`, `invoice_quantity`) are integers; money columns (`price`, `discount`, `coupon_discount`, `final_price`) are `decimal(12,2)`.
 
 # pages
 
@@ -992,6 +1018,11 @@ This table is for storing order notes.
 * `user_id`: Stores the user ID of the person who created the note.  
 * `order_id`: Stores the order ID.  
 * `content`: Stores the note content.
+
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete`. `user_id`: nullable FK to `users` (`nullOnDelete`), the note author.
+* Editable inline on the Order edit page via `OrderNotesRelationManager`.
 
 # emalls\_products
 

@@ -437,6 +437,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Table text columns that can be long (headings, relation labels) use `->limit(30)->wrap()`.
 - Enum-backed table columns render via `->getStateUsing(fn (ModelName $record): string => $record->field->label())` and `->color(fn (ModelName $record): string => $record->field->color())`. Always type the `$record` parameter and return type to satisfy 100% type coverage.
 - Manage many-to-many pivots with a relationship multi-select: `Select::make('products')->relationship('products', 'heading')->multiple()->searchable()->preload()` (see `CouponResource`). No separate resource for pure scoping pivots.
+- Manage a `hasMany` of line items inline on the parent's edit page with a Relation Manager in `app/Filament/Resources/{Parent}Resource/RelationManagers/{Children}RelationManager.php` (set `protected static string $relationship = 'childrenMethod';`, define `form()`/`table()` with `headerActions([CreateAction::make()])`), and register it in the parent's `getRelations()`. See `OrderResource` + `OrderVarietiesRelationManager` (an order has many `order_varieties`). The child can still have its own standalone resource for a global list.
 - To filter relationship select options by another form field (reactive options): switch from `->relationship()` to `->options(fn (Get $get, ?Model $record): array => [...])`. Always include the current record's value in the options to prevent validation failures on edit: `if ($record?->field_id) { $ids = $ids->push($record->field_id)->unique(); }`.
 - To reset a dependent field when its parent changes: add `->afterStateUpdated(fn (Set $set) => $set('dependent_field', null))` to the parent select alongside `->live()`.
 - To show options immediately without typing, add `->preload()` to any `->multiple()` relationship select.
@@ -490,6 +491,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Pivot tables add `$table->unique([...])` on the key pair and `->cascadeOnDelete()` on both FKs (see `coupon_product`).
 - **Pivot table naming**: Laravel derives the name alphabetically from the two model names (singular). e.g. `Attribute` + `Variety` → `attribute_variety`, NOT `variety_attribute`. Always verify with this rule before writing migration or assertions.
 - Default enum columns to a case value: `$table->unsignedTinyInteger('status')->default(ProductStatusEnum::PUBLISHED->value);`.
+- When a column references a table that is not built yet (e.g. `accounting_id`), add it as a plain nullable column with no FK constraint, and add the real FK later when that table exists. See `orders.accounting_id`.
 - Always implement `down()` with `Schema::dropIfExists(...)`.
 
 ## Factories
