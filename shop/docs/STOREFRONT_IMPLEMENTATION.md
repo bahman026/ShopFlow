@@ -22,7 +22,7 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - [x] RTL Persian root template (`lang="fa" dir="rtl"`)
 - [x] `A Iranian Sans` font + brand color `#ff8615`
 - [x] Base `AppLayout` + sample `Home` page
-- [ ] Eloquent models mapping shared tables (read-only): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review`
+- [x] Eloquent models mapping shared tables (read-focused): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review` (+ status enums and `HasOptions` trait). Relations to not-yet-created models (`AttributeGroup`, `Coupon`, `Discount`) are deferred to their phases.
 - [ ] Shared UI kit components: `BaseButton`, `PriceTag`, `ProductCard`, `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState`
 - [ ] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
 - [ ] SEO scaffolding: per-page `<Head>` pattern, shared meta defaults, canonical URL, Open Graph, `robots.txt`
