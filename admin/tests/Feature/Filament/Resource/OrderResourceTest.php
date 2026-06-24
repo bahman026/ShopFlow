@@ -5,7 +5,10 @@ declare(strict_types=1);
 use App\Enums\OrderSrcEnum;
 use App\Enums\OrderStatusEnum;
 use App\Filament\Resources\OrderResource;
+use App\Filament\Resources\OrderResource\Pages\EditOrder;
+use App\Filament\Resources\OrderResource\RelationManagers\OrderVarietiesRelationManager;
 use App\Models\Order;
+use App\Models\OrderVariety;
 use Filament\Actions\DeleteAction;
 
 use function Pest\Laravel\get;
@@ -37,7 +40,7 @@ it('can render edit order page.', function () {
 it('can update order model.', function () {
     $order = Order::factory()->create();
 
-    livewire(OrderResource\Pages\EditOrder::class, [
+    livewire(EditOrder::class, [
         'record' => $order->getRouteKey(),
     ])
         ->fillForm([
@@ -88,10 +91,21 @@ it('can create order model.', function () {
 it('can delete order model.', function () {
     $order = Order::factory()->create();
 
-    livewire(OrderResource\Pages\EditOrder::class, [
+    livewire(EditOrder::class, [
         'record' => $order->getRouteKey(),
     ])
         ->callAction(DeleteAction::class);
 
     $this->assertModelMissing($order);
+});
+
+it('lists the many varieties of an order in the relation manager.', function () {
+    $order = Order::factory()->create();
+    $items = OrderVariety::factory()->count(3)->create(['order_id' => $order->id]);
+
+    livewire(OrderVarietiesRelationManager::class, [
+        'ownerRecord' => $order,
+        'pageClass' => EditOrder::class,
+    ])
+        ->assertCanSeeTableRecords($items);
 });

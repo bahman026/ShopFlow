@@ -518,6 +518,13 @@ Implementation notes:
 * `coupon_discount`: Specifies the discount amount applied through the coupon.  
 * `final_price`: Specifies the price multiplied by quantity.
 
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete` (deleting an order removes its line items).
+* `product_id`, `variety_id`: Nullable FKs (`nullOnDelete`) so historical line items survive product/variety deletion. The line keeps its own price snapshot.
+* `sub_order_id`: Plain nullable column with no FK; `sub_orders` is seller-centric and intentionally not implemented (single-vendor).
+* Quantity columns (`quantity` default 1, `gather_quantity`, `invoice_quantity`) are integers; money columns (`price`, `discount`, `coupon_discount`, `final_price`) are `decimal(12,2)`.
+
 # pages
 
 * Used to create pages.  

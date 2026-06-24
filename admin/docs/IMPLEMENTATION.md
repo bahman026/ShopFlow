@@ -100,8 +100,8 @@ The main goal; depends on most of phases 1-3.
 
 - [~] Carts (migration, model, factory, seeder, tests; no Filament resource by design. Each row is one line item: variety + count, per user or guest session. Inventory rule in `ORDER.md`)
 - [x] Orders (`orders` table only: model, migration, factory, seeder, Filament resource (+ pages), tests. `OrderStatusEnum` + `OrderSrcEnum`; staff/finance refs to not-yet-built tables kept nullable without FK. Inventory rule in `ORDER.md`)
-- [ ] `order_varieties`
-- [ ] Sub Orders + `sub_order_logs`
+- [x] `order_varieties` (line items: model, migration, factory, seeder, Filament resource (+ pages), tests. Stores a per-line price/discount snapshot; `sub_order_id` kept nullable without FK since `sub_orders` is not implemented. An order's many varieties are also editable inline on the Order edit page via `OrderVarietiesRelationManager`)
+- [~] Sub Orders + `sub_order_logs` — NOT IMPLEMENTED (single-vendor). These are seller-centric; with no sellers an order maps 1:1 to fulfillment, so they add no value. Fulfillment lives on the order itself / `order_shippings`.
 - [ ] `order_logs`, `order_shippings`, `order_call_logs`, `order_notes`
 - [ ] Receipts
 - [ ] Transactions

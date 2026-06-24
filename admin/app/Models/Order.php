@@ -8,9 +8,11 @@ use App\Enums\OrderSrcEnum;
 use App\Enums\OrderStatusEnum;
 use Carbon\Carbon;
 use Database\Factories\OrderFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
@@ -53,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property User|null $notifier
  * @property ShippingLine|null $shippingLine
  * @property ShippingMethod|null $shippingMethod
+ * @property Collection<OrderVariety> $orderVarieties
  */
 class Order extends Model
 {
@@ -135,5 +138,10 @@ class Order extends Model
     public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
+    }
+
+    public function orderVarieties(): HasMany
+    {
+        return $this->hasMany(OrderVariety::class);
     }
 }
