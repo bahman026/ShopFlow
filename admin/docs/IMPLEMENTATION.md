@@ -106,8 +106,8 @@ The main goal; depends on most of phases 1-3.
 - [x] `order_notes` (internal staff notes: model, migration, factory, seeder, Filament resource (+ pages), inline relation manager on Order, tests)
 - [~] `order_logs`, `order_call_logs` — NOT IMPLEMENTED (not needed for current scope)
 - [x] Receipts (payment receipts: model, migration, factory, seeder, `ReceiptTypeEnum`, polymorphic image, Filament resource (+ pages), inline relation manager on Order, tests. `card_id` kept nullable without FK since cards are not built)
-- [ ] Transactions
-- [ ] Gateways
+- [x] Transactions (online gateway payments: model, migration, `TransactionPortEnum` (Mellat/Parsian/Zarinpal), `TransactionStatusEnum`, factory, seeder, Filament resource (+ pages), inline relation manager on Order, tests. `accounting_id` kept nullable without FK since accounting is not built)
+- [x] Gateways (gateway config: model, migration, `GatewayForEnum`, factory, seeder, polymorphic image, encrypted password, Filament resource (+ pages), tests)
 
 ## Phase 5 - Support, warranty & accounting
 

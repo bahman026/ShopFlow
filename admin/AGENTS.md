@@ -452,6 +452,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - If a model name clashes with a Filament concept (e.g. `Page`), alias the import in the resource file: `use App\Models\Page as PageModel`. This prevents naming ambiguity without renaming the model.
 - Conditionally required fields: pair `->hidden()` and `->required()` with the same closure so the field is only required when visible. Example: `->required(fn (Get $get): bool => $get('status') === SomeEnum::CASE->value)->hidden(fn (Get $get): bool => $get('status') !== SomeEnum::CASE->value)`.
 - Auto-generated slug fields use `->disabled()->dehydrated()` with `->unique(Model::class, 'slug', ignoreRecord: true)` to prevent duplicates while keeping the field read-only in the form.
+- Secret fields (e.g. gateway `password`): cast `'password' => 'encrypted'` and add it to the model's `$hidden`. In the form use `->password()->revealable()->dehydrated(fn (?string $state): bool => filled($state))` so an empty input on edit keeps the stored value instead of wiping it. See `GatewayResource`.
 
 ## Localisation (fa / en)
 

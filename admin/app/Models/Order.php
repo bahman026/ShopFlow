@@ -59,6 +59,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Collection<OrderNote> $orderNotes
  * @property Collection<OrderShipping> $orderShippings
  * @property Collection<Receipt> $receipts
+ * @property Collection<Transaction> $transactions
  */
 class Order extends Model
 {
@@ -161,5 +162,10 @@ class Order extends Model
     public function receipts(): HasMany
     {
         return $this->hasMany(Receipt::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
     }
 }
