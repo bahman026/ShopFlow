@@ -130,11 +130,14 @@ This table stores cards.
 
 # Carts
 
- Specifies the shopping cart of users. Each user can have two shopping carts: current and future. In the future cart, users place products they plan to buy later.
+ Specifies the shopping cart of users. Each row is one cart line: a single variety with a quantity, belonging to either a logged-in user or a guest session.
 
-* `is_future` is a boolean indicating if the cart is current (`false`) or future (`true`).  
-* `user_id` specifies the user associated with the purchase.  
-* `session_id` specifies the session associated with the purchase. This column is for users who have not logged in and contains their session. If a user logs in after selecting products, all items with this session move to the `user_id` column. Therefore, `session_id` and `user_id` cannot both have values simultaneously. This column contains the current user session (not logged in).
+* `user_id` specifies the user who owns the cart line. Nullable foreign key to `users`; cascades on user delete.  
+* `session_id` specifies the session for users who have not logged in. If a user logs in after selecting products, all items with this session move to the `user_id` column. Therefore, `session_id` and `user_id` cannot both have values simultaneously.  
+* `variety_id` specifies the variety placed in the cart. Foreign key to `varieties`; cascades on variety delete.  
+* `count` specifies the quantity of the variety, default `1`.
+
+Inventory note: a cart never changes `varieties.inventory`. Stock is decremented only on successful payment. See `ORDER.md`.
 
 # Categories
 

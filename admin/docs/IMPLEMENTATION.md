@@ -36,10 +36,13 @@ Catalog layer and platform basics.
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
 
 Cross-cutting improvements landed:
-- Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address.
+- Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address / Logistics.
 - `CACHE.md` added to track identified-but-not-implemented cache keys.
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
-- Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`).
+- Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`, `ORDER.md`).
+- **Inventory rule** (`ORDER.md`): stock is decremented only on successful payment (Strategy A); carts never change `varieties.inventory`.
+- **Localisation (fa / en)**: `SetLocale` middleware + `/locale/{locale}` route + user-menu switcher. All resources (Brand, Category, Product, Variety, City, Province, Coupon, Discount, ShippingLine, ShippingMethod, ShippingCity, Ancestor, AttributeGroup, AttributeGroupCategory, Attribute, Slider, Slide, Banner, Menu, MenuItem, Page, FAQ, Review, Wishlist, User) have `lang/en` + `lang/fa` files, `trans()`-based labels on all form fields and table columns, and translated enum `label()` methods. List-page subheadings are set via `mount()`. Filament vendor translations published for built-in UI strings.
+- **Persian font**: `A Iranian Sans` loaded from `public/fonts/AIranianSans.ttf`; applied globally when locale is `fa` via `public/css/persian-font.css` and a `renderHook` in `AdminPanelProvider`.
 - **Locale switching** (`en` / `fa`): `SetLocale` middleware reads the locale from session and calls `App::setLocale()`. A `/locale/{locale}` route stores the choice. Two user-menu items (English / فارسی) in `AdminPanelProvider` let admins switch. All Filament sub-package translations (`filament`, `filament-forms`, `filament-tables`, `filament-actions`, `filament-notifications`) are published to `lang/vendor/`.
 
 ## Phase 0 - Finish current branch (`implement_variety`)
@@ -95,7 +98,7 @@ Depend mostly on Images only.
 
 The main goal; depends on most of phases 1-3.
 
-- [ ] Carts
+- [~] Carts (migration, model, factory, seeder, tests; no Filament resource by design. Each row is one line item: variety + count, per user or guest session. Inventory rule in `ORDER.md`)
 - [ ] Orders
 - [ ] `order_varieties`
 - [ ] Sub Orders + `sub_order_logs`
