@@ -2,13 +2,45 @@
 
 return [
 
-    'column_toggle' => [
+    'column_manager' => [
 
-        'heading' => 'Kolumnit',
+        'heading' => 'Sarakkeet',
+
+        'actions' => [
+
+            'apply' => [
+                'label' => 'Aseta sarakkeet',
+            ],
+
+            'reset' => [
+                'label' => 'Palauta',
+            ],
+
+        ],
 
     ],
 
     'columns' => [
+
+        'actions' => [
+            'label' => 'Toiminta|Toiminnat',
+        ],
+
+        'select' => [
+
+            'loading_message' => 'Ladataan...',
+
+            'no_options_message' => 'Ei vaihtoehtoja saatavilla.',
+
+            'no_search_results_message' => 'Ei hakuasi vastaavia vaihtoehtoja.',
+
+            'placeholder' => 'Valitse vaihtoehto',
+
+            'searching_message' => 'Haetaan...',
+
+            'search_prompt' => 'Aloita kirjoittaminen hakeaksesi...',
+
+        ],
 
         'text' => [
 
@@ -38,9 +70,9 @@ return [
         ],
 
         'search' => [
-            'label' => 'Etsi',
-            'placeholder' => 'Etsi',
-            'indicator' => 'Etsi',
+            'label' => 'Haku',
+            'placeholder' => 'Hae',
+            'indicator' => 'Haku',
         ],
 
     ],
@@ -95,8 +127,8 @@ return [
             'label' => 'Avaa toiminnot',
         ],
 
-        'toggle_columns' => [
-            'label' => 'Näytä kolumnit',
+        'column_manager' => [
+            'label' => 'Näytä sarakkeet',
         ],
 
     ],
@@ -114,7 +146,7 @@ return [
         'actions' => [
 
             'apply' => [
-                'label' => 'Käytä suodattimet',
+                'label' => 'Aseta suodattimet',
             ],
 
             'remove' => [
@@ -122,12 +154,12 @@ return [
             ],
 
             'remove_all' => [
-                'label' => 'Poista suodattimet',
-                'tooltip' => 'Poista suodattimet',
+                'label' => 'Tyhjennä suodattimet',
+                'tooltip' => 'Tyhjennä suodattimet',
             ],
 
             'reset' => [
-                'label' => 'Tyhjennä suodattimet',
+                'label' => 'Palauta',
             ],
 
         ],
@@ -141,7 +173,13 @@ return [
         ],
 
         'select' => [
+
             'placeholder' => 'Kaikki',
+
+            'relationship' => [
+                'empty_option_label' => 'Ei yhtään',
+            ],
+
         ],
 
         'trashed' => [
@@ -164,12 +202,11 @@ return [
 
             'group' => [
                 'label' => 'Ryhmittele',
-                'placeholder' => 'Ryhmittele',
             ],
 
             'direction' => [
 
-                'label' => 'Ryhmittelyn suunta',
+                'label' => 'Ryhmitys',
 
                 'options' => [
                     'asc' => 'Nousevasti',
@@ -195,7 +232,7 @@ return [
             ],
 
             'deselect_all' => [
-                'label' => 'Poista valinta kaikista',
+                'label' => 'Poista valinnat',
             ],
 
         ],
@@ -212,7 +249,7 @@ return [
 
             'direction' => [
 
-                'label' => 'Järjestyksen suunta',
+                'label' => 'Järjestys',
 
                 'options' => [
                     'asc' => 'Nousevasti',
@@ -224,5 +261,7 @@ return [
         ],
 
     ],
+
+    'default_model_label' => 'tietue',
 
 ];

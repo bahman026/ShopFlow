@@ -2,13 +2,45 @@
 
 return [
 
-    'column_toggle' => [
+    'column_manager' => [
 
         'heading' => 'Sloupce',
+
+        'actions' => [
+
+            'apply' => [
+                'label' => 'Použít sloupce',
+            ],
+
+            'reset' => [
+                'label' => 'Resetovat sloupce',
+            ],
+
+        ],
 
     ],
 
     'columns' => [
+
+        'actions' => [
+            'label' => 'Akce|Akce',
+        ],
+
+        'select' => [
+
+            'loading_message' => 'Načítává se...',
+
+            'no_options_message' => 'Nejsou dostupné žádné možnosti.',
+
+            'no_search_results_message' => 'Žádné možnosti neodpovídají vašemu hledání.',
+
+            'placeholder' => 'Vyberte možnost',
+
+            'searching_message' => 'Vyhledává se...',
+
+            'search_prompt' => 'Začněte psát pro vyhledávání...',
+
+        ],
 
         'text' => [
 
@@ -94,7 +126,7 @@ return [
             'label' => 'Otevřít panel akcí',
         ],
 
-        'toggle_columns' => [
+        'column_manager' => [
             'label' => 'Skrýt/zobrazit sloupce',
         ],
 
@@ -140,7 +172,13 @@ return [
         ],
 
         'select' => [
+
             'placeholder' => 'Vše',
+
+            'relationship' => [
+                'empty_option_label' => 'Žádná',
+            ],
+
         ],
 
         'trashed' => [
@@ -163,7 +201,6 @@ return [
 
             'group' => [
                 'label' => 'Seskupit podle',
-                'placeholder' => 'Seskupit podle',
             ],
 
             'direction' => [
@@ -223,5 +260,7 @@ return [
         ],
 
     ],
+
+    'default_model_label' => 'záznam',
 
 ];

@@ -18,10 +18,10 @@ enum CouponStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::CANCELED => 'Canceled',
-            self::USED => 'Used',
-            self::UNDER_REVIEW => 'Under review',
-            self::ACTIVE => 'Active',
+            self::CANCELED => trans('coupon.status_canceled'),
+            self::USED => trans('coupon.status_used'),
+            self::UNDER_REVIEW => trans('coupon.status_under_review'),
+            self::ACTIVE => trans('coupon.status_active'),
         };
     }
 

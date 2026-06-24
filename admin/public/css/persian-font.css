@@ -1,0 +1,26 @@
+@font-face {
+    font-family: 'A Iranian Sans';
+    src: url('/fonts/AIranianSans.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root[dir="rtl"],
+html[lang="fa"],
+[lang="fa"] {
+    --font-family: 'A Iranian Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+[lang="fa"] *,
+[lang="fa"] .fi-body,
+[lang="fa"] .fi-sidebar,
+[lang="fa"] .fi-header,
+[lang="fa"] .fi-topbar,
+[lang="fa"] .fi-btn,
+[lang="fa"] .fi-input,
+[lang="fa"] .fi-table,
+[lang="fa"] .fi-fo-field-wrp,
+[lang="fa"] .fi-badge {
+    font-family: 'A Iranian Sans', ui-sans-serif, system-ui, sans-serif !important;
+}

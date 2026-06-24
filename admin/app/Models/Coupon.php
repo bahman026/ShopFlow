@@ -25,7 +25,6 @@ use Illuminate\Support\Carbon;
  * @property positive-int|null $total_uses
  * @property positive-int|null $user_id
  * @property positive-int|null $user_creator_id
- * @property positive-int|null $seller_creator_id
  * @property CouponStatusEnum $status
  * @property bool $is_percent
  * @property bool $shipping
@@ -52,7 +51,6 @@ class Coupon extends Model
         'total_uses',
         'user_id',
         'user_creator_id',
-        'seller_creator_id',
         'status',
         'is_percent',
         'shipping',
@@ -78,11 +76,6 @@ class Coupon extends Model
     public function userCreator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_creator_id');
-    }
-
-    public function sellerCreator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'seller_creator_id');
     }
 
     public function products(): BelongsToMany

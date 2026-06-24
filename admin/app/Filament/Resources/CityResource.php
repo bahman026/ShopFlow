@@ -22,18 +22,33 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Address';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('city.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('city.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('city.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Textarea::make('name')
+                    ->label(trans('city.name'))
                     ->required()
                     ->columnSpanFull(),
                 Select::make('province_id')
+                    ->label(trans('city.province_id'))
                     ->relationship('province', 'name')
                     ->required(),
             ]);
@@ -44,14 +59,18 @@ class CityResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(trans('city.name'))
                     ->sortable(),
                 TextColumn::make('province.name')
+                    ->label(trans('city.province'))
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('city.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('city.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

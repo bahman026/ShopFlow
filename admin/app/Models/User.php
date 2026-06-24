@@ -91,4 +91,19 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return $this->hasMany(Address::class);
     }
+
+    public function carts(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function userConfigs(): HasMany
+    {
+        return $this->hasMany(UserConfig::class);
+    }
 }

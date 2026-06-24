@@ -23,13 +23,20 @@ class AddressFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'user_id' => User::query()->inRandomOrder()->first()->id,
+            'user_id' => User::factory(),
             'phone' => $this->faker->phoneNumber(),
             'postal_code' => $this->faker->postcode(),
             'address' => $this->faker->address(),
             'description' => $this->faker->text(),
-            'city_id' => City::factory()->create()->id,
-            'prime' => $this->faker->boolean(),
+            'city_id' => City::factory(),
+            'prime' => false,
         ];
+    }
+
+    public function prime(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'prime' => true,
+        ]);
     }
 }

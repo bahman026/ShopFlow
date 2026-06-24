@@ -17,9 +17,9 @@ enum SliderStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'Deleted',
-            self::PUBLISHED => 'Published',
-            self::DRAFT => 'Draft',
+            self::DELETED => trans('slider.status_deleted'),
+            self::PUBLISHED => trans('slider.status_published'),
+            self::DRAFT => trans('slider.status_draft'),
         };
     }
 

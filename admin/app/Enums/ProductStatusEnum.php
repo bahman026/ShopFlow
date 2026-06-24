@@ -17,9 +17,9 @@ enum ProductStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'Deleted',
-            self::PUBLISHED => 'Published',
-            self::DRAFT => 'Draft',
+            self::DELETED => trans('product.status_deleted'),
+            self::PUBLISHED => trans('product.status_published'),
+            self::DRAFT => trans('product.status_draft'),
         };
     }
 

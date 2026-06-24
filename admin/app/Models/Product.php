@@ -42,12 +42,14 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property positive-int|null $height
  * @property ProductStatusEnum $status
  * @property positive-int $seen
- * @property Image $featuredImage
+ * @property Image|null $featuredImage
  * @property Collection<Image> $images
  * @property Collection<Variety> $varieties
- * @property AttributeGroup $attributeGroup
- * @property Category $category
- * @property Brand $brand
+ * @property Collection<Review> $reviews
+ * @property Collection<Coupon> $coupons
+ * @property AttributeGroup|null $attributeGroup
+ * @property Category|null $category
+ * @property Brand|null $brand
  */
 class Product extends Model
 {
@@ -162,5 +164,15 @@ class Product extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function coupons(): BelongsToMany
+    {
+        return $this->belongsToMany(Coupon::class, 'coupon_product')->withTimestamps();
     }
 }

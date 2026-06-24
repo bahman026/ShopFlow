@@ -22,29 +22,46 @@ class AttributeGroupResource extends Resource
 {
     protected static ?string $model = AttributeGroup::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
-
     protected static ?int $navigationSort = 2;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('attribute_group.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('attribute_group.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('attribute_group.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('ancestor_id')
+                    ->label(trans('attribute_group.ancestor_id'))
                     ->relationship('ancestor', 'name')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Groups attribute groups under a common ancestor (e.g. "Physical", "Technical"). Create ancestors first.')
+                    ->hintIconTooltip(trans('attribute_group.ancestor_id_hint'))
                     ->required(),
                 TextInput::make('name')
+                    ->label(trans('attribute_group.name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('label')
+                    ->label(trans('attribute_group.label_field'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The label shown to the customer on the frontend (e.g. "Choose a color"). If empty, the name is used.')
+                    ->hintIconTooltip(trans('attribute_group.label_field_hint'))
                     ->maxLength(255),
                 TextInput::make('order')
+                    ->label(trans('attribute_group.order'))
                     ->numeric(),
             ]);
     }
@@ -54,20 +71,26 @@ class AttributeGroupResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('ancestor.name')
+                    ->label(trans('attribute_group.ancestor'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('name')
+                    ->label(trans('attribute_group.name'))
                     ->searchable(),
                 TextColumn::make('label')
+                    ->label(trans('attribute_group.label_field'))
                     ->searchable(),
                 TextColumn::make('order')
+                    ->label(trans('attribute_group.order'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('attribute_group.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('attribute_group.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

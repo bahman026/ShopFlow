@@ -17,9 +17,9 @@ enum CouponForEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::EVERYONE => 'Everyone',
-            self::USERS => 'Users',
-            self::PARTNERS => 'Partners',
+            self::EVERYONE => trans('coupon.for_everyone'),
+            self::USERS => trans('coupon.for_users'),
+            self::PARTNERS => trans('coupon.for_partners'),
         };
     }
 

@@ -29,15 +29,29 @@ class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Catalog';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('brand.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('brand.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('brand.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('heading')
+                    ->label(trans('brand.heading'))
                     ->required()
                     ->live(onBlur: true)
                     ->maxLength(255)
@@ -47,6 +61,7 @@ class BrandResource extends Resource
                         }
                     }),
                 TextInput::make('slug')
+                    ->label(trans('brand.slug'))
                     ->disabled()
                     ->dehydrated()
                     ->required()
@@ -54,19 +69,26 @@ class BrandResource extends Resource
                     ->unique(Brand::class, 'slug', ignoreRecord: true),
 
                 TinyEditor::make('content')
+                    ->label(trans('brand.content'))
                     ->columnSpanFull(),
                 TextInput::make('title')
+                    ->label(trans('brand.title'))
                     ->maxLength(255),
                 TextInput::make('description')
+                    ->label(trans('brand.description'))
                     ->maxLength(255),
                 Toggle::make('no_index')
+                    ->label(trans('brand.no_index'))
                     ->required(),
                 TextInput::make('canonical')
+                    ->label(trans('brand.canonical'))
                     ->maxLength(255),
                 Fieldset::make('image')
+                    ->label(trans('brand.image'))
                     ->relationship('image')
                     ->schema([
                         FileUpload::make('path')
+                            ->label(trans('brand.path'))
                             ->image()
                             ->nullable()
                             ->columns(1)
@@ -81,6 +103,7 @@ class BrandResource extends Resource
                     })
                     ->columnSpanFull(),
                 Select::make('status')
+                    ->label(trans('brand.status'))
                     ->required()
                     ->options(BrandStatusEnum::options())
                     ->default(BrandStatusEnum::ACTIVE->value),
@@ -92,29 +115,38 @@ class BrandResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('heading')
+                    ->label(trans('brand.heading'))
                     ->limit(30)
                     ->wrap(),
                 TextColumn::make('slug')
+                    ->label(trans('brand.slug'))
                     ->limit(30)
                     ->wrap(),
                 TextColumn::make('title')
+                    ->label(trans('brand.title'))
                     ->limit(30)
                     ->wrap(),
                 TextColumn::make('description')
+                    ->label(trans('brand.description'))
                     ->limit(30)
                     ->wrap(),
                 IconColumn::make('no_index')
+                    ->label(trans('brand.no_index'))
                     ->boolean(),
-                ImageColumn::make('image.path'),
+                ImageColumn::make('image.path')
+                    ->label(trans('brand.image')),
                 TextColumn::make('status')
+                    ->label(trans('brand.status'))
                     ->getStateUsing(fn (Brand $record) => $record->status->label())
                     ->color(fn (Brand $record): string => $record->status->color())
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(trans('brand.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('brand.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

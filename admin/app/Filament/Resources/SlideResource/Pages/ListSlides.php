@@ -12,7 +12,13 @@ class ListSlides extends ListRecords
 {
     protected static string $resource = SlideResource::class;
 
-    protected ?string $subheading = 'Slides are the individual items inside a slider. Each slide belongs to one slider and has an image, an optional heading, label, and a URL to link to when clicked.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('slide.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

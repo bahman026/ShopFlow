@@ -12,7 +12,13 @@ class ListMenus extends ListRecords
 {
     protected static string $resource = MenuResource::class;
 
-    protected ?string $subheading = 'Menus group navigation links shown in the header, footer, or any other frontend placement. Create a menu first, then add items to it via the Menu Items section.';
+    protected ?string $subheading = null;
+
+    public function mount(): void
+    {
+        parent::mount();
+        $this->subheading = trans('menu.subheading');
+    }
 
     protected function getHeaderActions(): array
     {

@@ -23,32 +23,47 @@ class MenuResource extends Resource
 {
     protected static ?string $model = Menu::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
-
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-3';
 
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('menu.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('menu.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('menu.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(trans('menu.name'))
                     ->required()
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Human-readable label for this menu, e.g. "Header" or "Footer Column 1". Not shown on the frontend.'),
+                    ->hintIconTooltip(trans('menu.name_hint')),
                 TextInput::make('position')
+                    ->label(trans('menu.position'))
                     ->required()
                     ->maxLength(255)
                     ->unique(Menu::class, 'position', ignoreRecord: true)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The key used by the frontend to fetch this menu, e.g. "header" or "footer-column-1". Must be unique.'),
+                    ->hintIconTooltip(trans('menu.position_hint')),
                 Toggle::make('status')
-                    ->label('Active')
+                    ->label(trans('menu.status'))
                     ->default(true)
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('When off, this menu is hidden on the frontend regardless of its items.'),
+                    ->hintIconTooltip(trans('menu.status_hint')),
             ]);
     }
 
@@ -57,24 +72,28 @@ class MenuResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(trans('menu.name'))
                     ->limit(30)
                     ->wrap()
                     ->searchable(),
                 TextColumn::make('position')
+                    ->label(trans('menu.position'))
                     ->searchable(),
                 TextColumn::make('menu_items_count')
-                    ->label('Items')
+                    ->label(trans('menu.items_count'))
                     ->counts('menuItems')
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('status')
-                    ->label('Active')
+                    ->label(trans('menu.status'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(trans('menu.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('menu.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

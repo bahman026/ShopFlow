@@ -20,6 +20,23 @@ class TestSeeder extends Seeder
             BannerSeeder::class,
             SliderSeeder::class,
             MenuSeeder::class,
+            PageSeeder::class,
+            FaqSeeder::class,
+            ReviewSeeder::class,
+            WishlistSeeder::class,
+            CartSeeder::class,
+            OrderSeeder::class,
+            OrderVarietySeeder::class,
+            OrderShippingSeeder::class,
+            OrderNoteSeeder::class,
+            ReceiptSeeder::class,
+            TransactionSeeder::class,
+            GatewaySeeder::class,
+            UserConfigSeeder::class,
+            AddressSeeder::class,
+            ShippingLineSeeder::class,
+            ShippingMethodSeeder::class,
+            ShippingCitySeeder::class,
         ]);
     }
 }

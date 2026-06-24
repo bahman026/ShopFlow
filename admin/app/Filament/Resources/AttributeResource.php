@@ -22,29 +22,45 @@ class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Attribute';
-
     protected static ?int $navigationSort = 4;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans('attribute.navigation_group');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return trans('attribute.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return trans('attribute.plural_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('attribute_group_id')
+                    ->label(trans('attribute.attribute_group_id'))
                     ->relationship('attributeGroup', 'name')
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The group this attribute belongs to (e.g. "Color", "Size"). Create attribute groups first.')
+                    ->hintIconTooltip(trans('attribute.attribute_group_id_hint'))
                     ->required(),
                 TextInput::make('value')
+                    ->label(trans('attribute.value'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('The display value of this attribute (e.g. "Red", "XL"). Shown to customers and used as the variety label.')
+                    ->hintIconTooltip(trans('attribute.value_hint'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('color')
+                    ->label(trans('attribute.color'))
                     ->hintIcon('heroicon-o-information-circle')
-                    ->hintIconTooltip('Optional hex or color name (e.g. #ff0000). Auto-copied to the variety\'s color when this attribute is selected.')
+                    ->hintIconTooltip(trans('attribute.color_hint'))
                     ->nullable()
                     ->maxLength(31),
             ]);
@@ -55,15 +71,20 @@ class AttributeResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('attributeGroup.name')
+                    ->label(trans('attribute.attribute_group'))
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('value'),
-                TextColumn::make('color'),
+                TextColumn::make('value')
+                    ->label(trans('attribute.value')),
+                TextColumn::make('color')
+                    ->label(trans('attribute.color')),
                 TextColumn::make('created_at')
+                    ->label(trans('attribute.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(trans('attribute.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
