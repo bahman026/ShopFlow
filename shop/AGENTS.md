@@ -198,6 +198,7 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
 - Props are explicitly typed and validated; emit named events instead of mutating props. Keep business logic in the controller/server, components stay presentational.
 - Extract repeated logic into composables under `resources/js/composables/` (e.g. `useCart.ts`).
 - Style with Tailwind utility classes, RTL-first (see fonts/RTL section). No inline styles, no copy-pasted markup; reuse components.
+- **Brand color is `#ff8615`.** It is registered in `resources/css/app.css` as `--color-brand`, so use the Tailwind `brand` utilities (`bg-brand`, `text-brand`, `border-brand`, ...) for primary actions and accents. Do not hardcode the hex in components.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
 
 ## Language, RTL & fonts

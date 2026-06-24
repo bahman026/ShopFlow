@@ -14,4 +14,6 @@
 @theme {
     --font-sans: 'A Iranian Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-brand: #ff8615;
 }
