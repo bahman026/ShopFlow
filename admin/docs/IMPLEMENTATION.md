@@ -115,7 +115,7 @@ The main goal; depends on most of phases 1-3.
 - [ ] Guarantees + `guarantee_items` + `guarantee_item_images` + `guarantee_logs` + `guarantee_item_logs`
 - [ ] Accounting Sources
 - [ ] Persons
-- [ ] Settings
+- [x] Settings (global site key/value settings: model, migration, factory, idempotent reference seeder (footer/contact keys) in `DatabaseSeeder`, Filament resource (+ pages), fa/en lang, tests. Unique on `key`; `autoload` defaults true)
 - [ ] Cards / Saved Cards
 
 ## Phase 6 - Users extended & misc
