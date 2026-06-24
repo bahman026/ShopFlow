@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'seo' => [
                 'siteName' => (string) config('app.name'),
-                'url' => $request->url(),
+                'url' => $this->canonicalUrl($request),
                 'locale' => 'fa_IR',
             ],
             'footer' => [
@@ -65,6 +65,19 @@ class HandleInertiaRequests extends Middleware
                 'copyright' => $this->value($settings, 'footer_copyright'),
             ],
         ];
+    }
+
+    /**
+     * Build the canonical/og URL from the configured public origin (APP_URL)
+     * rather than the raw request, so it stays correct behind TLS-terminating
+     * proxies regardless of the internal scheme/host.
+     */
+    private function canonicalUrl(Request $request): string
+    {
+        $base = rtrim((string) config('app.url'), '/');
+        $path = $request->path();
+
+        return $path === '/' ? $base : $base.'/'.$path;
     }
 
     /**

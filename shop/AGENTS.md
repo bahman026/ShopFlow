@@ -278,8 +278,18 @@ When adding a new feature, build files in this order, matching existing files:
 ## Tests
 
 - This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`.
-- Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `RefreshDatabase`.
-- Most tests should be feature tests. Use factories (and their custom states) to build data. Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
+- Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `DatabaseTransactions` (each test runs in a transaction that is rolled back).
+- **Shared database, not sqlite.** The shop is a read-only consumer of the admin-owned schema, so tests run against a real Postgres test database (`shop_flow_test`) whose schema is built by **admin's** migrations — never the shop's. The shop must not own or migrate those tables. Do not switch tests back to sqlite/`RefreshDatabase`; that hides schema drift from production.
+- **One-time local setup** (run from the admin container, pointing at the test DB):
+
+```bash
+createdb -U shop_flow shop_flow_test   # or CREATE DATABASE shop_flow_test;
+cd admin
+DB_DATABASE=shop_flow_test php artisan migrate --force
+DB_DATABASE=shop_flow_test php artisan db:seed --class="Database\Seeders\SettingSeeder" --force
+```
+
+- Most tests should be feature tests. Build test rows with factories inside the test (they roll back via the transaction). Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
 - Run the minimum tests needed with a filter before finalizing, then `composer test-dev` for the full suite.
 
 ## Business constraints

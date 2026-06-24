@@ -53,6 +53,33 @@ jobs:
   create-deployment-artifact-shop:
     name: Create Deployment Artifact (Shop)
     runs-on: ubuntu-latest
+
+    # The shop reads the admin-owned database, so tests need that schema.
+    # We stand up Postgres, build the schema with admin's migrations, then run
+    # the shop test suite against it.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: shop_flow_test
+          POSTGRES_USER: shop_flow
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shop_flow"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: shop_flow_test
+      DB_USERNAME: shop_flow
+      DB_PASSWORD: password
+
     steps:
       - uses: actions/checkout@v2
 
@@ -61,6 +88,16 @@ jobs:
         with:
           php-version: 8.5
           tools: composer
+          extensions: pdo_pgsql, pgsql
+
+      - name: Build shared schema (admin migrations)
+        working-directory: ./admin
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class="Database\\Seeders\\SettingSeeder" --force
 
       - name: Install PHP Dependencies
         working-directory: ./shop
