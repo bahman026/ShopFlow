@@ -41,7 +41,28 @@ class Address extends Model
         'description',
         'city_id',
         'user_id',
+        'prime',
     ];
+
+    protected $casts = [
+        'prime' => 'boolean',
+    ];
+
+    protected static function booted(): void
+    {
+        // Addresses are immutable history (orders reference them), so we never
+        // mutate or delete them. We only keep a single primary per user: when
+        // an address is saved as primary, demote the user's other addresses.
+        static::saved(function (Address $address): void {
+            if ($address->prime) {
+                static::query()
+                    ->where('user_id', $address->user_id)
+                    ->whereKeyNot($address->getKey())
+                    ->where('prime', true)
+                    ->update(['prime' => false]);
+            }
+        });
+    }
 
     public function city(): BelongsTo
     {

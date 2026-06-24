@@ -31,7 +31,7 @@ Catalog layer and platform basics.
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
 - [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
 - [x] Wishlists (`user_id` + `product_id` pivot; cascades on user/product delete; list + delete resource)
-- [~] Addresses (model only, no resource yet)
+- [x] Addresses (immutable history: model, factory, seeder, Filament resource (+ pages), tests. Editing creates a NEW address instead of mutating; the new address inherits the edited one's primary status; records are never deleted, so orders keep an accurate address history. One primary per user enforced via a model `saved` hook)
 
 Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed --class=TestSeeder`); `DatabaseSeeder` holds only necessary data.
 

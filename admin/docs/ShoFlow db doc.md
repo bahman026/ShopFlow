@@ -23,6 +23,13 @@ Used to store user addresses.
 * `latitude` and `longitude` specify the geographical coordinates.  
 * 
 
+Implementation notes:
+
+* Addresses are immutable history. Editing in the admin panel never updates a row: it creates a NEW address. The new address inherits the edited one's `prime` status (if the edited address was primary the new one becomes primary and the old is demoted; otherwise the new one is created non-primary). The old record is kept so orders that reference an address keep an accurate history.
+* No delete action is exposed (table, edit page); records are never removed. `deleted_at` (soft delete) stays on the table for future use but is not used by the panel.
+* One primary per user is enforced by a model `saved` hook that demotes the user's other `prime` addresses.
+* `latitude` / `longitude` from the doc are not implemented as columns yet (no current need).
+
 
   # Ancestors
 
