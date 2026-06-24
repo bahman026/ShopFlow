@@ -1,4 +1,8 @@
 {
+    "agents": [
+        "junie",
+        "cursor"
+    ],
     "cloud": false,
     "guidelines": true,
     "mcp": true,

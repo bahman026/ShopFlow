@@ -166,10 +166,16 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Filament admin panel lives in `admin/`. Both apps share the same PostgreSQL database and schema. `docs/ShoFlow db doc.md` is the source of truth for tables and relationships. All PHP files use `declare(strict_types=1);` and are formatted by Pint.
 
+## Read the docs first (before doing anything)
+
+- **Before starting any task, read the files in `docs/`** — at minimum `ShoFlow db doc.md` (schema, source of truth), `IMPLEMENTATION.md` (what is done / next), `ORDER.md` (orders & inventory rules), and `CACHE.md` (cache keys). Do not write code before reading the docs relevant to the task.
+
 ## Running commands and tests
 
 - The app runs in Docker. Execute commands inside the container: `docker exec -it -u www-data shop_flow_shop_app bash`.
-- Run tests with `php artisan test --compact` inside the container, and `vendor/bin/pint` to fix formatting, before finalizing.
+- Before finalizing, run the full check suite: `composer test-dev`. It runs, in order: Pest, Pint (`--bail`), Pest type-coverage (`--min=100`), and PHPStan (level 5). All four must pass.
+- For a quick single run, use `vendor/bin/pest --filter=testName` and `vendor/bin/pint` to fix formatting.
+- 100% type coverage is required: add return types, parameter types, and property/PHPDoc types to every new PHP file.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
 - Always ask before committing. NEVER commit without explicit user approval.
 
@@ -178,6 +184,26 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 - Laravel + Inertia (server-driven SPA). Controllers return `Inertia::render(...)`; page components live under `resources/js/Pages`.
 - **The database schema is owned by the admin app.** Do not recreate tables that already exist in `admin/`; add Eloquent models here that map to the shared tables. Coordinate any schema change in the admin app's migrations, then update `docs/ShoFlow db doc.md`.
 - This is single-vendor commerce; the storefront reads catalog/pricing data and writes carts, orders, addresses, receipts/transactions per the documented rules.
+
+## Language, RTL & fonts
+
+- **The storefront is Persian only.** There is no language switcher and no English UI. Set `<html lang="fa" dir="rtl">` in the root template, and write all user-facing text in Persian.
+- Build RTL-first: use Tailwind logical utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`) instead of left/right so layout flows right to left.
+- **Font: `A Iranian Sans` (IranSans).** Reuse the same font as the admin app. The file lives in admin at `public/fonts/AIranianSans.ttf`; copy it into this app's `public/fonts/AIranianSans.ttf` and load it with an `@font-face` (family name `A Iranian Sans`), then set it as the default `font-family` on `body`.
+- Show Persian digits and Jalali (Shamsi) dates. Format on the server so SSR output is already correct.
+
+## SEO (very high priority)
+
+SEO is critical for this storefront. Treat it as a first-class requirement on every page, not an afterthought.
+
+- Render pages with SSR so the full Persian HTML is present in the initial response and indexable. Never rely on client-only rendering for content that must rank.
+- Every page sets a unique, descriptive `<title>` and meta description. Use the `<Head>` component from Inertia so they appear in the SSR output.
+- Add Open Graph and Twitter card tags, and a canonical URL on every page.
+- Use clean, human-readable Persian slugs in URLs; keep them stable (do not change a slug once published).
+- Use one `<h1>` per page and a correct heading hierarchy; use semantic HTML (`<main>`, `<nav>`, `<article>`).
+- Add JSON-LD structured data: `Product` (with `Offer`/price/availability) on product pages, `BreadcrumbList` on listings, and `Organization`/`WebSite` on the home page.
+- Serve a `sitemap.xml` and `robots.txt`; return correct HTTP status codes (200 / 404 / 301) so crawlers see the right signals.
+- Set `lang="fa"` and provide descriptive `alt` text (in Persian) on images.
 
 ## Implementation order
 
@@ -232,9 +258,10 @@ When adding a new feature, build files in this order, matching existing files:
 
 ## Tests
 
-- Follow the configured test framework (see the boost rules above). Most tests should be feature tests.
-- Use factories (and their custom states) to build data. Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
-- Run the minimum tests needed with a filter before finalizing.
+- This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`.
+- Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `RefreshDatabase`.
+- Most tests should be feature tests. Use factories (and their custom states) to build data. Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
+- Run the minimum tests needed with a filter before finalizing, then `composer test-dev` for the full suite.
 
 ## Business constraints
 
