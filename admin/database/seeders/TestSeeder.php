@@ -24,6 +24,7 @@ class TestSeeder extends Seeder
             FaqSeeder::class,
             ReviewSeeder::class,
             WishlistSeeder::class,
+            CartSeeder::class,
             ShippingLineSeeder::class,
             ShippingMethodSeeder::class,
             ShippingCitySeeder::class,

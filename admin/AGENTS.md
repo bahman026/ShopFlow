@@ -530,6 +530,7 @@ When adding a new entity, build the files in this order, matching the existing f
   - `IMPLEMENTATION.md` — what is done, what is next, and the priority order.
   - `ShoFlow db doc.md` — the full schema reference; treat it as the source of truth for table columns and relationships.
   - `CACHE.md` — cache keys that have been identified but not yet implemented.
+  - `ORDER.md` — the orders/inventory rules: stock is decremented only on successful payment (Strategy A), carts never change inventory.
 - When an entity is finished or the plan changes, update `IMPLEMENTATION.md`.
 - When adding a model whose data is likely to be cached (products, categories, banners, menus, etc.), check `CACHE.md` and add or update the relevant rows.
 - Keep this "ShopFlow Admin Conventions" section updated whenever a new reusable pattern is introduced.
