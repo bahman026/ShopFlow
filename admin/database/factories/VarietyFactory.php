@@ -42,6 +42,21 @@ class VarietyFactory extends Factory
         ]);
     }
 
+    public function published(): static
+    {
+        return $this->state([
+            'status' => VarietyStatusEnum::PUBLISHED,
+        ]);
+    }
+
+    public function inStock(): static
+    {
+        return $this->state([
+            'has_stock' => true,
+            'inventory' => fake()->numberBetween(5, 100),
+        ]);
+    }
+
     public function withImage(): static
     {
         return $this->afterCreating(function (Variety $variety): void {

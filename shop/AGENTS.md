@@ -156,9 +156,10 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Running Tests
 
 - Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+- Use Pest directly, not `php artisan test`.
+- To run all tests: `vendor/bin/pest`.
+- To run all tests in a file: `vendor/bin/pest tests/Feature/ExampleTest.php`.
+- To filter on a particular test name: `vendor/bin/pest --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
 
@@ -277,7 +278,7 @@ When adding a new feature, build files in this order, matching existing files:
 
 ## Tests
 
-- This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`.
+- This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`. Run them with `vendor/bin/pest`, not `php artisan test`.
 - Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `DatabaseTransactions` (each test runs in a transaction that is rolled back).
 - **Shared database, not sqlite.** The shop is a read-only consumer of the admin-owned schema, so tests run against a real Postgres test database (`shop_flow_test`) whose schema is built by **admin's** migrations — never the shop's. The shop must not own or migrate those tables. Do not switch tests back to sqlite/`RefreshDatabase`; that hides schema drift from production.
 - **One-time local setup** (run from the admin container, pointing at the test DB):

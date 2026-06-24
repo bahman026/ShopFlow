@@ -13,6 +13,13 @@ import {
     faCartShopping,
     faBars,
     faXmark,
+    faStar,
+    faShieldHalved,
+    faTruckFast,
+    faRotateLeft,
+    faCheck,
+    faPlus,
+    faMinus,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -38,4 +45,11 @@ export const uiIcons = {
     cart: faCartShopping,
     menu: faBars,
     close: faXmark,
+    star: faStar,
+    shield: faShieldHalved,
+    truck: faTruckFast,
+    returns: faRotateLeft,
+    check: faCheck,
+    plus: faPlus,
+    minus: faMinus,
 };

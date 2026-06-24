@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property string|null $color
  * @property positive-int $price
  * @property positive-int|null $sale_price
- * @property positive-int $inventory
+ * @property int<0, max> $inventory
  * @property bool $has_stock
  * @property VarietyStatusEnum $status
  * @property Product $product
