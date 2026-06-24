@@ -168,7 +168,7 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 
 ## Read the docs first (before doing anything)
 
-- **Before starting any task, read the files in `docs/`** — at minimum `ShoFlow db doc.md` (schema, source of truth), `IMPLEMENTATION.md` (what is done / next), `ORDER.md` (orders & inventory rules), and `CACHE.md` (cache keys). Do not write code before reading the docs relevant to the task.
+- **Before starting any task, read the files in `docs/`** — at minimum `ShoFlow db doc.md` (schema, source of truth), `STOREFRONT_IMPLEMENTATION.md` (the storefront roadmap: what to build and in what order), `ORDER.md` (orders & inventory rules), and `CACHE.md` (cache keys). `IMPLEMENTATION.md` tracks the admin build, not the storefront. Do not write code before reading the docs relevant to the task.
 
 ## Running commands and tests
 
@@ -289,7 +289,8 @@ When adding a new feature, build files in this order, matching existing files:
 
 - **Before starting any task**, read these files (copied under `docs/`):
   - `ShoFlow db doc.md` — the full schema reference; the source of truth for columns and relationships.
-  - `IMPLEMENTATION.md` — what is done and what is next (note: tracks the admin build; keep a storefront roadmap as the shop grows).
+  - `STOREFRONT_IMPLEMENTATION.md` — the storefront roadmap; what to build and in what order. Update it as features land.
+  - `IMPLEMENTATION.md` — the admin build status (reference only; not the storefront plan).
   - `ORDER.md` — orders/inventory rules.
   - `CACHE.md` — identified cache keys.
 - Keep this "ShopFlow Storefront Conventions" section updated whenever a new reusable pattern is introduced.
