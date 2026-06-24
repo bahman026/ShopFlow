@@ -23,10 +23,13 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - [x] `A Iranian Sans` font + brand color `#ff8615`
 - [x] Base `AppLayout` + sample `Home` page
 - [x] Eloquent models mapping shared tables (read-focused): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review` (+ status enums and `HasOptions` trait). Relations to not-yet-created models (`AttributeGroup`, `Coupon`, `Discount`) are deferred to their phases.
-- [ ] Shared UI kit components: `BaseButton`, `PriceTag`, `ProductCard`, `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState`
-- [ ] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
-- [ ] SEO scaffolding: per-page `<Head>` pattern, shared meta defaults, canonical URL, Open Graph, `robots.txt`
-- [ ] Error pages (404 / 500) in Persian, RTL
+- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` done; `PriceTag`, `ProductCard`, `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState` pending
+- [x] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
+- [x] SEO scaffolding: per-page `<Head>` via `AppHead` component, shared meta defaults (Inertia `seo` shared prop), canonical URL, Open Graph + Twitter, `robots.txt`
+- [x] Error pages (404 / 500) in Persian, RTL (self-contained Blade, brand color, IranSans, no Vite/SSR dependency)
+- [x] Shared database connection: shop reads the admin-owned Postgres (`shop_flow_db`); file/sync session/cache/queue so shop owns no tables (`.env.example` stays SQLite for CI/tests)
+- [x] Icon system: FontAwesome (self-hosted via npm) behind the shared `Icon` component, icon-object pattern (SSR-safe). See `AGENTS.md`
+- [x] Global footer wired from `settings`: read-only `Setting` model + Inertia shared `footer` (link columns, contact, socials, about, copyright) rendered by `AppFooter`/`Footer/*` components
 
 ## Phase 1 - Catalog browsing (highest SEO value, build first)
 

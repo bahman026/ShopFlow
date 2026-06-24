@@ -199,6 +199,9 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
 - Extract repeated logic into composables under `resources/js/composables/` (e.g. `useCart.ts`).
 - Style with Tailwind utility classes, RTL-first (see fonts/RTL section). No inline styles, no copy-pasted markup; reuse components.
 - **Brand color is `#ff8615`.** It is registered in `resources/css/app.css` as `--color-brand`, so use the Tailwind `brand` utilities (`bg-brand`, `text-brand`, `border-brand`, ...) for primary actions and accents. Do not hardcode the hex in components.
+- **Icons: FontAwesome only, for a uniform icon set.** Always render icons through the shared `<Icon>` component (`resources/js/Components/Icon.vue`). Never use raw SVGs, emoji, or another icon library, and do not place `<FontAwesomeIcon>` directly in components.
+  - Register every icon as an object in `resources/js/fontawesome.js` (solid from `@fortawesome/free-solid-svg-icons`, brands from `@fortawesome/free-brands-svg-icons`) and pass the imported icon object: `<Icon :icon="..." />`.
+  - Do NOT use string names with `library.add` (e.g. `['fab','instagram']`). Inertia turns FontAwesome's missing-icon `console.error` into an SSR exception, so string lookups break SSR. Passing icon objects is the SSR-safe, tree-shakeable pattern.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
 
 ## Language, RTL & fonts
@@ -275,8 +278,18 @@ When adding a new feature, build files in this order, matching existing files:
 ## Tests
 
 - This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`.
-- Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `RefreshDatabase`.
-- Most tests should be feature tests. Use factories (and their custom states) to build data. Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
+- Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `DatabaseTransactions` (each test runs in a transaction that is rolled back).
+- **Shared database, not sqlite.** The shop is a read-only consumer of the admin-owned schema, so tests run against a real Postgres test database (`shop_flow_test`) whose schema is built by **admin's** migrations — never the shop's. The shop must not own or migrate those tables. Do not switch tests back to sqlite/`RefreshDatabase`; that hides schema drift from production.
+- **One-time local setup** (run from the admin container, pointing at the test DB):
+
+```bash
+createdb -U shop_flow shop_flow_test   # or CREATE DATABASE shop_flow_test;
+cd admin
+DB_DATABASE=shop_flow_test php artisan migrate --force
+DB_DATABASE=shop_flow_test php artisan db:seed --class="Database\Seeders\SettingSeeder" --force
+```
+
+- Most tests should be feature tests. Build test rows with factories inside the test (they roll back via the transaction). Assert with `assertDatabaseHas(...)`, `assertModelMissing(...)`, or `expect($model->refresh())`.
 - Run the minimum tests needed with a filter before finalizing, then `composer test-dev` for the full suite.
 
 ## Business constraints

@@ -8,12 +8,15 @@ declare(strict_types=1);
 |--------------------------------------------------------------------------
 */
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
+// The admin app owns the shared database schema, so the shop never migrates it.
+// Each feature test runs inside a transaction that is rolled back afterwards,
+// against the pre-migrated shared Postgres test database.
 uses(
     TestCase::class,
-    RefreshDatabase::class,
+    DatabaseTransactions::class,
 )->in('Feature');
 
 /*

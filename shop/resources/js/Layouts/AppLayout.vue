@@ -1,12 +1,11 @@
 <script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import AppFooter from '@/Components/Footer/AppFooter.vue';
 
-defineProps({
-    footer: {
-        type: Object,
-        default: () => ({}),
-    },
-});
+const page = usePage();
+
+const footer = computed(() => page.props.footer ?? {});
 </script>
 
 <template>
@@ -25,6 +24,7 @@ defineProps({
         </main>
 
         <AppFooter
+            :about="footer.about ?? ''"
             :columns="footer.columns ?? []"
             :contact="footer.contact ?? {}"
             :socials="footer.socials ?? []"
