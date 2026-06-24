@@ -99,7 +99,7 @@ Depend mostly on Images only.
 The main goal; depends on most of phases 1-3.
 
 - [~] Carts (migration, model, factory, seeder, tests; no Filament resource by design. Each row is one line item: variety + count, per user or guest session. Inventory rule in `ORDER.md`)
-- [ ] Orders
+- [x] Orders (`orders` table only: model, migration, factory, seeder, Filament resource (+ pages), tests. `OrderStatusEnum` + `OrderSrcEnum`; staff/finance refs to not-yet-built tables kept nullable without FK. Inventory rule in `ORDER.md`)
 - [ ] `order_varieties`
 - [ ] Sub Orders + `sub_order_logs`
 - [ ] `order_logs`, `order_shippings`, `order_call_logs`, `order_notes`

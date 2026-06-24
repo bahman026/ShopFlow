@@ -490,6 +490,7 @@ When adding a new entity, build the files in this order, matching the existing f
 - Pivot tables add `$table->unique([...])` on the key pair and `->cascadeOnDelete()` on both FKs (see `coupon_product`).
 - **Pivot table naming**: Laravel derives the name alphabetically from the two model names (singular). e.g. `Attribute` + `Variety` → `attribute_variety`, NOT `variety_attribute`. Always verify with this rule before writing migration or assertions.
 - Default enum columns to a case value: `$table->unsignedTinyInteger('status')->default(ProductStatusEnum::PUBLISHED->value);`.
+- When a column references a table that is not built yet (e.g. `accounting_id`), add it as a plain nullable column with no FK constraint, and add the real FK later when that table exists. See `orders.accounting_id`.
 - Always implement `down()` with `Schema::dropIfExists(...)`.
 
 ## Factories
