@@ -30,6 +30,8 @@ class TestSeeder extends Seeder
             OrderShippingSeeder::class,
             OrderNoteSeeder::class,
             ReceiptSeeder::class,
+            TransactionSeeder::class,
+            GatewaySeeder::class,
             ShippingLineSeeder::class,
             ShippingMethodSeeder::class,
             ShippingCitySeeder::class,

@@ -267,6 +267,15 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 * `result_code`: Stores the bank transaction response code.  
 * `result_message`: Stores the bank transaction response message.
 
+Implementation notes:
+
+* `user_id`, `order_id`: nullable FKs (`nullOnDelete`) so transactions survive user/order deletion.
+* `port`: `TransactionPortEnum` (`MELLAT=10`, `PARSIAN=20`, `ZARINPAL=30`), nullable.
+* `status`: `TransactionStatusEnum` (`PENDING=10` default, `SUCCESS=20`, `FAILED=30`, `CANCELED=40`).
+* `accounting_id`: plain nullable column with no FK; the accounting table is not built yet.
+* `amount` is `decimal(12,2)`; `paid_at` is a nullable datetime.
+* Editable inline on the Order edit page via `TransactionsRelationManager`.
+
 # gateways
 
 * Stores payment gateways.  
@@ -283,6 +292,13 @@ In short: discounts are automatic, per-variety, condition-based price rules. The
 * `coding`  
 * `created_at`  
 * `updated_at`
+
+Implementation notes:
+
+* `for`: `GatewayForEnum` (`EVERYONE=10` default, `USERS=20`, `PARTNERS=30`).
+* `password`: stored with the `encrypted` cast and hidden from serialization.
+* `active`: boolean default `true`; `priority`: unsigned integer default `0`.
+* `image_id` from the doc is implemented as the project-standard polymorphic image (`morphOne` on `images`), not a column. Deleting a gateway deletes its image.
 
 # guarantees
 
