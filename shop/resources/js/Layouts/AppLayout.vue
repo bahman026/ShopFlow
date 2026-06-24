@@ -1,8 +1,10 @@
 <script setup>
+import AppFooter from '@/Components/Footer/AppFooter.vue';
+
 defineProps({
-    title: {
-        type: String,
-        default: '',
+    footer: {
+        type: Object,
+        default: () => ({}),
     },
 });
 </script>
@@ -13,7 +15,7 @@ defineProps({
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
                 <span class="text-lg font-bold">ShopFlow</span>
                 <nav class="flex gap-4 text-sm">
-                    <a href="/" class="hover:text-indigo-600">خانه</a>
+                    <a href="/" class="hover:text-brand">خانه</a>
                 </nav>
             </div>
         </header>
@@ -22,10 +24,11 @@ defineProps({
             <slot />
         </main>
 
-        <footer class="border-t border-gray-200 bg-white">
-            <div class="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-gray-500">
-                © ShopFlow
-            </div>
-        </footer>
+        <AppFooter
+            :columns="footer.columns ?? []"
+            :contact="footer.contact ?? {}"
+            :socials="footer.socials ?? []"
+            :copyright="footer.copyright ?? ''"
+        />
     </div>
 </template>
