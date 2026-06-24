@@ -27,7 +27,7 @@ class EditAddress extends EditRecord
      */
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        $data['prime'] = (bool) $record->prime;
+        $data['prime'] = (bool) $record->getAttribute('prime');
 
         return Address::create($data);
     }
