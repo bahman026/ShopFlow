@@ -10,6 +10,7 @@
 /.idea
 /.nova
 /.phpunit.cache
+/bootstrap/ssr
 /.vscode
 /.zed
 /auth.json

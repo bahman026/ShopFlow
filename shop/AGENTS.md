@@ -185,6 +185,21 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 - **The database schema is owned by the admin app.** Do not recreate tables that already exist in `admin/`; add Eloquent models here that map to the shared tables. Coordinate any schema change in the admin app's migrations, then update `docs/ShoFlow db doc.md`.
 - This is single-vendor commerce; the storefront reads catalog/pricing data and writes carts, orders, addresses, receipts/transactions per the documented rules.
 
+## Frontend (Inertia + Vue)
+
+The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a hard requirement, not a nice-to-have.
+
+- **Vue 3 only**, `<script setup>` with the Composition API. No Options API.
+- **Component for every element and every page.** Build small, single-purpose components and compose them; do not write large monolithic pages.
+  - `resources/js/Pages/` — one component per route (e.g. `Products/Index.vue`, `Products/Show.vue`).
+  - `resources/js/Layouts/` — shared page layouts (header, footer, RTL shell).
+  - `resources/js/Components/` — reusable UI elements (`BaseButton.vue`, `PriceTag.vue`, `ProductCard.vue`, `QuantityInput.vue`, ...). Each visual element is its own component.
+- One component per file; name files `PascalCase.vue`. Keep components small and focused; if a component grows large, split it.
+- Props are explicitly typed and validated; emit named events instead of mutating props. Keep business logic in the controller/server, components stay presentational.
+- Extract repeated logic into composables under `resources/js/composables/` (e.g. `useCart.ts`).
+- Style with Tailwind utility classes, RTL-first (see fonts/RTL section). No inline styles, no copy-pasted markup; reuse components.
+- Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
+
 ## Language, RTL & fonts
 
 - **The storefront is Persian only.** There is no language switcher and no English UI. Set `<html lang="fa" dir="rtl">` in the root template, and write all user-facing text in Persian.

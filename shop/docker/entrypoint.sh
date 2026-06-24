@@ -19,5 +19,8 @@ fi
 # Refresh caches
 php "/var/www/html/shop/artisan" optimize:clear
 
+# Start the Inertia SSR server in the background (Vue server-side rendering)
+php "/var/www/html/shop/artisan" inertia:start-ssr &
+
 # Start php-fpm
 exec php-fpm
