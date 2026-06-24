@@ -41,4 +41,16 @@ class VarietyFactory extends Factory
             'attribute_id' => $attribute->id,
         ]);
     }
+
+    public function withImage(): static
+    {
+        return $this->afterCreating(function (Variety $variety): void {
+            $variety->image()->create([
+                'path' => ImageFactory::placeholderUrl(),
+                'is_featured' => true,
+                'order' => 0,
+                'alt_text' => $variety->attribute_value ?? $variety->color,
+            ]);
+        });
+    }
 }

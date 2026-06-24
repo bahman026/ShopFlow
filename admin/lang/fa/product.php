@@ -81,6 +81,7 @@ return [
     'variety_inventory' => 'موجودی',
     'variety_has_stock' => 'موجود در انبار',
     'variety_status' => 'وضعیت',
+    'variety_image' => 'تصویر تنوع',
 
     // Table columns
     'featured' => 'تصویر شاخص',

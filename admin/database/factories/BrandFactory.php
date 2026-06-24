@@ -36,7 +36,7 @@ class BrandFactory extends Factory
     {
         return $this->afterCreating(function (Brand $brand) {
             $brand->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'imageable_type' => Brand::class,
                 'imageable_id' => $brand->id,
             ]);

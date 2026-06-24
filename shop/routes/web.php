@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('Home', [
-    'message' => 'فروشگاه آنلاین، آماده توسعه.',
-]));
+Route::get('/', HomeController::class)->name('home');

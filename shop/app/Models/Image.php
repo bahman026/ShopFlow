@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Str;
 
 /**
  * @property positive-int $id
@@ -18,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property positive-int|null $order
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string $url
  */
 class Image extends Model
 {
@@ -38,5 +41,28 @@ class Image extends Model
     public function imageable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Resolve the stored relative `path` into a full URL.
+     *
+     * `images.path` is relative to the CDN/asset host (see the db doc); we
+     * prefix it with `app.asset_url` when set, leaving already-absolute URLs
+     * untouched.
+     */
+    protected function url(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $path = (string) $this->path;
+
+            if ($path === '' || Str::startsWith($path, ['http://', 'https://', '//'])) {
+                return $path;
+            }
+
+            $base = rtrim((string) config('app.asset_url'), '/');
+            $path = ltrim($path, '/');
+
+            return $base === '' ? '/'.$path : $base.'/'.$path;
+        });
     }
 }

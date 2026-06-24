@@ -22,7 +22,7 @@ class CityFactory extends Factory
     {
         return [
             'name' => $this->faker->city,
-            'province_id' => Province::factory()->create()->id,
+            'province_id' => Province::query()->inRandomOrder()->value('id') ?? Province::factory(),
         ];
     }
 }

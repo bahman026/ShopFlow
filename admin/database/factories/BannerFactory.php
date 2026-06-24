@@ -34,7 +34,7 @@ class BannerFactory extends Factory
         return $this->afterCreating(function (Banner $banner) use ($count) {
             for ($i = 0; $i < $count; $i++) {
                 $banner->images()->create([
-                    'path' => fake()->imageUrl(),
+                    'path' => ImageFactory::placeholderUrl(),
                     'is_featured' => $i === 0,
                     'order' => $i,
                     'alt_text' => fake()->words(2, true),

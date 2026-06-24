@@ -23,7 +23,7 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - [x] `A Iranian Sans` font + brand color `#ff8615`
 - [x] Base `AppLayout` + sample `Home` page
 - [x] Eloquent models mapping shared tables (read-focused): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review` (+ status enums and `HasOptions` trait). Relations to not-yet-created models (`AttributeGroup`, `Coupon`, `Discount`) are deferred to their phases.
-- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` done; `PriceTag`, `ProductCard`, `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState` pending
+- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` + `PriceTag` + `ProductCard` + `SectionHeading` done; `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState` pending
 - [x] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
 - [x] SEO scaffolding: per-page `<Head>` via `AppHead` component, shared meta defaults (Inertia `seo` shared prop), canonical URL, Open Graph + Twitter, `robots.txt`
 - [x] Error pages (404 / 500) in Persian, RTL (self-contained Blade, brand color, IranSans, no Vite/SSR dependency)
@@ -35,7 +35,7 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 
 Read-only catalog. This is where SEO and SSR matter most.
 
-- [ ] Home page: published banners, slider, featured categories, product rows, menu (uses `CACHE.md` keys 1, 2, 8, 3)
+- [x] Home page: `HomeController` + `Home.vue` with hero slider, category strip, promo banner grid, product carousels (newest + most viewed), selected brands; JSON-LD `Organization`/`WebSite`; graceful empty states; feature tests. Caching (`CACHE.md` keys 1, 2, 8, 3) deferred to Phase 6
 - [ ] Category listing page: products by category with filters (brand, attributes, price range), sorting, pagination
 - [ ] Product detail page: image gallery, variety selection (price + discount + stock from `varieties`), attributes, related products, breadcrumbs
 - [ ] Product reviews (read) on the product page; ratings summary

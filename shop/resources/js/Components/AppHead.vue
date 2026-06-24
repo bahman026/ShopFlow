@@ -27,6 +27,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    jsonLd: {
+        type: [Object, Array],
+        default: null,
+    },
 });
 
 const page = usePage();
@@ -38,6 +42,7 @@ const canonicalUrl = computed(() => props.canonical || seo.value.url || '');
 const fullTitle = computed(() =>
     props.title ? `${props.title} - ${siteName.value}` : siteName.value,
 );
+const jsonLdString = computed(() => (props.jsonLd ? JSON.stringify(props.jsonLd) : ''));
 </script>
 
 <template>
@@ -102,5 +107,13 @@ const fullTitle = computed(() =>
             name="twitter:image"
             :content="image"
         >
+
+        <component
+            :is="'script'"
+            v-if="jsonLdString"
+            head-key="ld-json"
+            type="application/ld+json"
+            v-html="jsonLdString"
+        />
     </Head>
 </template>

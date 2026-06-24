@@ -12,6 +12,6 @@ class VarietySeeder extends Seeder
     public function run(): void
     {
         Variety::query()->truncate();
-        Variety::factory()->count(20)->create();
+        Variety::factory()->count(20)->withImage()->create();
     }
 }
