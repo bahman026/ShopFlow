@@ -49,3 +49,47 @@ jobs:
         working-directory: ./admin
         run: |
           ./vendor/bin/phpstan --memory-limit=2048M analyse
+
+  create-deployment-artifact-shop:
+    name: Create Deployment Artifact (Shop)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.5
+          tools: composer
+
+      - name: Install PHP Dependencies
+        working-directory: ./shop
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Compile CSS and JavaScript
+        working-directory: ./shop
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup Environment
+        working-directory: ./shop
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Pint Test
+        working-directory: ./shop
+        run: |
+          ./vendor/bin/pint --test
+
+      - name: Run Pest Tests
+        working-directory: ./shop
+        run: |
+          ./vendor/bin/pest
+
+      - name: Run PHPStan Analysis
+        working-directory: ./shop
+        run: |
+          ./vendor/bin/phpstan --memory-limit=2048M analyse
