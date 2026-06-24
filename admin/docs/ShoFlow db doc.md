@@ -503,6 +503,14 @@ Implementation notes:
 * `description`: Provides the order check description.  
 * `payment_type`: Specifies the payment type: cash, POS, online.
 
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete`.
+* `checker_id`, `pack_user`, `sender_id`, `courier_id`, `courier2_id`: Nullable FKs to `users` (`nullOnDelete`) — staff handling the shipment.
+* `payment_type`: `OrderShippingPaymentTypeEnum` (`CASH=10`, `POS=20`, `ONLINE=30`), nullable.
+* `cheque_is_require`: boolean, default false. Date columns are nullable.
+* Editable inline on the Order edit page via `OrderShippingsRelationManager`.
+
 # order\_varieties
 
 * Used to store product varieties in orders.  
@@ -1010,6 +1018,11 @@ This table is for storing order notes.
 * `user_id`: Stores the user ID of the person who created the note.  
 * `order_id`: Stores the order ID.  
 * `content`: Stores the note content.
+
+Implementation notes:
+
+* `order_id`: FK to `orders`, `cascadeOnDelete`. `user_id`: nullable FK to `users` (`nullOnDelete`), the note author.
+* Editable inline on the Order edit page via `OrderNotesRelationManager`.
 
 # emalls\_products
 

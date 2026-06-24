@@ -56,6 +56,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ShippingLine|null $shippingLine
  * @property ShippingMethod|null $shippingMethod
  * @property Collection<OrderVariety> $orderVarieties
+ * @property Collection<OrderNote> $orderNotes
+ * @property Collection<OrderShipping> $orderShippings
  */
 class Order extends Model
 {
@@ -143,5 +145,15 @@ class Order extends Model
     public function orderVarieties(): HasMany
     {
         return $this->hasMany(OrderVariety::class);
+    }
+
+    public function orderNotes(): HasMany
+    {
+        return $this->hasMany(OrderNote::class);
+    }
+
+    public function orderShippings(): HasMany
+    {
+        return $this->hasMany(OrderShipping::class);
     }
 }

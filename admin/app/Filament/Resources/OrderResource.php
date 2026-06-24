@@ -9,6 +9,8 @@ use App\Enums\OrderStatusEnum;
 use App\Filament\Resources\OrderResource\Pages\CreateOrder;
 use App\Filament\Resources\OrderResource\Pages\EditOrder;
 use App\Filament\Resources\OrderResource\Pages\ListOrders;
+use App\Filament\Resources\OrderResource\RelationManagers\OrderNotesRelationManager;
+use App\Filament\Resources\OrderResource\RelationManagers\OrderShippingsRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderVarietiesRelationManager;
 use App\Models\Order;
 use Filament\Actions\BulkActionGroup;
@@ -259,6 +261,8 @@ class OrderResource extends Resource
     {
         return [
             OrderVarietiesRelationManager::class,
+            OrderShippingsRelationManager::class,
+            OrderNotesRelationManager::class,
         ];
     }
 
