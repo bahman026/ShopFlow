@@ -12,6 +12,7 @@ use App\Filament\Resources\OrderResource\Pages\ListOrders;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderNotesRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderShippingsRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderVarietiesRelationManager;
+use App\Filament\Resources\OrderResource\RelationManagers\ReceiptsRelationManager;
 use App\Models\Order;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -262,6 +263,7 @@ class OrderResource extends Resource
         return [
             OrderVarietiesRelationManager::class,
             OrderShippingsRelationManager::class,
+            ReceiptsRelationManager::class,
             OrderNotesRelationManager::class,
         ];
     }

@@ -626,6 +626,15 @@ Used to store products.
 * The `is_paya` column indicates whether this transfer is a Paya transfer (nullable).  
 * The `type` column stores the type of receipt: 1-Receipt, 2-Prepayment, 3-Shipping Request (default 1).
 
+Implementation notes:
+
+* `type`: `ReceiptTypeEnum` (`RECEIPT=1` default, `PREPAYMENT=2`, `SHIPPING_REQUEST=3`).
+* `user_id`: nullable FK to `users` (`nullOnDelete`). `order_id`: nullable FK to `orders` (`nullOnDelete`) so receipts survive order deletion.
+* `card_id`: plain nullable column with no FK; the cards / saved-cards table is not built yet (Phase 5).
+* `image_id` from the doc is implemented as the project-standard polymorphic image (`morphOne` on `images`), not a column. Deleting a receipt deletes its image.
+* `amount` is `decimal(12,2)`; `is_paya` is a nullable boolean.
+* Editable inline on the Order edit page via `ReceiptsRelationManager`.
+
 # reviews
 
 * Contains user reviews for each product.

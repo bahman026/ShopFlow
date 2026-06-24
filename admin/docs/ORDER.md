@@ -46,3 +46,12 @@ Only consider this if real lost sales, oversell complaints, or flash sales appea
 - Same transaction + `SELECT ... FOR UPDATE` rule applies when reserving.
 
 Preferred shape if B is needed: a `reservations` table (`variety_id`, `quantity`, `user_id`/`session_id`, `order_id`, `expires_at`, `status`) rather than a bare `reserved` counter, because it is auditable and easier to expire correctly.
+
+## Payments: receipts vs transactions/gateways
+
+Two payment paths, kept separate:
+
+- Manual / offline payments use `receipts` (built): card-to-card, Paya transfers, prepayments. The customer provides a tracking code or uploads a receipt image, and staff confirm it. Fields: `destination_bank`, `end_of_card_number`, `tracking_code`, `is_paya`, plus a polymorphic receipt image.
+- Online gateway payments will use `transactions` + `gateways` (not built yet): Mellat, Parsian, Zarinpal. These record the gateway result automatically.
+
+Keep `receipts` if there is any chance of manual bank transfers (typical for Iranian shops). If the shop ever becomes gateway-only, `transactions`/`gateways` would cover everything and `receipts` could be retired.

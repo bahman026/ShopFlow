@@ -105,7 +105,7 @@ The main goal; depends on most of phases 1-3.
 - [x] `order_shippings` (fulfillment/shipment records: model, migration, factory, seeder, `OrderShippingPaymentTypeEnum`, Filament resource (+ pages), inline relation manager on Order, tests)
 - [x] `order_notes` (internal staff notes: model, migration, factory, seeder, Filament resource (+ pages), inline relation manager on Order, tests)
 - [~] `order_logs`, `order_call_logs` — NOT IMPLEMENTED (not needed for current scope)
-- [ ] Receipts
+- [x] Receipts (payment receipts: model, migration, factory, seeder, `ReceiptTypeEnum`, polymorphic image, Filament resource (+ pages), inline relation manager on Order, tests. `card_id` kept nullable without FK since cards are not built)
 - [ ] Transactions
 - [ ] Gateways
 
