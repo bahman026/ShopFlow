@@ -6,11 +6,13 @@ use App\Enums\CategoryStatusEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\ReviewStatusEnum;
 use App\Enums\VarietyStatusEnum;
+use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Variety;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 
 function makeImage(string $type, int $id, bool $featured = true): void
@@ -136,4 +138,70 @@ it('returns 404 for an unpublished product', function (): void {
 
 it('returns 404 for a missing product', function (): void {
     $this->get('/products/does-not-exist')->assertNotFound();
+});
+
+it('builds a selectable axis from variety attributes', function (): void {
+    $category = Category::create([
+        'heading' => 'پوشاک',
+        'slug' => 'apparel',
+        'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => 'رنگ',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $groupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId,
+        'name' => 'رنگ ظاهری',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $green = Attribute::create(['attribute_group_id' => $groupId, 'value' => 'سبز', 'color' => '#003300']);
+    $blue = Attribute::create(['attribute_group_id' => $groupId, 'value' => 'آبی', 'color' => '#000099']);
+
+    $product = Product::create([
+        'heading' => 'ست تیشرت',
+        'slug' => 'tshirt-set',
+        'price' => 500000,
+        'category_id' => $category->id,
+        'status' => ProductStatusEnum::PUBLISHED,
+        'seen' => 0,
+    ]);
+    makeImage(Product::class, $product->id);
+
+    Variety::create([
+        'product_id' => $product->id,
+        'attribute_id' => $green->id,
+        'attribute_value' => 'سبز',
+        'color' => '#003300',
+        'price' => 500000,
+        'inventory' => 25,
+        'has_stock' => true,
+        'status' => VarietyStatusEnum::PUBLISHED,
+    ]);
+    Variety::create([
+        'product_id' => $product->id,
+        'attribute_id' => $blue->id,
+        'attribute_value' => 'آبی',
+        'color' => '#000099',
+        'price' => 500000,
+        'inventory' => 0,
+        'has_stock' => true,
+        'status' => VarietyStatusEnum::PUBLISHED,
+    ]);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('product.variantAxes', 1, fn (AssertableInertia $axis): AssertableInertia => $axis
+                ->where('name', 'رنگ ظاهری')
+                ->has('options', 2)
+                ->etc()
+            )
+            ->has('product.varieties', 2)
+            ->has('product.varieties.0.options')
+        );
 });

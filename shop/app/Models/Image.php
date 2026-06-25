@@ -46,9 +46,9 @@ class Image extends Model
     /**
      * Resolve the stored relative `path` into a full URL.
      *
-     * `images.path` is relative to the CDN/asset host (see the db doc); we
-     * prefix it with `app.asset_url` when set, leaving already-absolute URLs
-     * untouched.
+     * `images.path` is relative to the image host (see the db doc); we prefix
+     * it with `app.image_url` (the admin app's public storage) when set,
+     * leaving already-absolute URLs untouched.
      */
     protected function url(): Attribute
     {
@@ -59,7 +59,7 @@ class Image extends Model
                 return $path;
             }
 
-            $base = rtrim((string) config('app.asset_url'), '/');
+            $base = rtrim((string) config('app.image_url'), '/');
             $path = ltrim($path, '/');
 
             return $base === '' ? '/'.$path : $base.'/'.$path;

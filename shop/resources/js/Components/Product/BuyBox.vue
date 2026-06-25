@@ -7,7 +7,7 @@ import { useFormat } from '@/composables/useFormat';
 const props = defineProps({
     price: {
         type: Number,
-        required: true,
+        default: null,
     },
     salePrice: {
         type: Number,
@@ -20,6 +20,10 @@ const props = defineProps({
     inStock: {
         type: Boolean,
         default: false,
+    },
+    selected: {
+        type: Boolean,
+        default: true,
     },
 });
 
@@ -57,8 +61,15 @@ function changeQuantity(delta) {
         </ul>
 
         <div class="border-t border-gray-100 pt-4">
+            <p
+                v-if="!selected"
+                class="rounded-lg bg-gray-50 px-4 py-3 text-center text-sm font-medium text-gray-500"
+            >
+                لطفاً ویژگی‌های محصول را انتخاب کنید
+            </p>
+
             <div
-                v-if="inStock"
+                v-else-if="inStock"
                 class="flex flex-col gap-3"
             >
                 <div class="flex items-center justify-between">

@@ -31,8 +31,8 @@ const props = defineProps({
 const page = usePage();
 const seo = computed(() => page.props.seo ?? {});
 
-const firstInStock = props.product.varieties.find((variety) => variety.inStock);
-const selectedVarietyId = ref(firstInStock ? firstInStock.id : null);
+const selectedVarietyId = ref(null);
+const hasVarieties = props.product.varieties.length > 0;
 
 const selectedVariety = computed(
     () => props.product.varieties.find((variety) => variety.id === selectedVarietyId.value) ?? null,
@@ -41,18 +41,48 @@ const selectedVariety = computed(
 const galleryImages = computed(() => {
     const base = props.product.gallery ?? [];
 
-    if (selectedVariety.value?.image) {
-        return [selectedVariety.value.image, ...base];
-    }
+    const images = selectedVariety.value?.image
+        ? [selectedVariety.value.image, ...base]
+        : base;
 
-    return base;
+    // Drop duplicates (a variety image may be the same file as the featured one).
+    const seen = new Set();
+
+    return images.filter((image) => {
+        if (seen.has(image.url)) {
+            return false;
+        }
+
+        seen.add(image.url);
+
+        return true;
+    });
 });
 
-const buyBox = computed(() => selectedVariety.value ?? {
-    price: props.product.price,
-    salePrice: props.product.salePrice,
-    discountPercent: props.product.discountPercent,
-    inStock: props.product.inStock,
+const buyBox = computed(() => {
+    if (selectedVariety.value) {
+        return { ...selectedVariety.value, selected: true };
+    }
+
+    // Simple product without varieties: show its own price right away.
+    if (!hasVarieties) {
+        return {
+            price: props.product.price,
+            salePrice: props.product.salePrice,
+            discountPercent: props.product.discountPercent,
+            inStock: props.product.inStock,
+            selected: true,
+        };
+    }
+
+    // Has varieties but none chosen yet: hide price until the user selects.
+    return {
+        price: null,
+        salePrice: null,
+        discountPercent: null,
+        inStock: false,
+        selected: false,
+    };
 });
 
 const metaTitle = computed(() => props.product.title || props.product.heading);
@@ -61,7 +91,7 @@ const metaDescription = computed(
 );
 
 const jsonLd = computed(() => {
-    const offerPrice = buyBox.value.salePrice ?? buyBox.value.price;
+    const offerPrice = props.product.salePrice ?? props.product.price;
 
     const data = [
         {
@@ -147,6 +177,7 @@ const jsonLd = computed(() => {
 
                     <VarietySelector
                         v-model="selectedVarietyId"
+                        :axes="product.variantAxes"
                         :varieties="product.varieties"
                     />
                 </div>
@@ -157,6 +188,7 @@ const jsonLd = computed(() => {
                         :sale-price="buyBox.salePrice"
                         :discount-percent="buyBox.discountPercent"
                         :in-stock="buyBox.inStock"
+                        :selected="buyBox.selected"
                     />
                 </div>
             </div>

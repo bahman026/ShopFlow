@@ -8,6 +8,7 @@ use App\Enums\CategoryStatusEnum;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Arr; // Import the Arr facade
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
@@ -107,6 +108,13 @@ class CategorySeeder extends Seeder
             if (isset($category['children'])) {
                 $this->createChildren($category['children'], $category['id']);
             }
+        }
+
+        // Explicit IDs above leave Postgres' auto-increment sequence behind, so
+        // advance it past the seeded rows to avoid duplicate-key errors on
+        // categories created later via the admin panel.
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("SELECT setval(pg_get_serial_sequence('categories', 'id'), (SELECT MAX(id) FROM categories))");
         }
     }
 

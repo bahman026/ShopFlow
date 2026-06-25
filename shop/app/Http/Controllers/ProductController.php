@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Attribute;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
@@ -30,7 +31,11 @@ class ProductController extends Controller
                 'images',
                 'brand',
                 'category',
-                'varieties' => fn ($query) => $query->published()->with(['image', 'attribute']),
+                'varieties' => fn ($query) => $query->published()->with([
+                    'image',
+                    'attribute.attributeGroup',
+                    'attributes.attributeGroup',
+                ]),
                 'attributes',
                 'reviews' => fn ($query) => $query->approved()->whereNull('parent_id')->with('user')->latest(),
             ])
@@ -84,6 +89,7 @@ class ProductController extends Controller
             'salePrice' => $hasDiscount ? $salePrice : null,
             'discountPercent' => $hasDiscount ? $this->discountPercent($price, $salePrice) : null,
             'inStock' => $varieties->contains(fn (Variety $variety): bool => $this->varietyInStock($variety)),
+            'variantAxes' => $this->variantAxes($varieties),
             'varieties' => $varieties->map(fn (Variety $variety): array => $this->varietyPayload($variety))->all(),
             'highlights' => $product->attributes
                 ->filter(fn ($attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false))
@@ -124,7 +130,95 @@ class ProductController extends Controller
             'discountPercent' => $hasDiscount ? $this->discountPercent($price, $salePrice) : null,
             'inStock' => $this->varietyInStock($variety),
             'image' => $this->image($variety->image),
+            'options' => $this->varietyOptions($variety),
         ];
+    }
+
+    /**
+     * Map of attribute-group id => list of values for a variety, combining its
+     * primary attribute with any additional attributes. A variety can carry
+     * several values in the same group (e.g. a color offered in many sizes).
+     *
+     * @return array<int, array<int, string>>
+     */
+    private function varietyOptions(Variety $variety): array
+    {
+        $options = [];
+
+        foreach ($this->varietyAttributes($variety) as $attribute) {
+            $options[$attribute->attribute_group_id][] = $attribute->value;
+        }
+
+        return array_map(
+            fn (array $values): array => array_values(array_unique($values)),
+            $options,
+        );
+    }
+
+    /**
+     * The grouped attributes that define a variety (primary + additional).
+     *
+     * @return array<int, Attribute>
+     */
+    private function varietyAttributes(Variety $variety): array
+    {
+        $attributes = [];
+
+        if ($variety->attribute !== null) {
+            $attributes[] = $variety->attribute;
+        }
+
+        foreach ($variety->attributes as $attribute) {
+            $attributes[] = $attribute;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Build selectable axes (one per attribute group) from the product's
+     * varieties, e.g. a "color" axis and a "size" axis. Each axis lists its
+     * distinct option values, keeping a hex color when the attribute has one.
+     *
+     * @param  Collection<int, Variety>  $varieties
+     * @return array<int, array<string, mixed>>
+     */
+    private function variantAxes(Collection $varieties): array
+    {
+        $axes = [];
+        $primaryGroupId = null;
+
+        foreach ($varieties as $variety) {
+            if ($variety->attribute !== null) {
+                $primaryGroupId = $variety->attribute->attribute_group_id;
+            }
+
+            foreach ($this->varietyAttributes($variety) as $attribute) {
+                $groupId = $attribute->attribute_group_id;
+
+                $axes[$groupId] ??= [
+                    'id' => $groupId,
+                    'name' => (string) $attribute->attributeGroup->name,
+                    'primary' => false,
+                    'options' => [],
+                ];
+
+                $axes[$groupId]['options'][$attribute->value] ??= [
+                    'value' => $attribute->value,
+                    'color' => $attribute->color,
+                ];
+            }
+        }
+
+        if ($primaryGroupId !== null && isset($axes[$primaryGroupId])) {
+            $axes[$primaryGroupId]['primary'] = true;
+        }
+
+        return array_values(array_map(function (array $axis): array {
+            $axis['options'] = array_values($axis['options']);
+
+            return $axis;
+        }, $axes));
     }
 
     /**
