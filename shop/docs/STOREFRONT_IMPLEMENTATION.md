@@ -39,7 +39,8 @@ Read-only catalog. This is where SEO and SSR matter most.
   - Header (`AppHeader` + `Header/*`): logo, search, account/cart actions, desktop category menu with dropdowns, mobile drawer; categories shared via Inertia `nav.categories`
   - `Variety` read model exposes a polymorphic `image` relation (per-color photo) for the upcoming product detail page
 - [ ] Category listing page: products by category with filters (brand, attributes, price range), sorting, pagination
-- [x] Product detail page: `ProductController@show` (`/products/{slug}`) + `Product/Show.vue`. Gallery (per-variety image), variety selector with out-of-stock state, buy box (price/discount/stock, trust badges, quantity), specs, description, breadcrumbs, related carousel; JSON-LD `Product`/`Offer` + `BreadcrumbList`; view counter; feature tests. Add-to-cart wiring deferred to Phase 3
+- [x] Product detail page: `ProductController@show` (`/products/{slug}`) + `Product/Show.vue`. Gallery (per-variety image, deduped by URL), variety selector (primary attribute group drives selection, additional attributes constrained by it, never the other way), buy box (price hidden until a variety is fully selected; price/discount/stock, trust badges, quantity), specs, description, breadcrumbs, related carousel; JSON-LD `Product`/`Offer` + `BreadcrumbList`; view counter; feature tests. Add-to-cart wiring deferred to Phase 3
+  - Quantity rule: the quantity stepper must never exceed the selected variety's `inventory` (clamp the max). Enforced with cart wiring in Phase 3
 - [x] Product reviews (read) on the product page (approved only). Ratings summary deferred (no numeric rating field in `reviews`)
 - [ ] Brand page: products for a brand
 - [ ] Search: keyword search over products with results page
@@ -64,7 +65,7 @@ Auth uses the shared `users` table. Password reset via mobile (`mobile_password_
 Inventory-neutral. A cart never changes `varieties.inventory` (see `ORDER.md`).
 
 - [ ] Cart model mapping `carts` (one row per variety line; user or guest session)
-- [ ] Add to cart / update quantity / remove line
+- [ ] Add to cart / update quantity / remove line. Quantity is capped at the variety's available `inventory` (clamp in the UI and reject over-limit amounts server-side)
 - [ ] Cart page + mini-cart component with live totals
 - [ ] Merge guest cart into user cart on login
 - [ ] Coupon preview at cart (validated, not yet committed)
