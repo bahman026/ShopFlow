@@ -12,6 +12,7 @@ import BuyBox from '@/Components/Product/BuyBox.vue';
 import ProductSpecs from '@/Components/Product/ProductSpecs.vue';
 import ProductReviews from '@/Components/Product/ProductReviews.vue';
 import ProductCarousel from '@/Components/Home/ProductCarousel.vue';
+import { breadcrumbJsonLd } from '@/seo';
 
 const props = defineProps({
     product: {
@@ -136,15 +137,7 @@ const jsonLd = computed(() => {
                 url: props.product.canonical || seo.value.url || '',
             },
         },
-        {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: props.breadcrumbs.map((item, index) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                name: item.heading,
-            })),
-        },
+        breadcrumbJsonLd(props.breadcrumbs, seo.value.origin),
     ];
 
     if (props.product.brand) {

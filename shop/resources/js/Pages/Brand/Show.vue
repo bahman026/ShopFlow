@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
@@ -9,6 +9,7 @@ import Pagination from '@/Components/Pagination.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import BrandFilters from '@/Components/Brand/BrandFilters.vue';
 import CategoryToolbar from '@/Components/Category/CategoryToolbar.vue';
+import { breadcrumbJsonLd } from '@/seo';
 
 const props = defineProps({
     brand: {
@@ -35,6 +36,9 @@ const props = defineProps({
 
 const showFilters = ref(false);
 
+const page = usePage();
+const seo = computed(() => page.props.seo ?? {});
+
 const metaTitle = computed(() => props.brand.title || props.brand.heading);
 const metaDescription = computed(
     () =>
@@ -42,17 +46,7 @@ const metaDescription = computed(
         `خرید آنلاین محصولات ${props.brand.heading} با بهترین قیمت از فروشگاه اینترنتی.`,
 );
 
-const jsonLd = computed(() => [
-    {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: props.breadcrumbs.map((item, index) => ({
-            '@type': 'ListItem',
-            position: index + 1,
-            name: item.heading,
-        })),
-    },
-]);
+const jsonLd = computed(() => [breadcrumbJsonLd(props.breadcrumbs, seo.value.origin)]);
 
 function navigate(overrides = {}) {
     const state = {

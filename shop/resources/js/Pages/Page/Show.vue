@@ -1,8 +1,10 @@
 <script setup>
 import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+import { breadcrumbJsonLd } from '@/seo';
 
 const props = defineProps({
     page: {
@@ -15,20 +17,13 @@ const props = defineProps({
     },
 });
 
+const inertiaPage = usePage();
+const seo = computed(() => inertiaPage.props.seo ?? {});
+
 const metaTitle = computed(() => props.page.title || props.page.heading);
 const metaDescription = computed(() => props.page.description || props.page.heading);
 
-const jsonLd = computed(() => [
-    {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: props.breadcrumbs.map((item, index) => ({
-            '@type': 'ListItem',
-            position: index + 1,
-            name: item.heading,
-        })),
-    },
-]);
+const jsonLd = computed(() => [breadcrumbJsonLd(props.breadcrumbs, seo.value.origin)]);
 </script>
 
 <template>

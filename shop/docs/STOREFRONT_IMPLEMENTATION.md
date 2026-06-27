@@ -50,8 +50,8 @@ Read-only catalog. This is where SEO and SSR matter most.
 - [ ] Search: keyword search over products with results page
 - [x] CMS pages (`pages.show`): `PageController@show` + `Page/Show.vue`. Served at clean top-level slugs (e.g. `/about-us`) via a catch-all `/{slug}` route kept LAST in `routes/web.php`; published pages only; heading, HTML content, optional image; breadcrumbs; JSON-LD `BreadcrumbList`; canonical/noindex; feature tests. `PageDTO` + `BuildPageDetail`
 - [x] FAQ page (`faqs.show`): `FaqController@show` + `Faq/Show.vue` (accordion). `/faq` shows null-position questions, `/faq/{position}` scopes to a section; ordered by `order`; JSON-LD `FAQPage` + `BreadcrumbList`; feature tests. `FaqDTO` + `GetFaqs`
-- [ ] SEO per page: unique title/description, canonical, Open Graph, JSON-LD `Product` (+ `Offer`), `BreadcrumbList`, `Organization`/`WebSite` on home
-- [ ] `sitemap.xml` (categories, products, brands, pages) and correct 200/404 status codes
+- [x] SEO per page: shared `AppHead` emits unique title/description, canonical, Open Graph + Twitter cards, robots noindex, and JSON-LD. Product page has `Product` (+ `Offer`, `Brand`); home has `Organization` + `WebSite`; catalog/CMS pages emit `BreadcrumbList` with absolute `item` URLs via the shared `seo.js` helper (origin shared as `seo.origin`)
+- [x] `sitemap.xml` + `robots.txt`: `SitemapController` (`index`/`robots`) + `GetSitemapUrls` action lists home, FAQ, active categories/brands and published products/pages (excludes `no_index`); `robots.txt` points at the sitemap. Controllers use `firstOrFail()` so unknown/unpublished slugs return 404; feature tests cover sitemap contents and 404s
 
 ## Phase 2 - User auth & account
 

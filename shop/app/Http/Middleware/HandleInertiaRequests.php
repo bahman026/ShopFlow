@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
             'seo' => [
                 'siteName' => (string) config('app.name'),
                 'url' => $this->canonicalUrl($request),
+                'origin' => rtrim((string) config('app.url'), '/'),
                 'locale' => 'fa_IR',
             ],
             'nav' => [
