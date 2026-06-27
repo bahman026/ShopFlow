@@ -39,7 +39,7 @@ function scroll(direction) {
         <div class="relative">
             <div
                 ref="track"
-                class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                class="flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
             >
                 <div
                     v-for="product in products"
@@ -52,7 +52,7 @@ function scroll(direction) {
 
             <button
                 type="button"
-                class="absolute top-1/2 -right-2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-sm transition hover:text-brand md:block"
+                class="hover:text-brand absolute top-1/2 -right-2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-sm transition md:block"
                 aria-label="قبلی"
                 @click="scroll(1)"
             >
@@ -60,7 +60,7 @@ function scroll(direction) {
             </button>
             <button
                 type="button"
-                class="absolute top-1/2 -left-2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-sm transition hover:text-brand md:block"
+                class="hover:text-brand absolute top-1/2 -left-2 hidden -translate-y-1/2 rounded-full border border-gray-200 bg-white p-2 text-gray-700 shadow-sm transition md:block"
                 aria-label="بعدی"
                 @click="scroll(-1)"
             >

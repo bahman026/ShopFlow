@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Home;
 
 use App\Actions\Catalog\BuildProductCard;
+use App\Enums\VarietyStatusEnum;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class GetProductRows
 {
@@ -24,14 +27,14 @@ class GetProductRows
     public function __invoke(): array
     {
         $rows = [
-            ['title' => 'جدیدترین محصولات', 'viewAllUrl' => '/products?sort=newest', 'query' => fn ($q) => $q->latest('id')],
-            ['title' => 'پربازدیدترین محصولات', 'viewAllUrl' => '/products?sort=popular', 'query' => fn ($q) => $q->orderByDesc('seen')],
+            ['title' => 'جدیدترین محصولات', 'viewAllUrl' => '/products?sort=newest', 'query' => fn (Builder $q) => $q->latest('id')],
+            ['title' => 'پربازدیدترین محصولات', 'viewAllUrl' => '/products?sort=popular', 'query' => fn (Builder $q) => $q->orderByDesc('seen')],
         ];
 
         return array_values(array_filter(array_map(function (array $row): array {
             $products = Product::query()
                 ->published()
-                ->with(['featuredImage', 'varieties' => fn ($q) => $q->published()])
+                ->with(['featuredImage', 'varieties' => fn (Relation $q) => $q->where('status', VarietyStatusEnum::PUBLISHED->value)])
                 ->tap($row['query'])
                 ->limit(self::ROW_LIMIT)
                 ->get()

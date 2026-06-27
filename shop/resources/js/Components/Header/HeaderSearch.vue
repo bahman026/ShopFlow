@@ -19,7 +19,7 @@ function submit() {
 
 <template>
     <form
-        class="flex w-full items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 focus-within:ring-2 focus-within:ring-brand"
+        class="focus-within:ring-brand flex w-full items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 focus-within:ring-2"
         role="search"
         @submit.prevent="submit"
     >
@@ -31,6 +31,6 @@ function submit() {
             placeholder="جستجو در فروشگاه..."
             class="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none"
             aria-label="جستجو"
-        >
+        />
     </form>
 </template>

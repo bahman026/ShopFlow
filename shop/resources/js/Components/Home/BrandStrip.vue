@@ -19,7 +19,7 @@ defineProps({
                 v-for="brand in brands"
                 :key="brand.id"
                 :href="brand.url"
-                class="flex items-center justify-center rounded-xl border border-gray-100 bg-white p-4 transition hover:border-brand"
+                class="hover:border-brand flex items-center justify-center rounded-xl border border-gray-100 bg-white p-4 transition"
             >
                 <img
                     v-if="brand.image"
@@ -27,7 +27,7 @@ defineProps({
                     :alt="brand.image.alt || brand.heading"
                     loading="lazy"
                     class="h-12 w-full object-contain"
-                >
+                />
                 <span v-else class="text-sm font-medium text-gray-700">
                     {{ brand.heading }}
                 </span>

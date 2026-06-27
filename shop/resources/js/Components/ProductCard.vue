@@ -15,7 +15,7 @@ defineProps({
 <template>
     <AppLink
         :href="product.url"
-        class="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition hover:border-brand hover:shadow-md"
+        class="group hover:border-brand flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition hover:shadow-md"
     >
         <div class="flex aspect-square items-center justify-center overflow-hidden bg-gray-50">
             <img
@@ -24,12 +24,8 @@ defineProps({
                 :alt="product.image.alt || product.heading"
                 loading="lazy"
                 class="h-full w-full object-contain transition duration-300 group-hover:scale-105"
-            >
-            <Icon
-                v-else
-                :icon="uiIcons.image"
-                class="text-4xl text-gray-300"
             />
+            <Icon v-else :icon="uiIcons.image" class="text-4xl text-gray-300" />
         </div>
 
         <div class="flex flex-1 flex-col gap-3 p-3">

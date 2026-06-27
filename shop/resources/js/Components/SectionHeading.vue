@@ -28,7 +28,7 @@ defineProps({
         <AppLink
             v-if="viewAllUrl"
             :href="viewAllUrl"
-            class="flex items-center gap-1 text-sm font-medium text-brand hover:opacity-80"
+            class="text-brand flex items-center gap-1 text-sm font-medium hover:opacity-80"
         >
             {{ viewAllLabel }}
             <Icon :icon="uiIcons.chevronLeft" class="text-xs" />

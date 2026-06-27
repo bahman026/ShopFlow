@@ -14,14 +14,10 @@ defineProps({
 <template>
     <nav v-if="categories.length" class="hidden md:block" aria-label="دسته‌بندی‌ها">
         <ul class="flex items-center gap-1">
-            <li
-                v-for="category in categories"
-                :key="category.url"
-                class="group relative"
-            >
+            <li v-for="category in categories" :key="category.url" class="group relative">
                 <AppLink
                     :href="category.url"
-                    class="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-brand"
+                    class="hover:text-brand flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                     {{ category.heading }}
                     <Icon
@@ -39,7 +35,7 @@ defineProps({
                         v-for="child in category.children"
                         :key="child.url"
                         :href="child.url"
-                        class="block rounded-lg px-3 py-2 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-brand"
+                        class="hover:text-brand block rounded-lg px-3 py-2 text-sm text-gray-600 transition hover:bg-gray-50"
                     >
                         {{ child.heading }}
                     </AppLink>

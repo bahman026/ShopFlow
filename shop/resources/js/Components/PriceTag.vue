@@ -26,10 +26,7 @@ const finalPrice = computed(() => (hasDiscount.value ? props.salePrice : props.p
 <template>
     <div class="flex items-center justify-between gap-2">
         <div class="flex flex-col">
-            <span
-                v-if="hasDiscount"
-                class="text-xs text-gray-400 line-through"
-            >
+            <span v-if="hasDiscount" class="text-xs text-gray-400 line-through">
                 {{ formatPrice(price) }}
             </span>
             <span class="text-sm font-bold text-gray-900">
@@ -39,7 +36,7 @@ const finalPrice = computed(() => (hasDiscount.value ? props.salePrice : props.p
 
         <span
             v-if="hasDiscount && discountPercent"
-            class="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white"
+            class="bg-brand rounded-full px-2 py-0.5 text-xs font-bold text-white"
         >
             {{ toPersianDigits(discountPercent) }}٪
         </span>

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\CategoryStatusEnum;
 use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Middleware;
@@ -86,7 +88,7 @@ class HandleInertiaRequests extends Middleware
             return Category::query()
                 ->active()
                 ->whereNull('parent_id')
-                ->with(['children' => fn ($query) => $query->active()->orderBy('heading')])
+                ->with(['children' => fn (Relation $query) => $query->where('status', CategoryStatusEnum::ACTIVE->value)->orderBy('heading')])
                 ->orderBy('heading')
                 ->get()
                 ->map(fn (Category $category): array => [

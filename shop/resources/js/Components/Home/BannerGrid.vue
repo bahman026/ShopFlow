@@ -28,7 +28,7 @@ const visibleBanners = computed(() => props.banners.filter((banner) => banner.im
                     :alt="banner.image.alt || banner.heading"
                     loading="lazy"
                     class="h-full w-full object-cover transition duration-300 hover:scale-105"
-                >
+                />
             </component>
         </div>
     </section>

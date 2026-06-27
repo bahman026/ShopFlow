@@ -77,9 +77,13 @@ function initSelection() {
 
 initSelection();
 
-watch(activeVariety, (item) => {
-    emit('update:modelValue', item ? item.id : null);
-}, { immediate: true });
+watch(
+    activeVariety,
+    (item) => {
+        emit('update:modelValue', item ? item.id : null);
+    },
+    { immediate: true },
+);
 
 // Flat fallback (no attribute axes): a lone in-stock variety needs no choice,
 // so auto-select it instead of forcing a meaningless click.
@@ -125,9 +129,7 @@ function selectOption(groupId, value, isPrimary) {
             continue;
         }
 
-        const stillValid = props.varieties.some(
-            (item) => item.inStock && matches(item, next),
-        );
+        const stillValid = props.varieties.some((item) => item.inStock && matches(item, next));
 
         if (!stillValid) {
             delete next[axis.id];
@@ -146,15 +148,8 @@ function selectVariety(item) {
 </script>
 
 <template>
-    <div
-        v-if="hasAxes"
-        class="flex flex-col gap-4"
-    >
-        <div
-            v-for="axis in axes"
-            :key="axis.id"
-            class="flex flex-col gap-2"
-        >
+    <div v-if="hasAxes" class="flex flex-col gap-4">
+        <div v-for="axis in axes" :key="axis.id" class="flex flex-col gap-2">
             <span class="text-sm font-medium text-gray-700">{{ axis.name }}</span>
 
             <div class="flex flex-wrap gap-2">
@@ -168,7 +163,9 @@ function selectVariety(item) {
                         isSelected(axis.id, option.value)
                             ? 'border-brand bg-brand/5 text-brand'
                             : 'border-gray-200 text-gray-700 hover:border-gray-300',
-                        !isAvailable(axis.id, option.value, axis.primary) ? 'cursor-not-allowed text-gray-300 line-through' : '',
+                        !isAvailable(axis.id, option.value, axis.primary)
+                            ? 'cursor-not-allowed text-gray-300 line-through'
+                            : '',
                     ]"
                     @click="selectOption(axis.id, option.value, axis.primary)"
                 >
@@ -183,10 +180,7 @@ function selectVariety(item) {
         </div>
     </div>
 
-    <div
-        v-else-if="varieties.length"
-        class="flex flex-col gap-3"
-    >
+    <div v-else-if="varieties.length" class="flex flex-col gap-3">
         <span class="text-sm font-medium text-gray-700">انتخاب نوع کالا</span>
 
         <div class="flex flex-wrap gap-2">

@@ -10,6 +10,8 @@ use App\DTOs\ImageDTO;
 use App\DTOs\ProductDTO;
 use App\DTOs\ReviewDTO;
 use App\DTOs\VarietyDTO;
+use App\Models\Attribute;
+use App\Models\Image;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Variety;
@@ -60,12 +62,12 @@ class BuildProductDetail
             variantAxes: ($this->buildVariantAxes)($varieties),
             varieties: $varieties->map(fn (Variety $variety): VarietyDTO => $this->variety($variety))->all(),
             highlights: $product->attributes
-                ->filter(fn ($attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false))
-                ->map(fn ($attribute): array => ['value' => $attribute->value])
+                ->filter(fn (Attribute $attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false))
+                ->map(fn (Attribute $attribute): array => ['value' => $attribute->value])
                 ->values()
                 ->all(),
             specs: $product->attributes
-                ->map(fn ($attribute): array => ['value' => $attribute->value])
+                ->map(fn (Attribute $attribute): array => ['value' => $attribute->value])
                 ->all(),
             reviews: $product->reviews
                 ->map(fn (Review $review): ReviewDTO => new ReviewDTO(
@@ -128,7 +130,7 @@ class BuildProductDetail
     {
         return $product->images
             ->sortByDesc('is_featured')
-            ->map(fn ($image): ImageDTO => new ImageDTO(
+            ->map(fn (Image $image): ImageDTO => new ImageDTO(
                 url: $image->url,
                 alt: (string) ($image->alt_text ?? $product->heading),
             ))

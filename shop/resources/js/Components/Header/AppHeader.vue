@@ -30,9 +30,7 @@ const mobileOpen = ref(false);
                 <Icon :icon="mobileOpen ? uiIcons.close : uiIcons.menu" />
             </button>
 
-            <Link href="/" class="shrink-0 text-xl font-bold text-brand">
-                ShopFlow
-            </Link>
+            <Link href="/" class="text-brand shrink-0 text-xl font-bold"> ShopFlow </Link>
 
             <div class="hidden flex-1 sm:block">
                 <HeaderSearch />
@@ -58,7 +56,9 @@ const mobileOpen = ref(false);
                     :key="category.url"
                     class="border-b border-gray-50 last:border-0"
                 >
-                    <summary class="flex cursor-pointer items-center justify-between py-2 text-sm text-gray-700">
+                    <summary
+                        class="flex cursor-pointer items-center justify-between py-2 text-sm text-gray-700"
+                    >
                         <AppLink :href="category.url" class="hover:text-brand">
                             {{ category.heading }}
                         </AppLink>
@@ -68,12 +68,12 @@ const mobileOpen = ref(false);
                             class="text-xs text-gray-400"
                         />
                     </summary>
-                    <div v-if="category.children.length" class="pb-2 pr-3">
+                    <div v-if="category.children.length" class="pr-3 pb-2">
                         <AppLink
                             v-for="child in category.children"
                             :key="child.url"
                             :href="child.url"
-                            class="block py-1.5 text-sm text-gray-500 hover:text-brand"
+                            class="hover:text-brand block py-1.5 text-sm text-gray-500"
                         >
                             {{ child.heading }}
                         </AppLink>

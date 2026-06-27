@@ -44,7 +44,7 @@ const iconFor = (social) => {
                 :title="social.name"
                 :aria-label="social.name"
                 rel="noopener noreferrer nofollow"
-                class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition hover:border-brand hover:text-brand"
+                class="hover:border-brand hover:text-brand flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition"
             >
                 <Icon :icon="iconFor(social)" />
             </a>

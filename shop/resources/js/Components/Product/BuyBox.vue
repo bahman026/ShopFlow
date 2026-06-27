@@ -72,10 +72,7 @@ watch(
                 :key="item.label"
                 class="flex items-center gap-2 text-sm text-gray-600"
             >
-                <Icon
-                    :icon="item.icon"
-                    class="text-brand"
-                />
+                <Icon :icon="item.icon" class="text-brand" />
                 <span>{{ item.label }}</span>
             </li>
         </ul>
@@ -88,25 +85,19 @@ watch(
                 لطفاً ویژگی‌های محصول را انتخاب کنید
             </p>
 
-            <div
-                v-else-if="inStock"
-                class="flex flex-col gap-3"
-            >
+            <div v-else-if="inStock" class="flex flex-col gap-3">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-500">قیمت</span>
                     <span
                         v-if="hasDiscount && discountPercent"
-                        class="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-white"
+                        class="bg-brand rounded-full px-2 py-0.5 text-xs font-bold text-white"
                     >
                         {{ toPersianDigits(discountPercent) }}٪ تخفیف
                     </span>
                 </div>
 
                 <div class="flex items-baseline justify-between">
-                    <span
-                        v-if="hasDiscount"
-                        class="text-sm text-gray-400 line-through"
-                    >
+                    <span v-if="hasDiscount" class="text-sm text-gray-400 line-through">
                         {{ formatPrice(price) }}
                     </span>
                     <span class="text-lg font-bold text-gray-900">
@@ -119,44 +110,35 @@ watch(
                     <div class="flex h-10 items-center rounded-lg border border-gray-200">
                         <button
                             type="button"
-                            class="px-3 text-gray-600 transition hover:text-brand disabled:text-gray-300"
+                            class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
                             aria-label="افزایش"
                             :disabled="atMax"
                             @click="changeQuantity(1)"
                         >
-                            <Icon
-                                :icon="uiIcons.plus"
-                                class="shrink-0 text-sm"
-                            />
+                            <Icon :icon="uiIcons.plus" class="shrink-0 text-sm" />
                         </button>
                         <span class="min-w-[2rem] text-center text-sm font-medium">
                             {{ toPersianDigits(quantity) }}
                         </span>
                         <button
                             type="button"
-                            class="px-3 text-gray-600 transition hover:text-brand disabled:text-gray-300"
+                            class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
                             aria-label="کاهش"
                             :disabled="quantity <= 1"
                             @click="changeQuantity(-1)"
                         >
-                            <Icon
-                                :icon="uiIcons.minus"
-                                class="shrink-0 text-sm"
-                            />
+                            <Icon :icon="uiIcons.minus" class="shrink-0 text-sm" />
                         </button>
                     </div>
                 </div>
 
-                <p
-                    v-if="atMax && inventory !== null"
-                    class="text-xs text-gray-400"
-                >
+                <p v-if="atMax && inventory !== null" class="text-xs text-gray-400">
                     بیشترین تعداد موجود: {{ toPersianDigits(inventory) }}
                 </p>
 
                 <button
                     type="button"
-                    class="h-12 w-full rounded-xl bg-brand text-sm font-bold text-white transition hover:bg-brand/90"
+                    class="bg-brand hover:bg-brand/90 h-12 w-full rounded-xl text-sm font-bold text-white transition"
                 >
                     افزودن به سبد خرید
                 </button>

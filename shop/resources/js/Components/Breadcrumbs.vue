@@ -12,28 +12,17 @@ defineProps({
 </script>
 
 <template>
-    <nav
-        v-if="items.length"
-        aria-label="مسیر"
-        class="text-sm text-gray-500"
-    >
+    <nav v-if="items.length" aria-label="مسیر" class="text-sm text-gray-500">
         <ol class="flex flex-wrap items-center gap-1">
-            <li
-                v-for="(item, index) in items"
-                :key="index"
-                class="flex items-center gap-1"
-            >
+            <li v-for="(item, index) in items" :key="index" class="flex items-center gap-1">
                 <AppLink
                     v-if="item.url && index < items.length - 1"
                     :href="item.url"
-                    class="transition hover:text-brand"
+                    class="hover:text-brand transition"
                 >
                     {{ item.heading }}
                 </AppLink>
-                <span
-                    v-else
-                    class="font-medium text-gray-700"
-                >
+                <span v-else class="font-medium text-gray-700">
                     {{ item.heading }}
                 </span>
 

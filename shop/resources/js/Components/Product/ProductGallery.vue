@@ -47,30 +47,27 @@ watch(
 
 <template>
     <div class="flex flex-col gap-3">
-        <div class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+        <div
+            class="flex aspect-square items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-gray-50"
+        >
             <img
                 v-if="images.length"
                 :src="images[activeIndex].url"
                 :alt="images[activeIndex].alt || alt"
                 class="h-full w-full object-contain"
-            >
-            <Icon
-                v-else
-                :icon="uiIcons.image"
-                class="text-6xl text-gray-300"
             />
+            <Icon v-else :icon="uiIcons.image" class="text-6xl text-gray-300" />
         </div>
 
-        <div
-            v-if="images.length > 1"
-            class="flex flex-wrap gap-2"
-        >
+        <div v-if="images.length > 1" class="flex flex-wrap gap-2">
             <button
                 v-for="(image, index) in images"
                 :key="index"
                 type="button"
                 class="h-16 w-16 overflow-hidden rounded-lg border bg-white transition"
-                :class="index === activeIndex ? 'border-brand' : 'border-gray-200 hover:border-gray-300'"
+                :class="
+                    index === activeIndex ? 'border-brand' : 'border-gray-200 hover:border-gray-300'
+                "
                 @click="activeIndex = index"
             >
                 <img
@@ -78,7 +75,7 @@ watch(
                     :alt="image.alt || alt"
                     loading="lazy"
                     class="h-full w-full object-contain"
-                >
+                />
             </button>
         </div>
     </div>

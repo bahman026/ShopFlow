@@ -204,6 +204,10 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
   - Register every icon as an object in `resources/js/fontawesome.js` (solid from `@fortawesome/free-solid-svg-icons`, brands from `@fortawesome/free-brands-svg-icons`) and pass the imported icon object: `<Icon :icon="..." />`.
   - Do NOT use string names with `library.add` (e.g. `['fab','instagram']`). Inertia turns FontAwesome's missing-icon `console.error` into an SSR exception, so string lookups break SSR. Passing icon objects is the SSR-safe, tree-shakeable pattern.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
+- **Lint & format the frontend** (the JS/Vue equivalent of Pint/PHPStan):
+  - **Prettier** formats `resources/js` (config in `.prettierrc.json`: 4-space indent, single quotes, semicolons, `printWidth` 100, Tailwind class sorting via `prettier-plugin-tailwindcss`).
+  - **ESLint** (flat config in `eslint.config.js`: `eslint-plugin-vue` recommended + `@vue/eslint-config-prettier`) analyses and auto-fixes Vue/JS issues.
+  - Scripts: `npm run format` (write) / `npm run format:check`, `npm run lint` / `npm run lint:fix`. Run them before finishing frontend work; `composer test-dev` also runs `lint` + `format:check`.
 
 ## Language, RTL & fonts
 
@@ -244,6 +248,7 @@ Keep controllers thin and push logic into single-purpose actions that return typ
   - Do not create DTOs for small value shapes (prices, links, breadcrumbs, variant axes/options). Type those as PHPDoc array shapes instead, e.g. `array{price: int, salePrice: int|null, discountPercent: int|null}` or `array{heading: string, url: string}`.
   - Provide a `toArray(): array` for the Inertia boundary. Flat DTOs may use `get_object_vars($this)`; DTOs holding nested DTOs convert them explicitly in `toArray()`. Add a `fromArray(array $data): self` only when something actually hydrates the DTO from an array (e.g. cache payloads, queue jobs) — don't add it speculatively.
   - Actions return DTOs (or plain typed arrays for value shapes / lightweight cards); the controller calls `->toArray()` on DTOs at the Inertia boundary so the frontend receives plain nested arrays. Do not pass DTO objects straight into `Inertia::render` (Inertia testing reads array keys, not object properties).
+- **Type every query closure** (100% type coverage requires it). Eager-load constraints inside `with([...])` receive a `Illuminate\Database\Eloquent\Relations\Relation` — type the param as `Relation` and use base query methods. Larastan can't resolve model scopes (`published()`, `active()`) on a bare `Relation`, so inline the filter instead, e.g. `fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)`. `tap()` closures get a `Builder`; `map()`/`filter()`/`each()` over an Eloquent collection get the model type (`fn (Variety $variety) => ...`).
 
 ## Models
 

@@ -14,7 +14,9 @@ const props = defineProps({
     },
 });
 
-const stars = computed(() => Array.from({ length: 5 }, (_, index) => index < Math.round(props.rating)));
+const stars = computed(() =>
+    Array.from({ length: 5 }, (_, index) => index < Math.round(props.rating)),
+);
 </script>
 
 <template>
@@ -27,11 +29,6 @@ const stars = computed(() => Array.from({ length: 5 }, (_, index) => index < Mat
                 :class="filled ? 'text-amber-400' : 'text-gray-200'"
             />
         </div>
-        <span
-            v-if="count !== null"
-            class="text-xs text-gray-400"
-        >
-            ({{ count }})
-        </span>
+        <span v-if="count !== null" class="text-xs text-gray-400"> ({{ count }}) </span>
     </div>
 </template>

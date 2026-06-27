@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Home;
 
 use App\Actions\Catalog\TransformImage;
+use App\Models\Slide;
 use App\Models\Slider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class GetHeroSlides
 {
@@ -24,7 +26,7 @@ class GetHeroSlides
         $slider = Slider::query()
             ->published()
             ->where('position', self::POSITION)
-            ->with(['slides' => fn ($query) => $query->orderBy('order'), 'slides.image'])
+            ->with(['slides' => fn (Relation $query) => $query->orderBy('order'), 'slides.image'])
             ->first();
 
         if ($slider === null) {
@@ -32,7 +34,7 @@ class GetHeroSlides
         }
 
         return $slider->slides
-            ->map(fn ($slide): array => [
+            ->map(fn (Slide $slide): array => [
                 'id' => $slide->id,
                 'heading' => $slide->heading,
                 'label' => $slide->label,

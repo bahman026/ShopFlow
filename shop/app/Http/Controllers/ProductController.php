@@ -7,7 +7,10 @@ namespace App\Http\Controllers;
 use App\Actions\Product\BuildProductBreadcrumbs;
 use App\Actions\Product\BuildProductDetail;
 use App\Actions\Product\GetRelatedProducts;
+use App\Enums\ReviewStatusEnum;
+use App\Enums\VarietyStatusEnum;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,13 +30,13 @@ class ProductController extends Controller
                 'images',
                 'brand',
                 'category',
-                'varieties' => fn ($query) => $query->published()->with([
+                'varieties' => fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)->with([
                     'image',
                     'attribute.attributeGroup',
                     'attributes.attributeGroup',
                 ]),
                 'attributes',
-                'reviews' => fn ($query) => $query->approved()->whereNull('parent_id')->with('user')->latest(),
+                'reviews' => fn (Relation $query) => $query->where('status', ReviewStatusEnum::APPROVED->value)->whereNull('parent_id')->with('user')->latest(),
             ])
             ->firstOrFail();
 

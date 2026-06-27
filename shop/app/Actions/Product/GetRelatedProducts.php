@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Product;
 
 use App\Actions\Catalog\BuildProductCard;
+use App\Enums\VarietyStatusEnum;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class GetRelatedProducts
 {
@@ -31,7 +33,7 @@ class GetRelatedProducts
             ->published()
             ->where('category_id', $product->category_id)
             ->whereKeyNot($product->id)
-            ->with(['featuredImage', 'varieties' => fn ($query) => $query->published()])
+            ->with(['featuredImage', 'varieties' => fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)])
             ->latest('id')
             ->limit(self::LIMIT)
             ->get()

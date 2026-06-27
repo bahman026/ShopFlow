@@ -60,10 +60,10 @@ onBeforeUnmount(() => {
                     :src="slide.image.url"
                     :alt="slide.image.alt || slide.heading || ''"
                     class="h-full w-full object-cover"
-                >
+                />
                 <div
                     v-if="slide.heading || slide.label"
-                    class="absolute bottom-0 right-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white sm:p-6"
+                    class="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-4 text-white sm:p-6"
                 >
                     <p v-if="slide.heading" class="text-base font-bold sm:text-2xl">
                         {{ slide.heading }}
@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
                     :key="slide.id"
                     type="button"
                     class="h-2 rounded-full transition-all"
-                    :class="index === current ? 'w-5 bg-brand' : 'w-2 bg-white/70'"
+                    :class="index === current ? 'bg-brand w-5' : 'w-2 bg-white/70'"
                     :aria-label="`اسلاید ${index + 1}`"
                     @click="go(index)"
                 />

@@ -110,7 +110,9 @@ const buyBox = computed(() => {
 
 const metaTitle = computed(() => props.product.title || props.product.heading);
 const metaDescription = computed(
-    () => props.product.description || `خرید ${props.product.heading} با بهترین قیمت از فروشگاه اینترنتی.`,
+    () =>
+        props.product.description ||
+        `خرید ${props.product.heading} با بهترین قیمت از فروشگاه اینترنتی.`,
 );
 
 const jsonLd = computed(() => {
@@ -178,7 +180,7 @@ const jsonLd = computed(() => {
                 </div>
 
                 <div class="flex flex-col gap-4 lg:col-span-4">
-                    <h1 class="text-xl font-bold leading-relaxed text-gray-900">
+                    <h1 class="text-xl leading-relaxed font-bold text-gray-900">
                         {{ product.heading }}
                     </h1>
 
@@ -186,16 +188,13 @@ const jsonLd = computed(() => {
                         <AppLink
                             v-if="product.brand"
                             :href="product.brand.url"
-                            class="text-sm text-brand transition hover:underline"
+                            class="text-brand text-sm transition hover:underline"
                         >
                             {{ product.brand.heading }}
                         </AppLink>
 
                         <a href="#reviews">
-                            <RatingStars
-                                :rating="0"
-                                :count="product.reviewCount"
-                            />
+                            <RatingStars :rating="0" :count="product.reviewCount" />
                         </a>
                     </div>
 
@@ -218,10 +217,7 @@ const jsonLd = computed(() => {
                 </div>
             </div>
 
-            <section
-                v-if="product.content"
-                id="description"
-            >
+            <section v-if="product.content" id="description">
                 <h2 class="mb-4 text-lg font-bold text-gray-900">معرفی محصول</h2>
                 <div
                     class="prose prose-sm max-w-none leading-loose text-gray-700"
@@ -233,11 +229,7 @@ const jsonLd = computed(() => {
 
             <ProductReviews :reviews="product.reviews" />
 
-            <ProductCarousel
-                v-if="related.length"
-                title="محصولات مشابه"
-                :products="related"
-            />
+            <ProductCarousel v-if="related.length" title="محصولات مشابه" :products="related" />
         </div>
     </AppLayout>
 </template>
