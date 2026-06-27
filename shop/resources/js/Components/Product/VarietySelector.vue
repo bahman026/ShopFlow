@@ -81,6 +81,12 @@ watch(activeVariety, (item) => {
     emit('update:modelValue', item ? item.id : null);
 }, { immediate: true });
 
+// Flat fallback (no attribute axes): a lone in-stock variety needs no choice,
+// so auto-select it instead of forcing a meaningless click.
+if (!hasAxes.value && props.varieties.length === 1 && props.varieties[0].inStock) {
+    emit('update:modelValue', props.varieties[0].id);
+}
+
 function isSelected(groupId, value) {
     return String(selected.value[groupId]) === String(value);
 }

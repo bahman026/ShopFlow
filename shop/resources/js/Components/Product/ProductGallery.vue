@@ -8,6 +8,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    activeUrl: {
+        type: String,
+        default: null,
+    },
     alt: {
         type: String,
         default: '',
@@ -21,6 +25,23 @@ watch(
     () => {
         activeIndex.value = 0;
     },
+);
+
+// Switch the main image to the selected variety's photo when it's in the list.
+watch(
+    () => props.activeUrl,
+    (url) => {
+        if (!url) {
+            return;
+        }
+
+        const index = props.images.findIndex((image) => image.url === url);
+
+        if (index !== -1) {
+            activeIndex.value = index;
+        }
+    },
+    { immediate: true },
 );
 </script>
 

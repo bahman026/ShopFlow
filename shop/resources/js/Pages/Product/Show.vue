@@ -38,17 +38,18 @@ const selectedVariety = computed(
     () => props.product.varieties.find((variety) => variety.id === selectedVarietyId.value) ?? null,
 );
 
+// Show every image: the product gallery plus each variety's image, combined
+// and deduped by URL. Nothing is hidden when a variety is selected.
 const galleryImages = computed(() => {
     const base = props.product.gallery ?? [];
 
-    const images = selectedVariety.value?.image
-        ? [selectedVariety.value.image, ...base]
-        : base;
+    const varietyImages = props.product.varieties
+        .map((variety) => variety.image)
+        .filter((image) => image);
 
-    // Drop duplicates (a variety image may be the same file as the featured one).
     const seen = new Set();
 
-    return images.filter((image) => {
+    return [...base, ...varietyImages].filter((image) => {
         if (seen.has(image.url)) {
             return false;
         }
@@ -58,6 +59,14 @@ const galleryImages = computed(() => {
         return true;
     });
 });
+
+// Selecting a variety just switches the main image to that variety's photo.
+const activeImageUrl = computed(() => selectedVariety.value?.image?.url ?? null);
+
+// True when the product has varieties but none of them are buyable.
+const allVarietiesOutOfStock = computed(
+    () => hasVarieties && !props.product.varieties.some((variety) => variety.inStock),
+);
 
 const buyBox = computed(() => {
     if (selectedVariety.value) {
@@ -71,6 +80,19 @@ const buyBox = computed(() => {
             salePrice: props.product.salePrice,
             discountPercent: props.product.discountPercent,
             inStock: props.product.inStock,
+            inventory: null,
+            selected: true,
+        };
+    }
+
+    // Everything is out of stock: show the unavailable state, not a prompt.
+    if (allVarietiesOutOfStock.value) {
+        return {
+            price: null,
+            salePrice: null,
+            discountPercent: null,
+            inStock: false,
+            inventory: 0,
             selected: true,
         };
     }
@@ -81,6 +103,7 @@ const buyBox = computed(() => {
         salePrice: null,
         discountPercent: null,
         inStock: false,
+        inventory: null,
         selected: false,
     };
 });
@@ -149,6 +172,7 @@ const jsonLd = computed(() => {
                 <div class="lg:col-span-5">
                     <ProductGallery
                         :images="galleryImages"
+                        :active-url="activeImageUrl"
                         :alt="product.heading"
                     />
                 </div>
@@ -188,6 +212,7 @@ const jsonLd = computed(() => {
                         :sale-price="buyBox.salePrice"
                         :discount-percent="buyBox.discountPercent"
                         :in-stock="buyBox.inStock"
+                        :inventory="buyBox.inventory"
                         :selected="buyBox.selected"
                     />
                 </div>

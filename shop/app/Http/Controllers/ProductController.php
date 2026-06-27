@@ -129,6 +129,7 @@ class ProductController extends Controller
             'salePrice' => $hasDiscount ? $salePrice : null,
             'discountPercent' => $hasDiscount ? $this->discountPercent($price, $salePrice) : null,
             'inStock' => $this->varietyInStock($variety),
+            'inventory' => $this->varietyInStock($variety) ? (int) $variety->inventory : 0,
             'image' => $this->image($variety->image),
             'options' => $this->varietyOptions($variety),
         ];
@@ -186,11 +187,16 @@ class ProductController extends Controller
     private function variantAxes(Collection $varieties): array
     {
         $axes = [];
-        $primaryGroupId = null;
+
+        // The primary axis is the group most varieties pin via their primary
+        // attribute (attribute_id). Counting keeps it stable even if a single
+        // variety has inconsistent data; ties fall back to first seen.
+        $primaryVotes = [];
 
         foreach ($varieties as $variety) {
             if ($variety->attribute !== null) {
-                $primaryGroupId = $variety->attribute->attribute_group_id;
+                $groupId = $variety->attribute->attribute_group_id;
+                $primaryVotes[$groupId] = ($primaryVotes[$groupId] ?? 0) + 1;
             }
 
             foreach ($this->varietyAttributes($variety) as $attribute) {
@@ -210,8 +216,17 @@ class ProductController extends Controller
             }
         }
 
-        if ($primaryGroupId !== null && isset($axes[$primaryGroupId])) {
-            $axes[$primaryGroupId]['primary'] = true;
+        if ($primaryVotes !== []) {
+            $primaryGroupId = array_key_first($primaryVotes);
+            foreach ($primaryVotes as $groupId => $votes) {
+                if ($votes > $primaryVotes[$primaryGroupId]) {
+                    $primaryGroupId = $groupId;
+                }
+            }
+
+            if (isset($axes[$primaryGroupId])) {
+                $axes[$primaryGroupId]['primary'] = true;
+            }
         }
 
         return array_values(array_map(function (array $axis): array {

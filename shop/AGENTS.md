@@ -298,6 +298,7 @@ DB_DATABASE=shop_flow_test php artisan db:seed --class="Database\Seeders\Setting
 - **No seller / marketplace system.** ShopFlow is a single-vendor store. Never add `seller_id`, `seller_creator_id`, or any seller relation to models, migrations, or controllers.
 - **Inventory**: stock is decremented only on successful payment (Strategy A); carts never change inventory. See `docs/ORDER.md`.
 - **Quantity cap**: the customer can never choose a quantity above the selected variety's available stock. The quantity input on the product/cart pages must clamp to the variety `inventory`; the add-to-cart action must reject amounts beyond it.
+- **Product gallery**: show all images together — the product images plus every variety image, combined and deduped by URL. Never hide images based on the selection; selecting a variety only switches the main image to that variety's photo (when it exists in the list).
 - **Addresses are immutable history.** Editing an address creates a new record (inheriting the edited one's primary status); addresses are never deleted, so orders keep an accurate history.
 
 ## Roadmap & docs

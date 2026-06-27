@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Icon from '@/Components/Icon.vue';
 import { uiIcons } from '@/fontawesome';
 import { useFormat } from '@/composables/useFormat';
@@ -21,6 +21,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    inventory: {
+        type: Number,
+        default: null,
+    },
     selected: {
         type: Boolean,
         default: true,
@@ -33,6 +37,12 @@ const quantity = ref(1);
 const hasDiscount = computed(() => props.salePrice !== null && props.salePrice < props.price);
 const finalPrice = computed(() => (hasDiscount.value ? props.salePrice : props.price));
 
+// Highest quantity the customer may pick; null inventory means no known cap.
+const maxQuantity = computed(() =>
+    props.inventory === null ? Infinity : Math.max(0, props.inventory),
+);
+const atMax = computed(() => quantity.value >= maxQuantity.value);
+
 const trust = [
     { icon: uiIcons.shield, label: 'تضمین اصالت کالا' },
     { icon: uiIcons.returns, label: '۷ روز ضمانت بازگشت' },
@@ -40,8 +50,18 @@ const trust = [
 ];
 
 function changeQuantity(delta) {
-    quantity.value = Math.max(1, quantity.value + delta);
+    const next = quantity.value + delta;
+
+    quantity.value = Math.min(maxQuantity.value, Math.max(1, next));
 }
+
+// Reset to 1 and clamp whenever the selected variety (its stock) changes.
+watch(
+    () => [props.inventory, props.selected, props.inStock],
+    () => {
+        quantity.value = 1;
+    },
+);
 </script>
 
 <template>
@@ -99,8 +119,9 @@ function changeQuantity(delta) {
                     <div class="flex h-10 items-center rounded-lg border border-gray-200">
                         <button
                             type="button"
-                            class="px-3 text-gray-600 transition hover:text-brand"
+                            class="px-3 text-gray-600 transition hover:text-brand disabled:text-gray-300"
                             aria-label="افزایش"
+                            :disabled="atMax"
                             @click="changeQuantity(1)"
                         >
                             <Icon
@@ -125,6 +146,13 @@ function changeQuantity(delta) {
                         </button>
                     </div>
                 </div>
+
+                <p
+                    v-if="atMax && inventory !== null"
+                    class="text-xs text-gray-400"
+                >
+                    بیشترین تعداد موجود: {{ toPersianDigits(inventory) }}
+                </p>
 
                 <button
                     type="button"
