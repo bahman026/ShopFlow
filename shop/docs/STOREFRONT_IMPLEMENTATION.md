@@ -48,7 +48,8 @@ Read-only catalog. This is where SEO and SSR matter most.
 - [x] Product reviews (read) on the product page (approved only). Ratings summary deferred (no numeric rating field in `reviews`)
 - [x] Brand page: `BrandController@show` (`/brands/{slug}`) + `Brand/Show.vue`. Lists a brand's products with facet filters (category, price range, availability), sorting, pagination; sidebar `BrandFilters` (accordion, price slider, category search + counts) + shared toolbar/`Pagination`/`EmptyState`; breadcrumbs; JSON-LD `BreadcrumbList`; feature tests. Thin controller + `app/Actions/Brand/*` + `BrandDTO`. Shared catalog test helpers moved to `tests/Helpers.php`
 - [ ] Search: keyword search over products with results page
-- [ ] CMS pages (`pages.{slug}`) and FAQ page (`faqs.{position}`)
+- [x] CMS pages (`pages.show`): `PageController@show` + `Page/Show.vue`. Served at clean top-level slugs (e.g. `/about-us`) via a catch-all `/{slug}` route kept LAST in `routes/web.php`; published pages only; heading, HTML content, optional image; breadcrumbs; JSON-LD `BreadcrumbList`; canonical/noindex; feature tests. `PageDTO` + `BuildPageDetail`
+- [x] FAQ page (`faqs.show`): `FaqController@show` + `Faq/Show.vue` (accordion). `/faq` shows null-position questions, `/faq/{position}` scopes to a section; ordered by `order`; JSON-LD `FAQPage` + `BreadcrumbList`; feature tests. `FaqDTO` + `GetFaqs`
 - [ ] SEO per page: unique title/description, canonical, Open Graph, JSON-LD `Product` (+ `Offer`), `BreadcrumbList`, `Organization`/`WebSite` on home
 - [ ] `sitemap.xml` (categories, products, brands, pages) and correct 200/404 status codes
 

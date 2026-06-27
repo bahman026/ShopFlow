@@ -1,6 +1,12 @@
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { faInstagram, faTelegram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
+import {
+    faInstagram,
+    faTelegram,
+    faLinkedinIn,
+    faFacebookF,
+    faWhatsapp,
+} from '@fortawesome/free-brands-svg-icons';
 import {
     faLink,
     faChevronLeft,
@@ -29,6 +35,8 @@ config.autoAddCss = false;
 export const socialIcons = {
     instagram: faInstagram,
     telegram: faTelegram,
+    facebook: faFacebookF,
+    whatsapp: faWhatsapp,
     linkedin: faLinkedinIn,
     fallback: faLink,
 };

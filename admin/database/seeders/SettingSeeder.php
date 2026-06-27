@@ -96,6 +96,8 @@ class SettingSeeder extends Seeder
                 'content' => $this->json([
                     ['name' => 'اینستاگرام', 'url' => 'https://instagram.com/shopflow'],
                     ['name' => 'تلگرام', 'url' => 'https://t.me/shopflow'],
+                    ['name' => 'فیسبوک', 'url' => 'https://facebook.com/shopflow'],
+                    ['name' => 'واتساپ', 'url' => 'https://wa.me/989000000000'],
                     ['name' => 'لینکدین', 'url' => 'https://linkedin.com/company/shopflow'],
                 ]),
             ],
