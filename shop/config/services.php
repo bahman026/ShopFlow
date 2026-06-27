@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Neshan maps. The web map key is sent to the browser (domain-restricted);
+    // the service key stays server-side for reverse geocoding.
+    'neshan' => [
+        'map_key' => env('NESHAN_MAP_KEY'),
+        'service_key' => env('NESHAN_SERVICE_KEY'),
+    ],
+
 ];

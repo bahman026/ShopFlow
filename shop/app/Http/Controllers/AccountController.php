@@ -74,11 +74,6 @@ class AccountController extends Controller
         return $this->comingSoon('علاقه‌مندی‌های من');
     }
 
-    public function addresses(): Response
-    {
-        return $this->comingSoon('نشانی‌ها');
-    }
-
     public function reviews(): Response
     {
         return $this->comingSoon('نظرات ثبت‌شده');

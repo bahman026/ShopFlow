@@ -21,6 +21,8 @@ return new class extends Migration
             $table->text('phone');
             $table->text('postal_code')->nullable();
             $table->text('address');
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
             $table->string('description')->nullable();
             $table->boolean('prime')->default(false);
             $table->softDeletes();

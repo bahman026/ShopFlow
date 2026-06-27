@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * App\Models\Address
- *
  * @property positive-int $id
  * @property string $name
  * @property string $phone
- * @property string $postal_code
+ * @property string|null $postal_code
  * @property string $address
  * @property string|null $latitude
  * @property string|null $longitude
@@ -32,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Address extends Model
 {
-    use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
@@ -54,9 +51,8 @@ class Address extends Model
 
     protected static function booted(): void
     {
-        // Addresses are immutable history (orders reference them), so we never
-        // mutate or delete them. We only keep a single primary per user: when
-        // an address is saved as primary, demote the user's other addresses.
+        // One primary address per user: when an address is saved as primary,
+        // demote the user's other addresses (mirrors the admin model).
         static::saved(function (Address $address): void {
             if ($address->prime) {
                 static::query()
@@ -66,6 +62,11 @@ class Address extends Model
                     ->update(['prime' => false]);
             }
         });
+    }
+
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
     }
 
     public function city(): BelongsTo

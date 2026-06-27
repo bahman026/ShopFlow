@@ -32,6 +32,7 @@ import {
     faClipboardList,
     faRightFromBracket,
     faPenToSquare,
+    faTrashCan,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -72,4 +73,5 @@ export const uiIcons = {
     orders: faClipboardList,
     logout: faRightFromBracket,
     edit: faPenToSquare,
+    trash: faTrashCan,
 };

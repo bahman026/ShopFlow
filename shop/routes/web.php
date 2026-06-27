@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
@@ -46,8 +47,16 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::get('/orders', [AccountController::class, 'orders'])->name('orders');
     Route::get('/returns', [AccountController::class, 'returns'])->name('returns');
     Route::get('/wishlist', [AccountController::class, 'wishlist'])->name('wishlist');
-    Route::get('/addresses', [AccountController::class, 'addresses'])->name('addresses');
     Route::get('/reviews', [AccountController::class, 'reviews'])->name('reviews');
+
+    Route::get('/addresses', [AddressController::class, 'index'])->name('addresses');
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+    Route::put('/addresses/{address}/primary', [AddressController::class, 'setPrimary'])->name('addresses.primary');
+    Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+    Route::get('/addresses-cities', [AddressController::class, 'cities'])->name('addresses.cities');
+    Route::get('/addresses-reverse', [AddressController::class, 'reverse'])->name('addresses.reverse');
+    Route::get('/addresses-static', [AddressController::class, 'staticMap'])->name('addresses.static');
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
