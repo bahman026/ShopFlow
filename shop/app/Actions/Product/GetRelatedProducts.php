@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Product;
 
-use App\Actions\Catalog\CalculatePricing;
-use App\Actions\Catalog\TransformImage;
+use App\Actions\Catalog\BuildProductCard;
 use App\Models\Product;
-use App\Models\Variety;
-use Illuminate\Database\Eloquent\Collection;
 
 class GetRelatedProducts
 {
@@ -17,10 +14,7 @@ class GetRelatedProducts
      */
     private const LIMIT = 12;
 
-    public function __construct(
-        private CalculatePricing $pricing,
-        private TransformImage $transformImage,
-    ) {}
+    public function __construct(private BuildProductCard $buildProductCard) {}
 
     /**
      * Related products (lightweight cards) from the same category.
@@ -41,28 +35,7 @@ class GetRelatedProducts
             ->latest('id')
             ->limit(self::LIMIT)
             ->get()
-            ->map(fn (Product $related): array => $this->card($related))
+            ->map(fn (Product $related): array => ($this->buildProductCard)($related))
             ->all();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function card(Product $product): array
-    {
-        /** @var Collection<int, Variety> $varieties */
-        $varieties = $product->varieties;
-
-        $pricing = $this->pricing->forVarieties($varieties, (int) $product->price);
-
-        return [
-            'id' => $product->id,
-            'heading' => $product->heading,
-            'url' => '/products/'.$product->slug,
-            'image' => ($this->transformImage)($product->featuredImage)?->toArray(),
-            'price' => $pricing['price'],
-            'salePrice' => $pricing['salePrice'],
-            'discountPercent' => $pricing['discountPercent'],
-        ];
     }
 }

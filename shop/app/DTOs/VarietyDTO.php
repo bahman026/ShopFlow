@@ -23,27 +23,6 @@ readonly class VarietyDTO
     ) {}
 
     /**
-     * @param  array<string, mixed>  $data
-     */
-    public static function fromArray(array $data): self
-    {
-        $image = $data['image'] ?? null;
-
-        return new self(
-            $data['id'],
-            $data['label'] ?? null,
-            $data['color'] ?? null,
-            $data['price'],
-            $data['salePrice'] ?? null,
-            $data['discountPercent'] ?? null,
-            $data['inStock'] ?? false,
-            $data['inventory'] ?? 0,
-            $image instanceof ImageDTO || $image === null ? $image : ImageDTO::fromArray($image),
-            $data['options'] ?? [],
-        );
-    }
-
-    /**
      * @return array<string, mixed>
      */
     public function toArray(): array

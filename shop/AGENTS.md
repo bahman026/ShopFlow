@@ -242,7 +242,7 @@ Keep controllers thin and push logic into single-purpose actions that return typ
 - **Actions** live in `app/Actions/<Area>/` (e.g. `Actions/Catalog`, `Actions/Product`), one responsibility per class, invoked via `__invoke(...)`. Reusable, cross-page actions (image/price shaping) go under `Actions/Catalog`; page-specific ones under their feature folder. Actions depend on other actions through constructor injection.
 - **DTOs** live in `app/DTOs/`, **one per model** (`ProductDTO`, `VarietyDTO`, `ImageDTO`, `ReviewDTO`, ...). They are `readonly` classes using constructor property promotion with `camelCase` properties that match the Inertia/JSON keys the frontend expects.
   - Do not create DTOs for small value shapes (prices, links, breadcrumbs, variant axes/options). Type those as PHPDoc array shapes instead, e.g. `array{price: int, salePrice: int|null, discountPercent: int|null}` or `array{heading: string, url: string}`.
-  - Provide `fromArray(array $data): self` and `toArray(): array`. Leaf DTOs may use `get_object_vars($this)`; DTOs holding nested DTOs convert them explicitly in `toArray()`.
+  - Provide a `toArray(): array` for the Inertia boundary. Flat DTOs may use `get_object_vars($this)`; DTOs holding nested DTOs convert them explicitly in `toArray()`. Add a `fromArray(array $data): self` only when something actually hydrates the DTO from an array (e.g. cache payloads, queue jobs) — don't add it speculatively.
   - Actions return DTOs (or plain typed arrays for value shapes / lightweight cards); the controller calls `->toArray()` on DTOs at the Inertia boundary so the frontend receives plain nested arrays. Do not pass DTO objects straight into `Inertia::render` (Inertia testing reads array keys, not object properties).
 
 ## Models
