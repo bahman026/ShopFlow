@@ -204,6 +204,7 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
   - Register every icon as an object in `resources/js/fontawesome.js` (solid from `@fortawesome/free-solid-svg-icons`, brands from `@fortawesome/free-brands-svg-icons`) and pass the imported icon object: `<Icon :icon="..." />`.
   - Do NOT use string names with `library.add` (e.g. `['fab','instagram']`). Inertia turns FontAwesome's missing-icon `console.error` into an SSR exception, so string lookups break SSR. Passing icon objects is the SSR-safe, tree-shakeable pattern.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
+- **SSR runtime**: SSR is served by a Node process (`php artisan inertia:start-ssr`, port 13714). It has no auto-restart and Inertia's SSR server crashes the whole process on a bad request body (it `JSON.parse`s with no error handling), after which every page silently falls back to client-side (empty `<div id="app">`, no `data-server-rendered`). If pages stop rendering server-side, restart it and never POST malformed payloads to the render endpoint. After `npm run build`, restart SSR so it serves the new bundle.
 - **Lint & format the frontend** (the JS/Vue equivalent of Pint/PHPStan):
   - **Prettier** formats `resources/js` (config in `.prettierrc.json`: 4-space indent, single quotes, semicolons, `printWidth` 100, Tailwind class sorting via `prettier-plugin-tailwindcss`).
   - **ESLint** (flat config in `eslint.config.js`: `eslint-plugin-vue` recommended + `@vue/eslint-config-prettier`) analyses and auto-fixes Vue/JS issues.
@@ -314,7 +315,12 @@ DB_DATABASE=shop_flow_test php artisan db:seed --class="Database\Seeders\Setting
 - **No seller / marketplace system.** ShopFlow is a single-vendor store. Never add `seller_id`, `seller_creator_id`, or any seller relation to models, migrations, or controllers.
 - **Inventory**: stock is decremented only on successful payment (Strategy A); carts never change inventory. See `docs/ORDER.md`.
 - **Quantity cap**: the customer can never choose a quantity above the selected variety's available stock. The quantity input on the product/cart pages must clamp to the variety `inventory`; the add-to-cart action must reject amounts beyond it.
+- **Catalog filtering**: attribute filters on the category page match products through the `product_attribute` pivot (`Product::attributes()`) — the schema's documented "filters to products" link — never through `varieties`/`attribute_variety` (those drive the product page's variety selector). `attribute_group_category.as_filter` decides which groups appear as filters (resolved across the category and its descendants). Facet within a group is OR, across groups is AND.
+  - Facets only list values actually attached to products in the category, and each option carries a product `count` (category-level baseline, not recomputed against the other active selections).
+  - An availability filter (`in_stock` → `products.has_stock`) and a price range (on `products.price`, the denormalized cheapest-variety base price) are also supported.
+  - Filter UI is Digikala-style (`CategoryFilters.vue`): availability toggle, price range slider, brand list with a search box, collapsible accordion sections, per-option counts, and instant apply on change.
 - **Product gallery**: show all images together — the product images plus every variety image, combined and deduped by URL. Never hide images based on the selection; selecting a variety only switches the main image to that variety's photo (when it exists in the list).
+- **Product cards**: the card image is the product's `featuredImage`, falling back to the first variety image so cards still show a photo when the product has no product-level image (eager-load `varieties.image` wherever cards are built to avoid N+1). Cards link via `AppLink` with `new-tab` so products open in a new tab.
 - **Addresses are immutable history.** Editing an address creates a new record (inheriting the edited one's primary status); addresses are never deleted, so orders keep an accurate history.
 
 ## Roadmap & docs

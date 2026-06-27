@@ -13,6 +13,8 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - Persian digits and Jalali dates, formatted server-side.
 - One Vue component per element; pages under `resources/js/Pages`, shared shells under `resources/js/Layouts`, reusable elements under `resources/js/Components`.
 - Catalog tables are read-only here; never recreate or migrate admin-owned tables.
+- Keep controllers thin: push data loading/shaping into single-purpose actions (`app/Actions`) that return typed DTOs (`app/DTOs`, one per model). See `ProductController`/`HomeController` + their actions. Details in `AGENTS.md`.
+- Before finishing, run `composer test-dev` (Pest, Pint, 100% type coverage, PHPStan level 5, ESLint, Prettier). CI runs the same checks.
 
 ---
 
@@ -23,13 +25,15 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - [x] `A Iranian Sans` font + brand color `#ff8615`
 - [x] Base `AppLayout` + sample `Home` page
 - [x] Eloquent models mapping shared tables (read-focused): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review` (+ status enums and `HasOptions` trait). Relations to not-yet-created models (`AttributeGroup`, `Coupon`, `Discount`) are deferred to their phases.
-- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` + `PriceTag` + `ProductCard` + `SectionHeading` + `Breadcrumbs` + `RatingStars` done; `QuantityInput`, `Pagination`, `EmptyState` pending
+- [~] Shared UI kit components: `BaseButton` + `AppLink` (supports `new-tab` + external-link detection) + `Icon` + `PriceTag` + `ProductCard` (image falls back to first variety image when the product has none; opens in a new tab) + `SectionHeading` + `Breadcrumbs` + `RatingStars` + `Pagination` + `EmptyState` done; `QuantityInput` pending
 - [x] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
 - [x] SEO scaffolding: per-page `<Head>` via `AppHead` component, shared meta defaults (Inertia `seo` shared prop), canonical URL, Open Graph + Twitter, `robots.txt`
 - [x] Error pages (404 / 500) in Persian, RTL (self-contained Blade, brand color, IranSans, no Vite/SSR dependency)
 - [x] Shared database connection: shop reads the admin-owned Postgres (`shop_flow_db`); file/sync session/cache/queue so shop owns no tables (`.env.example` stays SQLite for CI/tests)
 - [x] Icon system: FontAwesome (self-hosted via npm) behind the shared `Icon` component, icon-object pattern (SSR-safe). See `AGENTS.md`
 - [x] Global footer wired from `settings`: read-only `Setting` model + Inertia shared `footer` (link columns, contact, socials, about, copyright) rendered by `AppFooter`/`Footer/*` components
+- [x] Server-side structure: thin controllers delegating to actions (`app/Actions/{Catalog,Product,Home}`) returning per-model DTOs (`app/DTOs`)
+- [x] Dev tooling: `composer test-dev` runs Pest, Pint, Pest type-coverage (`--min=100`), PHPStan (level 5), ESLint + Prettier (`resources/js`); mirrored in CI (`deploy-application.yml`)
 
 ## Phase 1 - Catalog browsing (highest SEO value, build first)
 
@@ -38,7 +42,7 @@ Read-only catalog. This is where SEO and SSR matter most.
 - [x] Home page: `HomeController` + `Home.vue` with hero slider, category strip, promo banner grid, product carousels (newest + most viewed), selected brands; JSON-LD `Organization`/`WebSite`; graceful empty states; feature tests. Caching (`CACHE.md` keys 1, 2, 8, 3) deferred to Phase 6
   - Header (`AppHeader` + `Header/*`): logo, search, account/cart actions, desktop category menu with dropdowns, mobile drawer; categories shared via Inertia `nav.categories`
   - `Variety` read model exposes a polymorphic `image` relation (per-color photo) for the upcoming product detail page
-- [ ] Category listing page: products by category with filters (brand, attributes, price range), sorting, pagination
+- [x] Category listing page: `CategoryController@show` (`/categories/{slug}`) + `Category/Show.vue`. Lists the category's products plus its descendants', with facet filters (brand, attribute groups marked `as_filter`, price range), sorting (newest/cheapest/expensive/popular) and pagination; sidebar filters + toolbar + `Pagination`/`EmptyState` components; breadcrumbs; JSON-LD `BreadcrumbList`; feature tests. Attribute filtering matches products through the `product_attribute` pivot (the documented "filters to products" link, NOT varieties); facets list only attribute values actually attached to products in the category; OR within a group, AND across groups. Price filters on `products.price` (denormalized cheapest-variety base price). Filter UI is Digikala-style: availability toggle (`in_stock` → `products.has_stock`), price range slider, brand list with search box, collapsible accordion sections, per-option product counts, and instant apply on change
 - [x] Product detail page: `ProductController@show` (`/products/{slug}`) + `Product/Show.vue`. Gallery shows all images combined (product images + every variety image, deduped by URL); selecting a variety switches the main image to that variety's photo without hiding the others. Variety selector (primary attribute group drives selection, additional attributes constrained by it, never the other way), buy box (price hidden until a variety is fully selected; price/discount/stock, trust badges, quantity), specs, description, breadcrumbs, related carousel; JSON-LD `Product`/`Offer` + `BreadcrumbList`; view counter; feature tests. Add-to-cart wiring deferred to Phase 3
   - Quantity rule: the quantity stepper must never exceed the selected variety's `inventory` (clamp the max). Enforced with cart wiring in Phase 3
 - [x] Product reviews (read) on the product page (approved only). Ratings summary deferred (no numeric rating field in `reviews`)
