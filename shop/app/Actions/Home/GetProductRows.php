@@ -34,7 +34,7 @@ class GetProductRows
         return array_values(array_filter(array_map(function (array $row): array {
             $products = Product::query()
                 ->published()
-                ->with(['featuredImage', 'varieties' => fn (Relation $q) => $q->where('status', VarietyStatusEnum::PUBLISHED->value)])
+                ->with(['featuredImage', 'varieties' => fn (Relation $q) => $q->where('status', VarietyStatusEnum::PUBLISHED->value)->with('image')])
                 ->tap($row['query'])
                 ->limit(self::ROW_LIMIT)
                 ->get()
