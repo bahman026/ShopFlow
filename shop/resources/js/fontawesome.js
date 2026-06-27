@@ -27,6 +27,11 @@ import {
     faPlus,
     faMinus,
     faBorderAll,
+    faHeart,
+    faLocationDot,
+    faClipboardList,
+    faRightFromBracket,
+    faPenToSquare,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -62,4 +67,9 @@ export const uiIcons = {
     plus: faPlus,
     minus: faMinus,
     grid: faBorderAll,
+    heart: faHeart,
+    location: faLocationDot,
+    orders: faClipboardList,
+    logout: faRightFromBracket,
+    edit: faPenToSquare,
 };

@@ -27,6 +27,12 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
+    /**
+     * Domain used for the synthetic email given to OTP-only sign-ups (the
+     * shared schema requires a unique, non-null email).
+     */
+    public const PLACEHOLDER_EMAIL_DOMAIN = '@mobile.shopflow.local';
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -66,5 +72,18 @@ class User extends Authenticatable
         $name = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
 
         return $name !== '' ? $name : $this->mobile;
+    }
+
+    public static function placeholderEmail(string $mobile): string
+    {
+        return $mobile.self::PLACEHOLDER_EMAIL_DOMAIN;
+    }
+
+    /**
+     * Whether the email is the synthetic placeholder from an OTP sign-up.
+     */
+    public function hasPlaceholderEmail(): bool
+    {
+        return $this->email !== null && str_ends_with($this->email, self::PLACEHOLDER_EMAIL_DOMAIN);
     }
 }

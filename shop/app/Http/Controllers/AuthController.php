@@ -84,7 +84,7 @@ class AuthController extends Controller
             $user->status = UserStatusEnum::ACTIVE;
             $user->first_name = '';
             $user->last_name = '';
-            $user->email = $mobile.'@mobile.shopflow.local';
+            $user->email = User::placeholderEmail($mobile);
             $user->password = Hash::make(Str::random(40));
         }
 

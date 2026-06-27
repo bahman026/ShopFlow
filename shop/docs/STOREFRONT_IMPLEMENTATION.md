@@ -64,8 +64,8 @@ Auth uses the shared `users` table. Password reset via mobile (`mobile_password_
   - The shared `users` table requires `email`/`password`/name, so OTP sign-ups seed placeholders (`{mobile}@mobile.shopflow.local`, a random password, empty names) the user can complete later.
   - Blocked users (`status = BLOCK`) cannot log in. `auth.user` and auth `flash` are shared via `HandleInertiaRequests`; the header shows the name + logout when signed in.
 - [ ] Password reset via mobile and via email
-- [ ] Account dashboard layout
-- [ ] Profile view/edit
+- [x] Account dashboard layout: `/account` area (auth) with `AccountLayout` (sidebar nav + user card + logout) wrapping `AppLayout`. `AccountController@dashboard` + `Account/Dashboard.vue` shows a greeting and shortcut cards. Sidebar links not yet built (orders, returns, wishlist, addresses, reviews) render `Account/ComingSoon.vue`. All account pages are `noindex`. Feature tests in `AccountTest`
+- [x] Profile view/edit: `Account/Profile.vue` edits first/last name + email (mobile is read-only). `AccountController@profile`/`updateProfile` validate (email unique, ignoring self) and flash a `status` message shared via `HandleInertiaRequests`. The synthetic OTP placeholder email (`User::hasPlaceholderEmail`) is hidden so the field shows empty. `UserDTO` shapes the shared user payload
 - [ ] Addresses: list, create, edit. Editing creates a NEW address inheriting primary status; addresses are never deleted (immutable history, see `AGENTS.md` / `db doc`)
 - [ ] Order history + single order view
 - [ ] Wishlist (`wishlists`): add/remove, list

@@ -25,10 +25,13 @@ function logout() {
         </AppLink>
 
         <div v-else class="flex items-center gap-1">
-            <span class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700">
+            <AppLink
+                href="/account"
+                class="hover:text-brand flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
+            >
                 <Icon :icon="uiIcons.user" />
                 <span class="hidden max-w-[8rem] truncate sm:inline">{{ user.name }}</span>
-            </span>
+            </AppLink>
             <button
                 type="button"
                 class="hover:text-brand rounded-lg px-2 py-2 text-xs text-gray-500 transition hover:bg-gray-100"

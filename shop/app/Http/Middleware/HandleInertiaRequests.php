@@ -51,6 +51,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $this->authUser($request),
             ],
             'flash' => [
+                'status' => $request->session()->get('status'),
                 'authStep' => $request->session()->get('authStep'),
                 'authMobile' => $request->session()->get('authMobile'),
                 'authResendIn' => $request->session()->get('authResendIn'),

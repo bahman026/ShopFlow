@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
@@ -35,6 +36,19 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+// Customer account area. Dashboard + profile are built; other sidebar links
+// render a placeholder for now.
+Route::middleware('auth')->prefix('account')->name('account.')->group(function (): void {
+    Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
+    Route::put('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/orders', [AccountController::class, 'orders'])->name('orders');
+    Route::get('/returns', [AccountController::class, 'returns'])->name('returns');
+    Route::get('/wishlist', [AccountController::class, 'wishlist'])->name('wishlist');
+    Route::get('/addresses', [AccountController::class, 'addresses'])->name('addresses');
+    Route::get('/reviews', [AccountController::class, 'reviews'])->name('reviews');
+});
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
