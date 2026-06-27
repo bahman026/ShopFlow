@@ -26,6 +26,7 @@ import {
     faCheck,
     faPlus,
     faMinus,
+    faBorderAll,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -60,4 +61,5 @@ export const uiIcons = {
     check: faCheck,
     plus: faPlus,
     minus: faMinus,
+    grid: faBorderAll,
 };

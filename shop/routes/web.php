@@ -8,10 +8,15 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 

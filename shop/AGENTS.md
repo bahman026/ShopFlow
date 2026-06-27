@@ -186,6 +186,7 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 - Laravel + Inertia (server-driven SPA). Controllers return `Inertia::render(...)`; page components live under `resources/js/Pages`.
 - **The database schema is owned by the admin app.** Do not recreate tables that already exist in `admin/`; add Eloquent models here that map to the shared tables. Coordinate any schema change in the admin app's migrations, then update `docs/ShoFlow db doc.md`.
 - This is single-vendor commerce; the storefront reads catalog/pricing data and writes carts, orders, addresses, receipts/transactions per the documented rules.
+- **Search runs behind the `App\Contracts\ProductSearch` contract** (bound to `DatabaseProductSearch` in `AppServiceProvider`), which does case-insensitive `ILIKE` matching now. Depend on the contract, never the implementation, so an Elasticsearch backend can be swapped in later without touching controllers/actions. It powers both the results page (`/search`) and the header autocomplete (`/search/suggest`).
 
 ## Frontend (Inertia + Vue)
 
