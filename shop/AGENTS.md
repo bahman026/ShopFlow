@@ -179,6 +179,7 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 - 100% type coverage is required: add return types, parameter types, and property/PHPDoc types to every new PHP file.
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
 - Always ask before committing. NEVER commit without explicit user approval.
+- Keep commits separate and atomic: one logical change per commit with its own message. Do not bundle unrelated changes into a single commit.
 
 ## Architecture
 
