@@ -231,8 +231,19 @@ When adding a new feature, build files in this order, matching existing files:
 
 1. Migration (only when a genuinely new table is needed — most already exist via admin)
 2. Model, factory, seeder
-3. Controller + Inertia page (or Eloquent API Resource for JSON endpoints)
+3. DTOs + Actions for the page/endpoint data, then a thin Controller + Inertia page (or Eloquent API Resource for JSON endpoints)
 4. Test
+
+## Server-side structure (controllers, actions, DTOs)
+
+Keep controllers thin and push logic into single-purpose actions that return typed DTOs. See `ProductController` + `app/Actions/Product/*` + `app/DTOs/*` as the reference.
+
+- **Controllers** only resolve the request: load the model(s), call actions, and hand the result to `Inertia::render(...)`. No payload shaping or business logic in the controller. Inject actions via method (or constructor) parameters; the container resolves them.
+- **Actions** live in `app/Actions/<Area>/` (e.g. `Actions/Catalog`, `Actions/Product`), one responsibility per class, invoked via `__invoke(...)`. Reusable, cross-page actions (image/price shaping) go under `Actions/Catalog`; page-specific ones under their feature folder. Actions depend on other actions through constructor injection.
+- **DTOs** live in `app/DTOs/`, **one per model** (`ProductDTO`, `VarietyDTO`, `ImageDTO`, `ReviewDTO`, ...). They are `readonly` classes using constructor property promotion with `camelCase` properties that match the Inertia/JSON keys the frontend expects.
+  - Do not create DTOs for small value shapes (prices, links, breadcrumbs, variant axes/options). Type those as PHPDoc array shapes instead, e.g. `array{price: int, salePrice: int|null, discountPercent: int|null}` or `array{heading: string, url: string}`.
+  - Provide `fromArray(array $data): self` and `toArray(): array`. Leaf DTOs may use `get_object_vars($this)`; DTOs holding nested DTOs convert them explicitly in `toArray()`.
+  - Actions return DTOs (or plain typed arrays for value shapes / lightweight cards); the controller calls `->toArray()` on DTOs at the Inertia boundary so the frontend receives plain nested arrays. Do not pass DTO objects straight into `Inertia::render` (Inertia testing reads array keys, not object properties).
 
 ## Models
 
