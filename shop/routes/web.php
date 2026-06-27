@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FaqController;
@@ -17,6 +18,23 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
+
+// Mobile-first auth: identify by mobile, then verify via OTP or password.
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login/identify', [AuthController::class, 'identify'])->name('login.identify');
+    Route::post('/login/otp', [AuthController::class, 'requestOtp'])
+        ->middleware('throttle:6,1')
+        ->name('login.otp');
+    Route::post('/login/otp/verify', [AuthController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('login.otp.verify');
+    Route::post('/login/password', [AuthController::class, 'password'])
+        ->middleware('throttle:10,1')
+        ->name('login.password');
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 

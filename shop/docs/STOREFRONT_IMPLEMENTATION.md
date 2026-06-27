@@ -57,7 +57,12 @@ Read-only catalog. This is where SEO and SSR matter most.
 
 Auth uses the shared `users` table. Password reset via mobile (`mobile_password_resets`) and email (`password_resets`).
 
-- [ ] Register / login (credentials per `users`)
+- [x] Register / login with mobile number. One flow at `/login`: enter mobile, verify with a one-time code (OTP) or a password.
+  - OTP is the primary path and registers the user on first login. Password login is offered as an alternative on the OTP screen.
+  - Codes are stored in cache (`otp:{mobile}`, 5 digits, 2 min TTL) and "sent" via a logged stub in `SendOtpCode` (swap in an SMS provider later). In debug mode the code is flashed to the page for testing.
+  - Resend is blocked until the current code expires: `SendOtpCode` reuses the active code (no new code, no reset of its lifetime) and `/login/otp` rejects an early resend with the remaining seconds, which also drives the UI countdown.
+  - The shared `users` table requires `email`/`password`/name, so OTP sign-ups seed placeholders (`{mobile}@mobile.shopflow.local`, a random password, empty names) the user can complete later.
+  - Blocked users (`status = BLOCK`) cannot log in. `auth.user` and auth `flash` are shared via `HandleInertiaRequests`; the header shows the name + logout when signed in.
 - [ ] Password reset via mobile and via email
 - [ ] Account dashboard layout
 - [ ] Profile view/edit

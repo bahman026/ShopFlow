@@ -187,6 +187,7 @@ This is `shop/`, the customer-facing storefront (Laravel 13 + Inertia). The Fila
 - **The database schema is owned by the admin app.** Do not recreate tables that already exist in `admin/`; add Eloquent models here that map to the shared tables. Coordinate any schema change in the admin app's migrations, then update `docs/ShoFlow db doc.md`.
 - This is single-vendor commerce; the storefront reads catalog/pricing data and writes carts, orders, addresses, receipts/transactions per the documented rules.
 - **Search runs behind the `App\Contracts\ProductSearch` contract** (bound to `DatabaseProductSearch` in `AppServiceProvider`), which does case-insensitive `ILIKE` matching now. Depend on the contract, never the implementation, so an Elasticsearch backend can be swapped in later without touching controllers/actions. It powers both the results page (`/search`) and the header autocomplete (`/search/suggest`).
+- **Auth is mobile-first** (`AuthController`, routes under `/login`). OTP is the primary path (and registers on first login); password login is an alternative. Codes live in cache via `SendOtpCode`/`VerifyOtpCode` and are "sent" by a logged stub - replace with a real SMS provider later. The shared `users` table has NOT NULL `email`/`password` and a non-unique `mobile`, so OTP sign-ups seed placeholders and a random password. `auth.user` + auth `flash` are shared in `HandleInertiaRequests`.
 
 ## Frontend (Inertia + Vue)
 
