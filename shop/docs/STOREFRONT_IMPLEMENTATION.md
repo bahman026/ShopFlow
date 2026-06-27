@@ -52,6 +52,7 @@ Read-only catalog. This is where SEO and SSR matter most.
 - [x] FAQ page (`faqs.show`): `FaqController@show` + `Faq/Show.vue` (accordion). `/faq` shows null-position questions, `/faq/{position}` scopes to a section; ordered by `order`; JSON-LD `FAQPage` + `BreadcrumbList`; feature tests. `FaqDTO` + `GetFaqs`
 - [x] SEO per page: shared `AppHead` emits unique title/description, canonical, Open Graph + Twitter cards, robots noindex, and JSON-LD. Product page has `Product` (+ `Offer`, `Brand`); home has `Organization` + `WebSite`; catalog/CMS pages emit `BreadcrumbList` with absolute `item` URLs via the shared `seo.js` helper (origin shared as `seo.origin`)
 - [x] `sitemap.xml` + `robots.txt`: `SitemapController` (`index`/`robots`) + `GetSitemapUrls` action lists home, FAQ, active categories/brands and published products/pages (excludes `no_index`); `robots.txt` points at the sitemap. Controllers use `firstOrFail()` so unknown/unpublished slugs return 404; feature tests cover sitemap contents and 404s
+- [x] PWA / add-to-home-screen: `public/manifest.webmanifest` + app icons (`public/icons/*`) + Apple meta tags in `app.blade.php`. `InstallPrompt.vue` (mounted in `AppLayout`) shows a light bottom-sheet with install steps on iOS Safari only (no native prompt there); hidden when already installed (standalone) and snoozed 7 days after dismissal via `localStorage`. Android/desktop Chrome use the native install prompt from the manifest
 
 ## Phase 2 - User auth & account
 
@@ -74,15 +75,18 @@ Auth uses the shared `users` table. Password reset via mobile (`mobile_password_
 
 Inventory-neutral. A cart never changes `varieties.inventory` (see `ORDER.md`).
 
-- [ ] Cart model mapping `carts` (one row per variety line; user or guest session)
-- [ ] Add to cart / update quantity / remove line. Quantity is capped at the variety's available `inventory` (clamp in the UI and reject over-limit amounts server-side)
-- [ ] Cart page + mini-cart component with live totals
-- [ ] Merge guest cart into user cart on login
+- [x] Cart model mapping `carts` (one row per variety line; user via `user_id`, guest via `session_id`). Owner is resolved per request by `ResolveCartOwner`
+- [x] Add to cart / update quantity / remove line (`CartController` + `Cart/` actions: `AddToCart`, `GetCartLines`, `BuildCartSummary`). Quantity is capped at the variety's available `inventory` (clamped in `BuyBox`/`CartLine` and again server-side). Add-to-cart is wired from the product `BuyBox` (requires a selected variety, since cart lines reference a variety)
+- [x] Cart page at `/cart` (`Cart/Index.vue`): checkout stepper (`CheckoutSteps.vue`: cart / shipping / payment), line items (`CartLine.vue`) and an order summary (`CartSummary.vue`: items total, savings, payable). Unit price is the variety `sale_price ?? price`. The header shows a live item-count badge via the shared `cart.count` prop (`HandleInertiaRequests`)
+- [x] Merge guest cart into the user cart on login (`MergeGuestCart`, called in `AuthController@login` with the pre-regeneration session id; quantities combine and clamp to inventory)
 - [ ] Coupon preview at cart (validated, not yet committed)
 
 ## Phase 4 - Checkout & payment (commerce core)
 
-- [ ] Checkout: choose address, choose shipping method (`shipping_lines` / `shipping_methods` / `shipping_cities` per-city cost), apply coupon
+- [~] Checkout: choose address, choose shipping method (`shipping_lines` / `shipping_methods` / `shipping_cities` per-city cost), apply coupon
+  - [x] Shipping step (`/checkout`, auth, `CheckoutController@shipping` + `Checkout/Shipping.vue`): pick a saved address (radio) or add one inline when none exist (reuses `AddressFormModal`); empty cart redirects back to `/cart`. The chosen address id is kept in the session; payment step (`Checkout/Payment.vue`) is a placeholder until the gateway/receipt flow lands
+  - [x] Shipping method selection: methods are resolved per destination (`GetShippingMethods` over `shipping_cities`: exact city > province > nationwide) and listed on the shipping step; changing the address refreshes them via `/checkout/methods` (JSON). The cost flows into the order summary (pay-on-delivery shows "پس‌کرایه", zero shows "رایگان"). Selection is validated against the address and kept in the session. Seed data lives in admin `ShippingSeeder` (پیک ویژه تهران، پست پیشتاز، تحویل حضوری از فروشگاه)
+  - [ ] Coupon application
 - [ ] Order creation with `pending` status; line snapshots in `order_varieties`; `order_shippings` for fulfillment
 - [ ] Inventory decrement on successful payment only, inside a DB transaction with `SELECT ... FOR UPDATE` row lock on the variety (Strategy A, `ORDER.md`)
 - [ ] Manual payment via `receipts` (card-to-card / Paya: tracking code or uploaded receipt image; staff confirm)

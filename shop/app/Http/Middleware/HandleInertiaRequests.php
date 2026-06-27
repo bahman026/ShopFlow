@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Actions\Cart\ResolveCartOwner;
 use App\Enums\CategoryStatusEnum;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Models\User;
@@ -66,6 +68,9 @@ class HandleInertiaRequests extends Middleware
             'nav' => [
                 'categories' => $this->navCategories(),
             ],
+            'cart' => [
+                'count' => $this->cartCount($request),
+            ],
             'footer' => [
                 'about' => $this->value($settings, 'footer_about'),
                 'columns' => [
@@ -103,6 +108,20 @@ class HandleInertiaRequests extends Middleware
             'name' => $user->displayName(),
             'mobile' => $user->mobile,
         ];
+    }
+
+    /**
+     * Total item count in the current cart (user or guest session), shared so
+     * the header badge stays in sync on every page. Guarded so the storefront
+     * still renders if the shared carts table is unavailable.
+     */
+    private function cartCount(Request $request): int
+    {
+        return rescue(function () use ($request): int {
+            $owner = app(ResolveCartOwner::class)($request);
+
+            return (int) Cart::query()->where($owner)->sum('count');
+        }, 0, false);
     }
 
     /**

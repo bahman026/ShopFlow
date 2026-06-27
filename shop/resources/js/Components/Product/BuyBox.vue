@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed } from 'vue';
+import AppLink from '@/Components/AppLink.vue';
 import Icon from '@/Components/Icon.vue';
 import { uiIcons } from '@/fontawesome';
 import { useFormat } from '@/composables/useFormat';
@@ -29,11 +30,20 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    processing: {
+        type: Boolean,
+        default: false,
+    },
+    cartCount: {
+        type: Number,
+        default: 0,
+    },
 });
+
+const emit = defineEmits(['add', 'increase', 'decrease', 'remove']);
 
 const { formatPrice, toPersianDigits } = useFormat();
 
-const quantity = ref(1);
 const hasDiscount = computed(() => props.salePrice !== null && props.salePrice < props.price);
 const finalPrice = computed(() => (hasDiscount.value ? props.salePrice : props.price));
 
@@ -41,27 +51,13 @@ const finalPrice = computed(() => (hasDiscount.value ? props.salePrice : props.p
 const maxQuantity = computed(() =>
     props.inventory === null ? Infinity : Math.max(0, props.inventory),
 );
-const atMax = computed(() => quantity.value >= maxQuantity.value);
+const atMax = computed(() => props.cartCount >= maxQuantity.value);
 
 const trust = [
     { icon: uiIcons.shield, label: 'تضمین اصالت کالا' },
     { icon: uiIcons.returns, label: '۷ روز ضمانت بازگشت' },
     { icon: uiIcons.truck, label: 'ارسال سریع' },
 ];
-
-function changeQuantity(delta) {
-    const next = quantity.value + delta;
-
-    quantity.value = Math.min(maxQuantity.value, Math.max(1, next));
-}
-
-// Reset to 1 and clamp whenever the selected variety (its stock) changes.
-watch(
-    () => [props.inventory, props.selected, props.inStock],
-    () => {
-        quantity.value = 1;
-    },
-);
 </script>
 
 <template>
@@ -105,43 +101,66 @@ watch(
                     </span>
                 </div>
 
-                <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm text-gray-500">تعداد</span>
-                    <div class="flex h-10 items-center rounded-lg border border-gray-200">
-                        <button
-                            type="button"
-                            class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
-                            aria-label="افزایش"
-                            :disabled="atMax"
-                            @click="changeQuantity(1)"
-                        >
-                            <Icon :icon="uiIcons.plus" class="shrink-0 text-sm" />
-                        </button>
-                        <span class="min-w-[2rem] text-center text-sm font-medium">
-                            {{ toPersianDigits(quantity) }}
-                        </span>
-                        <button
-                            type="button"
-                            class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
-                            aria-label="کاهش"
-                            :disabled="quantity <= 1"
-                            @click="changeQuantity(-1)"
-                        >
-                            <Icon :icon="uiIcons.minus" class="shrink-0 text-sm" />
-                        </button>
-                    </div>
-                </div>
-
-                <p v-if="atMax && inventory !== null" class="text-xs text-gray-400">
-                    بیشترین تعداد موجود: {{ toPersianDigits(inventory) }}
-                </p>
-
                 <button
+                    v-if="cartCount === 0"
                     type="button"
-                    class="bg-brand hover:bg-brand/90 h-12 w-full rounded-xl text-sm font-bold text-white transition"
+                    class="bg-brand hover:bg-brand/90 h-12 w-full rounded-xl text-sm font-bold text-white transition disabled:opacity-50"
+                    :disabled="processing"
+                    @click="emit('add')"
                 >
                     افزودن به سبد خرید
                 </button>
+
+                <template v-else>
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-sm text-gray-500">تعداد در سبد خرید</span>
+                        <div class="flex h-10 items-center rounded-lg border border-gray-200">
+                            <button
+                                type="button"
+                                class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
+                                aria-label="افزایش"
+                                :disabled="processing || atMax"
+                                @click="emit('increase')"
+                            >
+                                <Icon :icon="uiIcons.plus" class="shrink-0 text-sm" />
+                            </button>
+                            <span class="min-w-[2rem] text-center text-sm font-medium">
+                                {{ toPersianDigits(cartCount) }}
+                            </span>
+                            <button
+                                v-if="cartCount > 1"
+                                type="button"
+                                class="hover:text-brand px-3 text-gray-600 transition disabled:text-gray-300"
+                                aria-label="کاهش"
+                                :disabled="processing"
+                                @click="emit('decrease')"
+                            >
+                                <Icon :icon="uiIcons.minus" class="shrink-0 text-sm" />
+                            </button>
+                            <button
+                                v-else
+                                type="button"
+                                class="px-3 text-gray-500 transition hover:text-red-600 disabled:text-gray-300"
+                                aria-label="حذف"
+                                :disabled="processing"
+                                @click="emit('remove')"
+                            >
+                                <Icon :icon="uiIcons.trash" class="shrink-0 text-sm" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <p v-if="atMax && inventory !== null" class="text-xs text-gray-400">
+                        بیشترین تعداد موجود: {{ toPersianDigits(inventory) }}
+                    </p>
+
+                    <AppLink
+                        href="/cart"
+                        class="border-brand text-brand hover:bg-brand flex h-12 w-full items-center justify-center rounded-xl border text-sm font-bold transition hover:text-white"
+                    >
+                        رفتن به سبد خرید
+                    </AppLink>
+                </template>
             </div>
 
             <p

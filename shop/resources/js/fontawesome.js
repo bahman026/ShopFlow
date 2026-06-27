@@ -33,6 +33,7 @@ import {
     faRightFromBracket,
     faPenToSquare,
     faTrashCan,
+    faCreditCard,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -74,4 +75,5 @@ export const uiIcons = {
     logout: faRightFromBracket,
     edit: faPenToSquare,
     trash: faTrashCan,
+    creditCard: faCreditCard,
 };

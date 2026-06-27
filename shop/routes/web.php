@@ -6,7 +6,9 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
@@ -57,6 +59,20 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::get('/addresses-cities', [AddressController::class, 'cities'])->name('addresses.cities');
     Route::get('/addresses-reverse', [AddressController::class, 'reverse'])->name('addresses.reverse');
     Route::get('/addresses-static', [AddressController::class, 'staticMap'])->name('addresses.static');
+});
+
+// Cart works for guests (by session) and logged-in users (by user id).
+Route::get('/cart', [CartController::class, 'index'])->name('cart');
+Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
+
+// Checkout requires login; the shipping step collects a delivery address.
+Route::middleware('auth')->prefix('checkout')->name('checkout.')->group(function (): void {
+    Route::get('/', [CheckoutController::class, 'shipping'])->name('shipping');
+    Route::get('/methods', [CheckoutController::class, 'methods'])->name('methods');
+    Route::post('/shipping', [CheckoutController::class, 'storeShipping'])->name('shipping.store');
+    Route::get('/payment', [CheckoutController::class, 'payment'])->name('payment');
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

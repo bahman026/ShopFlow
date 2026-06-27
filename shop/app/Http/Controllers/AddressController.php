@@ -163,6 +163,26 @@ class AddressController extends Controller
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'prime' => ['boolean'],
+        ], [
+            'required' => 'وارد کردن :attribute الزامی است.',
+            'string' => ':attribute باید متن باشد.',
+            'integer' => ':attribute نامعتبر است.',
+            'numeric' => ':attribute نامعتبر است.',
+            'exists' => ':attribute انتخاب‌شده معتبر نیست.',
+            'max' => ':attribute نباید بیشتر از :max نویسه باشد.',
+            'between' => ':attribute خارج از محدوده مجاز است.',
+            'boolean' => ':attribute نامعتبر است.',
+        ], [
+            'name' => 'عنوان نشانی',
+            'city_id' => 'شهر',
+            'address' => 'نشانی',
+            'plate' => 'پلاک',
+            'unit' => 'واحد',
+            'postal_code' => 'کد پستی',
+            'phone' => 'شماره موبایل',
+            'note' => 'توضیحات',
+            'latitude' => 'موقعیت مکانی',
+            'longitude' => 'موقعیت مکانی',
         ]);
 
         $phone = $normalize($validated['phone']);

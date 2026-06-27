@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppLink from '@/Components/AppLink.vue';
@@ -26,6 +26,10 @@ const props = defineProps({
     related: {
         type: Array,
         default: () => [],
+    },
+    cartItems: {
+        type: Object,
+        default: () => ({}),
     },
 });
 
@@ -108,6 +112,47 @@ const buyBox = computed(() => {
         selected: false,
     };
 });
+
+const cartBusy = ref(false);
+
+// The cart line (id + quantity) for the chosen variety, mirrored from the cart.
+const cartEntry = computed(() =>
+    selectedVariety.value ? (props.cartItems[selectedVariety.value.id] ?? null) : null,
+);
+const cartCount = computed(() => cartEntry.value?.count ?? 0);
+
+const cartVisit = {
+    preserveScroll: true,
+    onStart: () => (cartBusy.value = true),
+    onFinish: () => (cartBusy.value = false),
+};
+
+// Cart lines reference a variety, so a variety must be chosen first.
+function addToCart() {
+    if (!selectedVariety.value) {
+        return;
+    }
+
+    router.post('/cart', { variety_id: selectedVariety.value.id, count: 1 }, cartVisit);
+}
+
+function increaseCart() {
+    if (cartEntry.value) {
+        router.patch('/cart/' + cartEntry.value.id, { count: cartCount.value + 1 }, cartVisit);
+    }
+}
+
+function decreaseCart() {
+    if (cartEntry.value && cartCount.value > 1) {
+        router.patch('/cart/' + cartEntry.value.id, { count: cartCount.value - 1 }, cartVisit);
+    }
+}
+
+function removeCart() {
+    if (cartEntry.value) {
+        router.delete('/cart/' + cartEntry.value.id, cartVisit);
+    }
+}
 
 const metaTitle = computed(() => props.product.title || props.product.heading);
 const metaDescription = computed(
@@ -206,6 +251,12 @@ const jsonLd = computed(() => {
                         :in-stock="buyBox.inStock"
                         :inventory="buyBox.inventory"
                         :selected="buyBox.selected"
+                        :processing="cartBusy"
+                        :cart-count="cartCount"
+                        @add="addToCart"
+                        @increase="increaseCart"
+                        @decrease="decreaseCart"
+                        @remove="removeCart"
                     />
                 </div>
             </div>
