@@ -156,9 +156,10 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Running Tests
 
 - Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+- Use Pest directly, not `php artisan test`.
+- To run all tests: `vendor/bin/pest`.
+- To run all tests in a file: `vendor/bin/pest tests/Feature/ExampleTest.php`.
+- To filter on a particular test name: `vendor/bin/pest --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
 
@@ -203,6 +204,10 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
   - Register every icon as an object in `resources/js/fontawesome.js` (solid from `@fortawesome/free-solid-svg-icons`, brands from `@fortawesome/free-brands-svg-icons`) and pass the imported icon object: `<Icon :icon="..." />`.
   - Do NOT use string names with `library.add` (e.g. `['fab','instagram']`). Inertia turns FontAwesome's missing-icon `console.error` into an SSR exception, so string lookups break SSR. Passing icon objects is the SSR-safe, tree-shakeable pattern.
 - Pages must use Inertia's `<Head>` for SEO tags (see SEO section) and render meaningful content server-side.
+- **Lint & format the frontend** (the JS/Vue equivalent of Pint/PHPStan):
+  - **Prettier** formats `resources/js` (config in `.prettierrc.json`: 4-space indent, single quotes, semicolons, `printWidth` 100, Tailwind class sorting via `prettier-plugin-tailwindcss`).
+  - **ESLint** (flat config in `eslint.config.js`: `eslint-plugin-vue` recommended + `@vue/eslint-config-prettier`) analyses and auto-fixes Vue/JS issues.
+  - Scripts: `npm run format` (write) / `npm run format:check`, `npm run lint` / `npm run lint:fix`. Run them before finishing frontend work; `composer test-dev` also runs `lint` + `format:check`.
 
 ## Language, RTL & fonts
 
@@ -230,8 +235,20 @@ When adding a new feature, build files in this order, matching existing files:
 
 1. Migration (only when a genuinely new table is needed — most already exist via admin)
 2. Model, factory, seeder
-3. Controller + Inertia page (or Eloquent API Resource for JSON endpoints)
+3. DTOs + Actions for the page/endpoint data, then a thin Controller + Inertia page (or Eloquent API Resource for JSON endpoints)
 4. Test
+
+## Server-side structure (controllers, actions, DTOs)
+
+Keep controllers thin and push logic into single-purpose actions that return typed DTOs. See `ProductController` + `app/Actions/Product/*` + `app/DTOs/*` as the reference.
+
+- **Controllers** only resolve the request: load the model(s), call actions, and hand the result to `Inertia::render(...)`. No payload shaping or business logic in the controller. Inject actions via method (or constructor) parameters; the container resolves them.
+- **Actions** live in `app/Actions/<Area>/` (e.g. `Actions/Catalog`, `Actions/Product`), one responsibility per class, invoked via `__invoke(...)`. Reusable, cross-page actions (image/price shaping) go under `Actions/Catalog`; page-specific ones under their feature folder. Actions depend on other actions through constructor injection.
+- **DTOs** live in `app/DTOs/`, **one per model** (`ProductDTO`, `VarietyDTO`, `ImageDTO`, `ReviewDTO`, ...). They are `readonly` classes using constructor property promotion with `camelCase` properties that match the Inertia/JSON keys the frontend expects.
+  - Do not create DTOs for small value shapes (prices, links, breadcrumbs, variant axes/options). Type those as PHPDoc array shapes instead, e.g. `array{price: int, salePrice: int|null, discountPercent: int|null}` or `array{heading: string, url: string}`.
+  - Provide a `toArray(): array` for the Inertia boundary. Flat DTOs may use `get_object_vars($this)`; DTOs holding nested DTOs convert them explicitly in `toArray()`. Add a `fromArray(array $data): self` only when something actually hydrates the DTO from an array (e.g. cache payloads, queue jobs) — don't add it speculatively.
+  - Actions return DTOs (or plain typed arrays for value shapes / lightweight cards); the controller calls `->toArray()` on DTOs at the Inertia boundary so the frontend receives plain nested arrays. Do not pass DTO objects straight into `Inertia::render` (Inertia testing reads array keys, not object properties).
+- **Type every query closure** (100% type coverage requires it). Eager-load constraints inside `with([...])` receive a `Illuminate\Database\Eloquent\Relations\Relation` — type the param as `Relation` and use base query methods. Larastan can't resolve model scopes (`published()`, `active()`) on a bare `Relation`, so inline the filter instead, e.g. `fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)`. `tap()` closures get a `Builder`; `map()`/`filter()`/`each()` over an Eloquent collection get the model type (`fn (Variety $variety) => ...`).
 
 ## Models
 
@@ -277,7 +294,7 @@ When adding a new feature, build files in this order, matching existing files:
 
 ## Tests
 
-- This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`.
+- This project uses **Pest** (not PHPUnit — this overrides the auto-generated boost note above). Write tests as Pest functions (`it(...)`, `test(...)`, `expect(...)`) with `declare(strict_types=1);`. Create them with `php artisan make:test --pest {name}`. Run them with `vendor/bin/pest`, not `php artisan test`.
 - Global setup lives in `tests/Pest.php`: `Feature` tests use `TestCase` + `DatabaseTransactions` (each test runs in a transaction that is rolled back).
 - **Shared database, not sqlite.** The shop is a read-only consumer of the admin-owned schema, so tests run against a real Postgres test database (`shop_flow_test`) whose schema is built by **admin's** migrations — never the shop's. The shop must not own or migrate those tables. Do not switch tests back to sqlite/`RefreshDatabase`; that hides schema drift from production.
 - **One-time local setup** (run from the admin container, pointing at the test DB):
@@ -296,6 +313,8 @@ DB_DATABASE=shop_flow_test php artisan db:seed --class="Database\Seeders\Setting
 
 - **No seller / marketplace system.** ShopFlow is a single-vendor store. Never add `seller_id`, `seller_creator_id`, or any seller relation to models, migrations, or controllers.
 - **Inventory**: stock is decremented only on successful payment (Strategy A); carts never change inventory. See `docs/ORDER.md`.
+- **Quantity cap**: the customer can never choose a quantity above the selected variety's available stock. The quantity input on the product/cart pages must clamp to the variety `inventory`; the add-to-cart action must reject amounts beyond it.
+- **Product gallery**: show all images together — the product images plus every variety image, combined and deduped by URL. Never hide images based on the selection; selecting a variety only switches the main image to that variety's photo (when it exists in the list).
 - **Addresses are immutable history.** Editing an address creates a new record (inheriting the edited one's primary status); addresses are never deleted, so orders keep an accurate history.
 
 ## Roadmap & docs

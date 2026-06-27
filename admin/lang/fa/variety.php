@@ -27,6 +27,10 @@ return [
     'additional_attributes' => 'ویژگی‌های اضافی',
     'additional_attributes_hint' => 'ویژگی‌های ثانویه این تنوع از سایر گروه‌ها، مثلاً رنگ وقتی گروه اصلی سایز است.',
 
+    'image' => 'تصویر',
+    'path' => 'فایل تصویر',
+    'alt_text' => 'متن جایگزین',
+
     'product' => 'محصول',
     'attribute_value' => 'مقدار',
     'created_at' => 'تاریخ ایجاد',

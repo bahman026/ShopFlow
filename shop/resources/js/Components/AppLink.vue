@@ -9,25 +9,19 @@ const props = defineProps({
     },
 });
 
-const isExternal = computed(() =>
-    /^(https?:)?\/\//.test(props.href) ||
-    props.href.startsWith('mailto:') ||
-    props.href.startsWith('tel:'),
+const isExternal = computed(
+    () =>
+        /^(https?:)?\/\//.test(props.href) ||
+        props.href.startsWith('mailto:') ||
+        props.href.startsWith('tel:'),
 );
 </script>
 
 <template>
-    <a
-        v-if="isExternal"
-        :href="href"
-        rel="noopener noreferrer"
-    >
+    <a v-if="isExternal" :href="href" rel="noopener noreferrer">
         <slot />
     </a>
-    <Link
-        v-else
-        :href="href"
-    >
+    <Link v-else :href="href">
         <slot />
     </Link>
 </template>

@@ -113,7 +113,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Test Enforcement
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Run the minimum number of tests needed to ensure code quality and speed. Use Pest directly (not `php artisan test`): `vendor/bin/pest` with a specific filename or `--filter`.
 
 === laravel/core rules ===
 
@@ -158,7 +158,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - This project uses Pest for testing. Create tests: `php artisan make:test --pest {name}`.
 - The `{name}` argument should not include the test suite directory. Use `php artisan make:test --pest SomeFeatureTest` instead of `php artisan make:test --pest Feature/SomeFeatureTest`.
-- Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
+- Run tests with Pest directly (not `php artisan test`): `vendor/bin/pest` or filter: `vendor/bin/pest --filter=testName`.
 - Do NOT delete tests without approval.
 
 === filament/filament rules ===

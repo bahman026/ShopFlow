@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\CategoryStatusEnum;
+use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Middleware;
@@ -48,6 +51,9 @@ class HandleInertiaRequests extends Middleware
                 'url' => $this->canonicalUrl($request),
                 'locale' => 'fa_IR',
             ],
+            'nav' => [
+                'categories' => $this->navCategories(),
+            ],
             'footer' => [
                 'about' => $this->value($settings, 'footer_about'),
                 'columns' => [
@@ -65,6 +71,38 @@ class HandleInertiaRequests extends Middleware
                 'copyright' => $this->value($settings, 'footer_copyright'),
             ],
         ];
+    }
+
+    /**
+     * Top-level active categories (with their active children) for the header
+     * navigation. Shared globally so every page's header has the menu.
+     *
+     * Guarded with rescue() so the storefront still renders if the shared
+     * categories table is unavailable.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function navCategories(): array
+    {
+        return rescue(function (): array {
+            return Category::query()
+                ->active()
+                ->whereNull('parent_id')
+                ->with(['children' => fn (Relation $query) => $query->where('status', CategoryStatusEnum::ACTIVE->value)->orderBy('heading')])
+                ->orderBy('heading')
+                ->get()
+                ->map(fn (Category $category): array => [
+                    'heading' => $category->heading,
+                    'url' => '/categories/'.$category->slug,
+                    'children' => $category->children
+                        ->map(fn (Category $child): array => [
+                            'heading' => $child->heading,
+                            'url' => '/categories/'.$child->slug,
+                        ])
+                        ->all(),
+                ])
+                ->all();
+        }, [], false);
     }
 
     /**

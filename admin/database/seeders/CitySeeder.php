@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\City;
 use App\Models\Province;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CitySeeder extends Seeder
 {
@@ -5747,5 +5748,11 @@ class CitySeeder extends Seeder
 
         City::query()->insert($cities);
 
+        // Rows are inserted with explicit ids, so advance the auto-increment
+        // sequences; otherwise the next factory-created province/city collides.
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("SELECT setval(pg_get_serial_sequence('provinces', 'id'), (SELECT MAX(id) FROM provinces))");
+            DB::statement("SELECT setval(pg_get_serial_sequence('cities', 'id'), (SELECT MAX(id) FROM cities))");
+        }
     }
 }

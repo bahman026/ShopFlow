@@ -24,38 +24,22 @@ defineProps({
 </script>
 
 <template>
-    <div
-        v-if="phone || email || address || hours.length"
-        class="space-y-3 text-sm text-gray-600"
-    >
+    <div v-if="phone || email || address || hours.length" class="space-y-3 text-sm text-gray-600">
         <p class="font-bold text-gray-800">{{ title }}</p>
 
         <p v-if="phone">
-            <a
-                :href="`tel:${phone}`"
-                class="transition hover:text-brand"
-            >{{ phone }}</a>
+            <a :href="`tel:${phone}`" class="hover:text-brand transition">{{ phone }}</a>
         </p>
 
         <p v-if="email">
-            <a
-                :href="`mailto:${email}`"
-                class="transition hover:text-brand"
-            >{{ email }}</a>
+            <a :href="`mailto:${email}`" class="hover:text-brand transition">{{ email }}</a>
         </p>
 
-        <p
-            v-for="line in hours"
-            :key="line"
-            class="leading-6"
-        >
+        <p v-for="line in hours" :key="line" class="leading-6">
             {{ line }}
         </p>
 
-        <p
-            v-if="address"
-            class="leading-7"
-        >
+        <p v-if="address" class="leading-7">
             {{ address }}
         </p>
     </div>

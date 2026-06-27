@@ -23,7 +23,7 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 - [x] `A Iranian Sans` font + brand color `#ff8615`
 - [x] Base `AppLayout` + sample `Home` page
 - [x] Eloquent models mapping shared tables (read-focused): `Category`, `Brand`, `Product`, `Variety`, `Attribute`, `Image`, `Banner`, `Slider`/`Slide`, `Menu`/`MenuItem`, `Page`, `Faq`, `Review` (+ status enums and `HasOptions` trait). Relations to not-yet-created models (`AttributeGroup`, `Coupon`, `Discount`) are deferred to their phases.
-- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` done; `PriceTag`, `ProductCard`, `QuantityInput`, `Breadcrumbs`, `Pagination`, `RatingStars`, `EmptyState` pending
+- [~] Shared UI kit components: `BaseButton` + `AppLink` + `Icon` + `PriceTag` + `ProductCard` + `SectionHeading` + `Breadcrumbs` + `RatingStars` done; `QuantityInput`, `Pagination`, `EmptyState` pending
 - [x] Helpers/composables: Persian digits, Jalali date, money formatting (`useFormat`)
 - [x] SEO scaffolding: per-page `<Head>` via `AppHead` component, shared meta defaults (Inertia `seo` shared prop), canonical URL, Open Graph + Twitter, `robots.txt`
 - [x] Error pages (404 / 500) in Persian, RTL (self-contained Blade, brand color, IranSans, no Vite/SSR dependency)
@@ -35,10 +35,13 @@ A storefront feature is "done" when it has: read/write Eloquent models for the s
 
 Read-only catalog. This is where SEO and SSR matter most.
 
-- [ ] Home page: published banners, slider, featured categories, product rows, menu (uses `CACHE.md` keys 1, 2, 8, 3)
+- [x] Home page: `HomeController` + `Home.vue` with hero slider, category strip, promo banner grid, product carousels (newest + most viewed), selected brands; JSON-LD `Organization`/`WebSite`; graceful empty states; feature tests. Caching (`CACHE.md` keys 1, 2, 8, 3) deferred to Phase 6
+  - Header (`AppHeader` + `Header/*`): logo, search, account/cart actions, desktop category menu with dropdowns, mobile drawer; categories shared via Inertia `nav.categories`
+  - `Variety` read model exposes a polymorphic `image` relation (per-color photo) for the upcoming product detail page
 - [ ] Category listing page: products by category with filters (brand, attributes, price range), sorting, pagination
-- [ ] Product detail page: image gallery, variety selection (price + discount + stock from `varieties`), attributes, related products, breadcrumbs
-- [ ] Product reviews (read) on the product page; ratings summary
+- [x] Product detail page: `ProductController@show` (`/products/{slug}`) + `Product/Show.vue`. Gallery shows all images combined (product images + every variety image, deduped by URL); selecting a variety switches the main image to that variety's photo without hiding the others. Variety selector (primary attribute group drives selection, additional attributes constrained by it, never the other way), buy box (price hidden until a variety is fully selected; price/discount/stock, trust badges, quantity), specs, description, breadcrumbs, related carousel; JSON-LD `Product`/`Offer` + `BreadcrumbList`; view counter; feature tests. Add-to-cart wiring deferred to Phase 3
+  - Quantity rule: the quantity stepper must never exceed the selected variety's `inventory` (clamp the max). Enforced with cart wiring in Phase 3
+- [x] Product reviews (read) on the product page (approved only). Ratings summary deferred (no numeric rating field in `reviews`)
 - [ ] Brand page: products for a brand
 - [ ] Search: keyword search over products with results page
 - [ ] CMS pages (`pages.{slug}`) and FAQ page (`faqs.{position}`)
@@ -62,7 +65,7 @@ Auth uses the shared `users` table. Password reset via mobile (`mobile_password_
 Inventory-neutral. A cart never changes `varieties.inventory` (see `ORDER.md`).
 
 - [ ] Cart model mapping `carts` (one row per variety line; user or guest session)
-- [ ] Add to cart / update quantity / remove line
+- [ ] Add to cart / update quantity / remove line. Quantity is capped at the variety's available `inventory` (clamp in the UI and reject over-limit amounts server-side)
 - [ ] Cart page + mini-cart component with live totals
 - [ ] Merge guest cart into user cart on login
 - [ ] Coupon preview at cart (validated, not yet committed)

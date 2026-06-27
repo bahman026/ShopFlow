@@ -28,7 +28,7 @@ class AddressFactory extends Factory
             'postal_code' => $this->faker->postcode(),
             'address' => $this->faker->address(),
             'description' => $this->faker->text(),
-            'city_id' => City::factory(),
+            'city_id' => City::query()->inRandomOrder()->value('id') ?? City::factory(),
             'prime' => false,
         ];
     }

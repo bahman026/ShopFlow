@@ -20,7 +20,7 @@ Catalog layer and platform basics.
 - [x] Attributes
 - [x] Attribute-Group-Categories
 - [x] Products (+ `product_attribute` pivot, product images)
-- [x] Varieties (+ `variety_counts` auto-sync on Product)
+- [x] Varieties (+ `variety_counts` auto-sync on Product; optional polymorphic image via `images` table — `withImage()` factory state, upload in VarietyResource and the ProductResource variety repeater, deleted with the variety)
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
@@ -41,6 +41,8 @@ Cross-cutting improvements landed:
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
 - Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`, `ORDER.md`).
 - **Inventory rule** (`ORDER.md`): stock is decremented only on successful payment (Strategy A); carts never change `varieties.inventory`.
+- **Placeholder images**: factories generate images via `ImageFactory::placeholderUrl()` (`placehold.co`); the dead `via.placeholder.com` service was removed. `ProductSeeder`/`VarietySeeder` attach images by default (`withImages()` / `withImage()`).
+- **Seeder robustness**: `CitySeeder` advances Postgres sequences with `setval` after explicit-ID inserts; `CityFactory`/`AddressFactory` reuse existing province/city rows before creating new ones, fixing `TestSeeder` unique-constraint failures.
 - **Localisation (fa / en)**: `SetLocale` middleware + `/locale/{locale}` route + user-menu switcher. All resources (Brand, Category, Product, Variety, City, Province, Coupon, Discount, ShippingLine, ShippingMethod, ShippingCity, Ancestor, AttributeGroup, AttributeGroupCategory, Attribute, Slider, Slide, Banner, Menu, MenuItem, Page, FAQ, Review, Wishlist, User) have `lang/en` + `lang/fa` files, `trans()`-based labels on all form fields and table columns, and translated enum `label()` methods. List-page subheadings are set via `mount()`. Filament vendor translations published for built-in UI strings.
 - **Persian font**: `A Iranian Sans` loaded from `public/fonts/AIranianSans.ttf`; applied globally when locale is `fa` via `public/css/persian-font.css` and a `renderHook` in `AdminPanelProvider`.
 - **Locale switching** (`en` / `fa`): `SetLocale` middleware reads the locale from session and calls `App::setLocale()`. A `/locale/{locale}` route stores the choice. Two user-menu items (English / فارسی) in `AdminPanelProvider` let admins switch. All Filament sub-package translations (`filament`, `filament-forms`, `filament-tables`, `filament-actions`, `filament-notifications`) are published to `lang/vendor/`.

@@ -38,10 +38,7 @@ const emit = defineEmits(['subscribe']);
 <template>
     <footer class="mt-12 bg-white">
         <div class="mx-auto max-w-6xl px-4 py-10">
-            <p
-                v-if="about"
-                class="mb-8 max-w-3xl text-sm leading-7 text-gray-600"
-            >
+            <p v-if="about" class="mb-8 max-w-3xl text-sm leading-7 text-gray-600">
                 {{ about }}
             </p>
 
@@ -63,10 +60,7 @@ const emit = defineEmits(['subscribe']);
             </div>
 
             <div class="mt-10 grid gap-8 border-t border-gray-200 pt-8 md:grid-cols-2">
-                <FooterNewsletter
-                    v-if="showNewsletter"
-                    @subscribe="emit('subscribe', $event)"
-                />
+                <FooterNewsletter v-if="showNewsletter" @subscribe="emit('subscribe', $event)" />
 
                 <FooterSocial :socials="socials" />
             </div>

@@ -28,9 +28,22 @@ class ImageFactory extends Factory
         $imageableType = $this->faker->randomElement($imageableTypes);
 
         return [
-            'path' => fake()->imageUrl,
+            'path' => self::placeholderUrl(),
             'imageable_id' => $imageableType::factory(),
             'imageable_type' => $imageableType,
         ];
+    }
+
+    /**
+     * A live placeholder image URL.
+     *
+     * Faker's default `imageUrl()` points at via.placeholder.com, which has
+     * been shut down; placehold.co is a working replacement.
+     */
+    public static function placeholderUrl(int $width = 640, int $height = 480): string
+    {
+        $color = ltrim(fake()->hexColor(), '#');
+
+        return "https://placehold.co/{$width}x{$height}/{$color}/ffffff?text=" . urlencode(fake()->word());
     }
 }

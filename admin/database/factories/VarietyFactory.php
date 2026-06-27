@@ -41,4 +41,31 @@ class VarietyFactory extends Factory
             'attribute_id' => $attribute->id,
         ]);
     }
+
+    public function published(): static
+    {
+        return $this->state([
+            'status' => VarietyStatusEnum::PUBLISHED,
+        ]);
+    }
+
+    public function inStock(): static
+    {
+        return $this->state([
+            'has_stock' => true,
+            'inventory' => fake()->numberBetween(5, 100),
+        ]);
+    }
+
+    public function withImage(): static
+    {
+        return $this->afterCreating(function (Variety $variety): void {
+            $variety->image()->create([
+                'path' => ImageFactory::placeholderUrl(),
+                'is_featured' => true,
+                'order' => 0,
+                'alt_text' => $variety->attribute_value ?? $variety->color,
+            ]);
+        });
+    }
 }
