@@ -69,6 +69,7 @@ class AttributeGroupResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order')
             ->columns([
                 TextColumn::make('ancestor.name')
                     ->label(trans('attribute_group.ancestor'))

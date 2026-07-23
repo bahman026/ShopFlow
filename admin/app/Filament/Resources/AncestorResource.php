@@ -57,6 +57,7 @@ class AncestorResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('order')
             ->columns([
                 TextColumn::make('name')
                     ->label(trans('ancestor.name'))
