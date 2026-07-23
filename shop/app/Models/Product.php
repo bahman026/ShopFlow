@@ -105,7 +105,10 @@ class Product extends Model
 
     public function varieties(): HasMany
     {
-        return $this->hasMany(Variety::class);
+        // Deterministic order (creation order): without it Postgres doesn't
+        // guarantee row order, which fed a real bug in the variety selector
+        // (axis/option order depending on accidental fetch order).
+        return $this->hasMany(Variety::class)->orderBy('id');
     }
 
     public function attributes(): BelongsToMany

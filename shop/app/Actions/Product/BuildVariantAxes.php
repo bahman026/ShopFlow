@@ -43,7 +43,9 @@ class BuildVariantAxes
                     'options' => [],
                 ];
 
-                $axes[$groupId]['options'][$attribute->value] ??= [
+                // Keyed by attribute id (not value) so options are dedupe-safe
+                // and can be sorted deterministically below.
+                $axes[$groupId]['options'][$attribute->id] ??= [
                     'value' => $attribute->value,
                     'color' => $attribute->color,
                 ];
@@ -52,15 +54,54 @@ class BuildVariantAxes
 
         $primaryGroupId = $this->primaryGroupId($primaryVotes);
 
-        return array_values(array_map(
+        $result = array_values(array_map(
             fn (array $axis): array => [
                 'id' => $axis['id'],
                 'name' => $axis['name'],
                 'primary' => $axis['id'] === $primaryGroupId,
-                'options' => array_values($axis['options']),
+                'options' => $this->sortedOptions($axis['options']),
             ],
             $axes,
         ));
+
+        return $this->primaryFirst($result, $primaryGroupId);
+    }
+
+    /**
+     * Options in attribute-creation order (`attributes` has no explicit
+     * `order` column, so id order is the best deterministic proxy available)
+     * instead of whatever order varieties happened to be processed in.
+     *
+     * @param  array<int, array{value: string, color: string|null}>  $options  keyed by attribute id
+     * @return array<int, array{value: string, color: string|null}>
+     */
+    private function sortedOptions(array $options): array
+    {
+        ksort($options);
+
+        return array_values($options);
+    }
+
+    /**
+     * The primary axis always renders first, regardless of which attribute
+     * group was encountered first while iterating varieties — e.g. a variety
+     * whose primary attribute was deleted (attribute_id set to null) still
+     * carries secondary attributes, and must never push the primary axis
+     * further down the list just because it was processed first.
+     *
+     * @param  array<int, array{id: int, name: string, primary: bool, options: array<int, array{value: string, color: string|null}>}>  $axes
+     * @return array<int, array{id: int, name: string, primary: bool, options: array<int, array{value: string, color: string|null}>}>
+     */
+    private function primaryFirst(array $axes, ?int $primaryGroupId): array
+    {
+        if ($primaryGroupId === null) {
+            return $axes;
+        }
+
+        $primary = array_values(array_filter($axes, fn (array $axis): bool => $axis['id'] === $primaryGroupId));
+        $rest = array_values(array_filter($axes, fn (array $axis): bool => $axis['id'] !== $primaryGroupId));
+
+        return [...$primary, ...$rest];
     }
 
     /**

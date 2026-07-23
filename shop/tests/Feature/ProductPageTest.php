@@ -246,3 +246,62 @@ it('builds a selectable axis from variety attributes', function (): void {
             ->has('product.varieties.0.options')
         );
 });
+
+it('orders variant axes and their options deterministically, primary first', function (): void {
+    $category = Category::create([
+        'heading' => 'کفش', 'slug' => 'shoes', 'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => 'مشخصات', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $sizeGroup = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'سایز', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $colorGroup = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'رنگ', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    // Attributes created in logical order: S, M, L, XL.
+    $s = Attribute::create(['attribute_group_id' => $sizeGroup, 'value' => 'S']);
+    $m = Attribute::create(['attribute_group_id' => $sizeGroup, 'value' => 'M']);
+    $l = Attribute::create(['attribute_group_id' => $sizeGroup, 'value' => 'L']);
+    $xl = Attribute::create(['attribute_group_id' => $sizeGroup, 'value' => 'XL']);
+    $red = Attribute::create(['attribute_group_id' => $colorGroup, 'value' => 'قرمز']);
+
+    $product = Product::create([
+        'heading' => 'کفش ورزشی', 'slug' => 'sneaker', 'price' => 900000,
+        'category_id' => $category->id, 'status' => ProductStatusEnum::PUBLISHED, 'seen' => 0,
+    ]);
+    makeImage(Product::class, $product->id);
+
+    // First variety has NO primary attribute (simulates a deleted primary
+    // attribute) but does carry a secondary (Color) attribute — this used to
+    // push the Color axis above the Size axis.
+    $noPrimary = Variety::create([
+        'product_id' => $product->id, 'price' => 900000, 'inventory' => 5,
+        'has_stock' => true, 'status' => VarietyStatusEnum::PUBLISHED,
+    ]);
+    $noPrimary->attributes()->attach($red->id);
+
+    // Remaining varieties created in a shuffled order: XL, L, S, M.
+    foreach ([$xl, $l, $s, $m] as $attribute) {
+        $variety = Variety::create([
+            'product_id' => $product->id, 'attribute_id' => $attribute->id, 'price' => 900000,
+            'inventory' => 5, 'has_stock' => true, 'status' => VarietyStatusEnum::PUBLISHED,
+        ]);
+        $variety->attributes()->attach($red->id);
+    }
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('product.variantAxes.0.name', 'سایز')
+            ->where('product.variantAxes.0.primary', true)
+            ->where('product.variantAxes.1.name', 'رنگ')
+            ->where('product.variantAxes.0.options.0.value', 'S')
+            ->where('product.variantAxes.0.options.1.value', 'M')
+            ->where('product.variantAxes.0.options.2.value', 'L')
+            ->where('product.variantAxes.0.options.3.value', 'XL')
+        );
+});
