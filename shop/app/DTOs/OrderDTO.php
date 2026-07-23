@@ -11,6 +11,7 @@ readonly class OrderDTO
      */
     public function __construct(
         public int $id,
+        public string $trackingCode,
         public string $status,
         public string $statusLabel,
         public string $createdAt,
@@ -25,6 +26,7 @@ readonly class OrderDTO
         public ?string $shippingLineName,
         public ?string $refId,
         public ?string $paidAt,
+        public bool $canRetryPayment,
     ) {}
 
     /**
@@ -34,6 +36,7 @@ readonly class OrderDTO
     {
         return [
             'id' => $this->id,
+            'trackingCode' => $this->trackingCode,
             'status' => $this->status,
             'statusLabel' => $this->statusLabel,
             'createdAt' => $this->createdAt,
@@ -48,6 +51,7 @@ readonly class OrderDTO
             'shippingLineName' => $this->shippingLineName,
             'refId' => $this->refId,
             'paidAt' => $this->paidAt,
+            'canRetryPayment' => $this->canRetryPayment,
         ];
     }
 }

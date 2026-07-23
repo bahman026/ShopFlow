@@ -30,12 +30,16 @@ class BuildOrderDTO
             'transactions',
         ]);
 
+        // A retried order can accumulate several transactions (one per
+        // attempt); the loaded collection isn't guaranteed DB-insertion
+        // order, so sort by id rather than trusting Collection::last().
         /** @var Transaction|null $transaction */
         $transaction = $order->transactions->firstWhere('status', TransactionStatusEnum::SUCCESS)
-            ?? $order->transactions->last();
+            ?? $order->transactions->sortBy('id')->last();
 
         return new OrderDTO(
             id: $order->id,
+            trackingCode: $order->tracking_code,
             status: $order->status->name,
             statusLabel: $order->status->label(),
             createdAt: (string) $order->created_at?->toIso8601String(),
@@ -50,6 +54,7 @@ class BuildOrderDTO
             shippingLineName: $order->shippingMethod?->shippingLine?->name,
             refId: $transaction?->ref_id,
             paidAt: $transaction?->paid_at?->toIso8601String(),
+            canRetryPayment: $order->isRetryable(),
         );
     }
 

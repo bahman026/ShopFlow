@@ -38,6 +38,22 @@ it('shows the profile form with the user data', function (): void {
         );
 });
 
+it('renders the dashboard and profile for a user with no mobile (e.g. an admin/staff account)', function (): void {
+    $user = User::factory()->create([
+        'first_name' => 'مدیر',
+        'last_name' => 'سیستم',
+        'mobile' => null,
+    ]);
+
+    $this->actingAs($user)->get('/account')->assertOk();
+    $this->actingAs($user)
+        ->get('/account/profile')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('user.mobile', null)
+        );
+});
+
 it('hides the placeholder email in the profile form', function (): void {
     $user = User::factory()->create([
         'mobile' => '09120000001',
@@ -96,10 +112,10 @@ it('renders a placeholder for sections not built yet', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get('/account/orders')
+        ->get('/account/wishlist')
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('Account/ComingSoon')
-            ->where('title', 'سفارش‌های من')
+            ->where('title', 'علاقه‌مندی‌های من')
         );
 });

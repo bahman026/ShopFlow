@@ -49,6 +49,7 @@ it('creates a pending order + transaction and redirects to zarinpal', function (
     expect($order->status)->toBe(OrderStatusEnum::PENDING);
     expect($order->user_id)->toBe($user->id);
     expect($order->total_price)->toBe(205000); // (2 * 80000) + 45000 shipping
+    expect($order->tracking_code)->toMatch('/^[1-9]\d{9}$/');
 
     $transaction = Transaction::query()->firstOrFail();
     expect($transaction->status)->toBe(TransactionStatusEnum::PENDING);

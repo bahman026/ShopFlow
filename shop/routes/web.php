@@ -41,13 +41,15 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// Customer account area. Dashboard + profile are built; other sidebar links
-// render a placeholder for now.
+// Customer account area. Dashboard, profile, addresses, orders and returns
+// are built; other sidebar links render a placeholder for now.
 Route::middleware('auth')->prefix('account')->name('account.')->group(function (): void {
     Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
     Route::put('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
     Route::get('/orders', [AccountController::class, 'orders'])->name('orders');
+    Route::get('/orders/{order}', [AccountController::class, 'showOrder'])->name('orders.show');
+    Route::post('/orders/{order}/retry', [AccountController::class, 'retryOrder'])->name('orders.retry');
     Route::get('/returns', [AccountController::class, 'returns'])->name('returns');
     Route::get('/wishlist', [AccountController::class, 'wishlist'])->name('wishlist');
     Route::get('/reviews', [AccountController::class, 'reviews'])->name('reviews');

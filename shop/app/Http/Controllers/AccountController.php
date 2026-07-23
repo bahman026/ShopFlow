@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Account\GetUserOrders;
+use App\Actions\Checkout\BuildOrderDTO;
+use App\Actions\Checkout\RetryOrderPayment;
 use App\DTOs\UserDTO;
+use App\Enums\OrderStatusEnum;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class AccountController extends Controller
 {
@@ -59,14 +65,55 @@ class AccountController extends Controller
         return back()->with('status', 'اطلاعات حساب با موفقیت ذخیره شد.');
     }
 
-    public function orders(): Response
+    public function orders(Request $request, GetUserOrders $getUserOrders): Response
     {
-        return $this->comingSoon('سفارش‌های من');
+        return Inertia::render('Account/Orders/Index', [
+            'orders' => $getUserOrders($this->user($request)),
+        ]);
     }
 
-    public function returns(): Response
+    public function showOrder(Request $request, Order $order, BuildOrderDTO $buildOrderDTO): Response
     {
-        return $this->comingSoon('مرجوعی‌های من');
+        if ($order->user_id !== $this->user($request)->id) {
+            abort(403);
+        }
+
+        return Inertia::render('Account/Orders/Show', [
+            'order' => $buildOrderDTO($order)->toArray(),
+        ]);
+    }
+
+    public function retryOrder(Request $request, Order $order, RetryOrderPayment $retryPayment): RedirectResponse|SymfonyResponse
+    {
+        $user = $this->user($request);
+
+        if ($order->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if (! $order->isRetryable()) {
+            abort(403);
+        }
+
+        $url = $retryPayment($order, $user, route('checkout.callback'), (string) $request->ip());
+
+        if ($url === null) {
+            return redirect()->route('account.orders.show', $order)
+                ->with('status', 'متأسفانه موجودی برخی از کالاهای این سفارش دیگر کافی نیست.');
+        }
+
+        return Inertia::location($url);
+    }
+
+    public function returns(Request $request, GetUserOrders $getUserOrders): Response
+    {
+        return Inertia::render('Account/Orders/Index', [
+            'orders' => $getUserOrders($this->user($request), OrderStatusEnum::RETURNED),
+            'title' => 'مرجوعی‌های من',
+            'emptyTitle' => 'هنوز مرجوعی‌ای ثبت نشده است',
+            'emptyDescription' => 'سفارش‌های مرجوع‌شده شما اینجا نمایش داده می‌شوند.',
+            'baseUrl' => '/account/returns',
+        ]);
     }
 
     public function wishlist(): Response
