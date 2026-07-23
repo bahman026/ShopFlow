@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Models\Address;
 use App\Models\City;
 use App\Models\Province;
 use Illuminate\Database\Seeder;
@@ -16,6 +17,12 @@ class CitySeeder extends Seeder
      */
     public function run(): void
     {
+        // addresses.city_id has no cascade action, so a lingering address
+        // (soft-deleted or not — the row still exists either way) blocks
+        // deleting cities. Force-delete every address first, including
+        // already-soft-deleted ones, so re-seeding doesn't hit a FK violation.
+        Address::withTrashed()->forceDelete();
+
         City::query()->delete();
         Province::query()->delete();
 
