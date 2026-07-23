@@ -105,6 +105,46 @@ it('filters products by a product attribute', function (): void {
         );
 });
 
+it('orders attribute-group facets by their configured order, not alphabetically', function (): void {
+    $category = catCategory('facets-order');
+
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => 'مشخصات', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    // "وزن" (weight) sorts before "رنگ" (color) alphabetically, but is
+    // configured with a higher `order` value, so it must render second.
+    $weightGroupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'وزن', 'order' => 2, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $colorGroupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'رنگ', 'order' => 1, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    foreach ([$weightGroupId, $colorGroupId] as $groupId) {
+        DB::table('attribute_group_category')->insert([
+            'attribute_group_id' => $groupId,
+            'category_id' => $category->id,
+            'as_filter' => true,
+            'required' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    $heavy = Attribute::create(['attribute_group_id' => $weightGroupId, 'value' => 'سنگین']);
+    $red = Attribute::create(['attribute_group_id' => $colorGroupId, 'value' => 'قرمز']);
+
+    catProduct($category, attributeId: $heavy->id);
+    catProduct($category, attributeId: $red->id);
+
+    $this->get('/categories/'.$category->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('filters.attributeGroups.0.name', 'رنگ')
+            ->where('filters.attributeGroups.1.name', 'وزن')
+        );
+});
+
 it('filters products to in-stock only', function (): void {
     $category = catCategory('stock');
     catProduct($category, hasStock: true);

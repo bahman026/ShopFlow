@@ -100,6 +100,7 @@ class GetCategoryFilters
         return AttributeGroup::query()
             ->whereIn('id', $groupIds)
             ->with(['attributes' => fn (Relation $relation) => $relation->whereIn('id', $usedAttributeIds)->orderBy('value')])
+            ->orderBy('order')
             ->orderBy('name')
             ->get()
             ->reject(fn (AttributeGroup $group): bool => $group->attributes->isEmpty())
