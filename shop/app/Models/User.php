@@ -15,7 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string|null $first_name
  * @property string|null $last_name
  * @property string|null $email
- * @property string $mobile
+ * @property string|null $mobile
  * @property Carbon|null $mobile_verified_at
  * @property string|null $password
  * @property UserStatusEnum $status
@@ -65,13 +65,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Human-friendly name, falling back to the mobile number.
+     * Human-friendly name, falling back to the mobile number. `mobile` is
+     * nullable at the schema level (admin/staff accounts have none), so this
+     * falls back further to the email, or a generic label, rather than
+     * assuming every user has a mobile.
      */
     public function displayName(): string
     {
         $name = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
 
-        return $name !== '' ? $name : $this->mobile;
+        return $name !== '' ? $name : ($this->mobile ?? $this->email ?? 'کاربر');
     }
 
     public static function placeholderEmail(string $mobile): string
