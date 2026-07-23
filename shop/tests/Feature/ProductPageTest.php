@@ -140,6 +140,47 @@ it('returns 404 for a missing product', function (): void {
     $this->get('/products/does-not-exist')->assertNotFound();
 });
 
+it('pairs descriptive specs and highlights with their attribute group name', function (): void {
+    $category = Category::create([
+        'heading' => 'پوشاک زنانه',
+        'slug' => 'womens-clothing',
+        'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => 'مشخصات فنی', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $groupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'متریال', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $cotton = Attribute::create(['attribute_group_id' => $groupId, 'value' => 'پنبه']);
+
+    $product = Product::create([
+        'heading' => 'شومیز زنانه',
+        'slug' => 'womens-blouse',
+        'price' => 700000,
+        'category_id' => $category->id,
+        'status' => ProductStatusEnum::PUBLISHED,
+        'seen' => 0,
+    ]);
+    makeImage(Product::class, $product->id);
+    $product->attributes()->attach($cotton->id, ['is_highlight' => true]);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('product.specs', 1, fn (AssertableInertia $spec): AssertableInertia => $spec
+                ->where('group', 'متریال')
+                ->where('value', 'پنبه')
+            )
+            ->has('product.highlights', 1, fn (AssertableInertia $highlight): AssertableInertia => $highlight
+                ->where('group', 'متریال')
+                ->where('value', 'پنبه')
+            )
+        );
+});
+
 it('builds a selectable axis from variety attributes', function (): void {
     $category = Category::create([
         'heading' => 'پوشاک',

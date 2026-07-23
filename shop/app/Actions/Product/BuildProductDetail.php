@@ -63,11 +63,11 @@ class BuildProductDetail
             varieties: $varieties->map(fn (Variety $variety): VarietyDTO => $this->variety($variety))->all(),
             highlights: $product->attributes
                 ->filter(fn (Attribute $attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false))
-                ->map(fn (Attribute $attribute): array => ['value' => $attribute->value])
+                ->map(fn (Attribute $attribute): array => $this->spec($attribute))
                 ->values()
                 ->all(),
             specs: $product->attributes
-                ->map(fn (Attribute $attribute): array => ['value' => $attribute->value])
+                ->map(fn (Attribute $attribute): array => $this->spec($attribute))
                 ->all(),
             reviews: $product->reviews
                 ->map(fn (Review $review): ReviewDTO => new ReviewDTO(
@@ -99,6 +99,21 @@ class BuildProductDetail
             image: ($this->transformImage)($variety->image),
             options: $this->options($variety),
         );
+    }
+
+    /**
+     * A descriptive product attribute paired with its group name (e.g.
+     * `{group: 'متریال', value: 'پنبه'}`), so specs/highlights are never
+     * shown as bare, out-of-context values.
+     *
+     * @return array{group: string, value: string}
+     */
+    private function spec(Attribute $attribute): array
+    {
+        return [
+            'group' => (string) $attribute->attributeGroup->name,
+            'value' => $attribute->value,
+        ];
     }
 
     /**

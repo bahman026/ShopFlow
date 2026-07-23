@@ -40,7 +40,7 @@ class ProductController extends Controller
                     'attribute.attributeGroup',
                     'attributes.attributeGroup',
                 ]),
-                'attributes',
+                'attributes.attributeGroup',
                 'reviews' => fn (Relation $query) => $query->where('status', ReviewStatusEnum::APPROVED->value)->whereNull('parent_id')->with('user')->latest(),
             ])
             ->firstOrFail();

@@ -12,8 +12,8 @@ readonly class ProductDTO
      * @param  array{heading: string, url: string}|null  $category
      * @param  array<int, array<string, mixed>>  $variantAxes
      * @param  array<int, VarietyDTO>  $varieties
-     * @param  array<int, array{value: string}>  $highlights
-     * @param  array<int, array{value: string}>  $specs
+     * @param  array<int, array{group: string, value: string}>  $highlights
+     * @param  array<int, array{group: string, value: string}>  $specs
      * @param  array<int, ReviewDTO>  $reviews
      */
     public function __construct(
