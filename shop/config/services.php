@@ -42,4 +42,12 @@ return [
         'service_key' => env('NESHAN_SERVICE_KEY'),
     ],
 
+    // Zarinpal payment gateway. base_url defaults to the sandbox so local/CI
+    // never accidentally hits production; any 36-character merchant_id works
+    // in sandbox mode (no real merchant account needed).
+    'zarinpal' => [
+        'merchant_id' => env('ZARINPAL_MERCHANT_ID'),
+        'base_url' => env('ZARINPAL_BASE_URL', 'https://sandbox.zarinpal.com'),
+    ],
+
 ];

@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Icon from '@/Components/Icon.vue';
@@ -16,6 +17,10 @@ const props = defineProps({
     shippingMethod: { type: Object, default: null },
 });
 
+const page = usePage();
+const status = computed(() => page.props.flash?.status ?? null);
+const processing = ref(false);
+
 const fullAddress = computed(() => {
     if (!props.address) {
         return '';
@@ -27,6 +32,14 @@ const fullAddress = computed(() => {
     ].filter(Boolean);
     return parts.join('، ');
 });
+
+function pay() {
+    router.post(
+        '/checkout/payment',
+        {},
+        { onStart: () => (processing.value = true), onFinish: () => (processing.value = false) },
+    );
+}
 </script>
 
 <template>
@@ -35,6 +48,10 @@ const fullAddress = computed(() => {
     <AppLayout>
         <div class="flex flex-col gap-8">
             <CheckoutSteps :current="3" />
+
+            <p v-if="status" class="rounded-lg bg-red-50 p-3 text-center text-sm text-red-700">
+                {{ status }}
+            </p>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div class="flex flex-col gap-6 lg:col-span-8">
@@ -64,11 +81,9 @@ const fullAddress = computed(() => {
                         class="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-16 text-center"
                     >
                         <Icon :icon="uiIcons.creditCard" class="text-4xl text-gray-300" />
-                        <p class="text-base font-bold text-gray-700">
-                            درگاه پرداخت به‌زودی فعال می‌شود
-                        </p>
+                        <p class="text-base font-bold text-gray-700">پرداخت آنلاین با زرین‌پال</p>
                         <p class="text-sm text-gray-500">
-                            انتخاب نشانی انجام شد؛ اتصال به درگاه پرداخت در مرحله بعد اضافه می‌شود.
+                            با کلیک روی «پرداخت» به درگاه پرداخت امن زرین‌پال منتقل می‌شوید.
                         </p>
                     </div>
                 </div>
@@ -77,9 +92,10 @@ const fullAddress = computed(() => {
                     <CartSummary
                         :summary="summary"
                         cta-label="پرداخت"
-                        :processing="true"
+                        :processing="processing"
                         :show-shipping="true"
                         :shipping="shippingMethod"
+                        @submit="pay"
                     />
                 </div>
             </div>

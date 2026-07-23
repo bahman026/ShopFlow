@@ -1,6 +1,6 @@
 # Orders & Inventory
 
-Notes for when the orders and payments flow is built. Not implemented yet.
+Strategy A (below) is implemented on the storefront side: order creation is `App\Actions\Checkout\CreatePendingOrder` (shop), the row-locked decrement is `App\Actions\Checkout\DecrementInventoryAndMarkPaid`, wired together by `App\Actions\Checkout\CompleteCheckoutPayment` (Zarinpal callback handler, `PaymentController@callback`). Strategy B is still just notes.
 
 ## When does `varieties.inventory` decrease?
 
@@ -34,6 +34,8 @@ The lock stops two simultaneous payments from both selling the last unit, so no 
 
 The last unit is not held during payment, so two people can both reach the payment page and the second fails at the final confirm. Rare except on hot or flash-sale items.
 
+Storefront-side, `PaymentController::initiate()` calls `ValidateCartStock` to re-check live inventory right before opening a Zarinpal payment session — this closes the common, fully-preventable case (item already out of stock when the customer clicks پرداخت) so nobody is charged for something unavailable. It cannot close the race above (two people mid-payment for the same last unit); that residual case still reaches `DecrementInventoryAndMarkPaid`'s rejection, and since Zarinpal's verify already succeeded there (money genuinely captured), `CompleteCheckoutPayment::failPaidButOversold()` keeps `ref_id`/`paid_at` and writes a "needs manual refund" message into `result_message` instead of a plain `FAILED` with no trace — check the Transactions table for `result_message` mentioning بازگشت وجه.
+
 ## If this is not enough later: Strategy B (reserve at checkout)
 
 Only consider this if real lost sales, oversell complaints, or flash sales appear. It is an additive change, so deferring it costs nothing now.
@@ -49,9 +51,11 @@ Preferred shape if B is needed: a `reservations` table (`variety_id`, `quantity`
 
 ## Payments: receipts vs transactions/gateways
 
-Two payment paths, kept separate:
+Two payment paths, kept separate — **a paid order only ever has a row in one of them, never both**:
 
-- Manual / offline payments use `receipts` (built): card-to-card, Paya transfers, prepayments. The customer provides a tracking code or uploads a receipt image, and staff confirm it. Fields: `destination_bank`, `end_of_card_number`, `tracking_code`, `is_paya`, plus a polymorphic receipt image.
-- Online gateway payments will use `transactions` + `gateways` (not built yet): Mellat, Parsian, Zarinpal. These record the gateway result automatically.
+- Manual / offline payments use `receipts` (admin table built; not yet wired into the storefront checkout flow): card-to-card, Paya transfers, prepayments. The customer provides a tracking code or uploads a receipt image, and staff confirm it. Fields: `destination_bank`, `end_of_card_number`, `tracking_code`, `is_paya`, plus a polymorphic receipt image.
+- Online gateway payments use `transactions` (built, storefront-side): **Zarinpal only so far, sandbox mode** (`port = ZARINPAL`). Mellat and Parsian are not built. The shop reads Zarinpal's `merchant_id`/base URL from its own `config('services.zarinpal.*')`/`.env`, not this `gateways` table (nothing is seeded there yet) — revisit once a second gateway needs real *selection* logic (`gateways.active`/`priority`).
+
+**A Zarinpal-paid order will never show a `receipts` row** — nothing in the codebase creates one for an online gateway payment (no observer/event links `Transaction` to `Receipt`); staff seeing an empty Receipts tab on a Zarinpal order in the panel is expected, not a bug. `receipts` only gets rows from the (not-yet-built) manual bank-transfer flow.
 
 Keep `receipts` if there is any chance of manual bank transfers (typical for Iranian shops). If the shop ever becomes gateway-only, `transactions`/`gateways` would cover everything and `receipts` could be retired.

@@ -12,6 +12,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
@@ -73,6 +74,9 @@ Route::middleware('auth')->prefix('checkout')->name('checkout.')->group(function
     Route::get('/methods', [CheckoutController::class, 'methods'])->name('methods');
     Route::post('/shipping', [CheckoutController::class, 'storeShipping'])->name('shipping.store');
     Route::get('/payment', [CheckoutController::class, 'payment'])->name('payment');
+    Route::post('/payment', [PaymentController::class, 'initiate'])->name('payment.initiate');
+    Route::get('/callback', [PaymentController::class, 'callback'])->name('callback');
+    Route::get('/confirmation/{order}', [PaymentController::class, 'confirmation'])->name('confirmation');
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
