@@ -12,6 +12,8 @@ use App\Enums\ReviewStatusEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\User;
+use App\Models\Wishlist;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,7 +54,27 @@ class ProductController extends Controller
             'breadcrumbs' => $buildBreadcrumbs($product),
             'related' => $getRelatedProducts($product),
             'cartItems' => $this->cartItems($request, $resolveOwner, $product),
+            'isWishlisted' => $this->isWishlisted($request, $product),
         ]);
+    }
+
+    /**
+     * Whether the current user has saved this product, so the buy box can
+     * show a filled/outlined heart instead of a fresh wishlist button.
+     * Guests (no session-based wishlist support, unlike cart) always see false.
+     */
+    private function isWishlisted(Request $request, Product $product): bool
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        return Wishlist::query()
+            ->where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->exists();
     }
 
     /**

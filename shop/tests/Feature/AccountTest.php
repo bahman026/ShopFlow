@@ -112,10 +112,10 @@ it('renders a placeholder for sections not built yet', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get('/account/wishlist')
+        ->get('/account/reviews')
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('Account/ComingSoon')
-            ->where('title', 'علاقه‌مندی‌های من')
+            ->where('title', 'نظرات ثبت‌شده')
         );
 });

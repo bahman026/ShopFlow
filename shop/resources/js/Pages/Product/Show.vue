@@ -31,6 +31,10 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    isWishlisted: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();
@@ -154,6 +158,20 @@ function removeCart() {
     }
 }
 
+const wishlistBusy = ref(false);
+
+function toggleWishlist() {
+    router.post(
+        `/products/${props.product.id}/wishlist`,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (wishlistBusy.value = true),
+            onFinish: () => (wishlistBusy.value = false),
+        },
+    );
+}
+
 const metaTitle = computed(() => props.product.title || props.product.heading);
 const metaDescription = computed(
     () =>
@@ -253,10 +271,13 @@ const jsonLd = computed(() => {
                         :selected="buyBox.selected"
                         :processing="cartBusy"
                         :cart-count="cartCount"
+                        :is-wishlisted="isWishlisted"
+                        :wishlist-processing="wishlistBusy"
                         @add="addToCart"
                         @increase="increaseCart"
                         @decrease="decreaseCart"
                         @remove="removeCart"
+                        @toggle-wishlist="toggleWishlist"
                     />
                 </div>
             </div>

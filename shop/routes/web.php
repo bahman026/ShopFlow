@@ -16,6 +16,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -41,8 +42,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// Customer account area. Dashboard, profile, addresses, orders and returns
-// are built; other sidebar links render a placeholder for now.
+// Customer account area. Dashboard, profile, addresses, orders, returns and
+// wishlist are built; other sidebar links render a placeholder for now.
 Route::middleware('auth')->prefix('account')->name('account.')->group(function (): void {
     Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
@@ -93,6 +94,12 @@ Route::get('/brands/{slug}', [BrandController::class, 'show'])->name('brands.sho
 Route::get('/faq/{position?}', [FaqController::class, 'show'])->name('faqs.show');
 
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+// Wishlist has no guest/session support (unlike cart) — user_id is required
+// at the schema level, so toggling is auth-only.
+Route::post('/products/{product}/wishlist', [WishlistController::class, 'toggle'])
+    ->middleware('auth')
+    ->name('wishlist.toggle');
 
 // CMS pages use clean top-level slugs (e.g. /about-us). Keep this LAST so it
 // only matches single-segment paths no other route claimed; unknown slugs 404.

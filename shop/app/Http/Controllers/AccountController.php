@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Account\GetUserOrders;
+use App\Actions\Account\GetUserWishlist;
 use App\Actions\Checkout\BuildOrderDTO;
 use App\Actions\Checkout\RetryOrderPayment;
 use App\DTOs\UserDTO;
@@ -127,9 +128,11 @@ class AccountController extends Controller
         ]);
     }
 
-    public function wishlist(): Response
+    public function wishlist(Request $request, GetUserWishlist $getUserWishlist): Response
     {
-        return $this->comingSoon('علاقه‌مندی‌های من');
+        return Inertia::render('Account/Wishlist/Index', [
+            'products' => $getUserWishlist($this->user($request)),
+        ]);
     }
 
     public function reviews(): Response

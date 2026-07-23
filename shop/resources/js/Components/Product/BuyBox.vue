@@ -38,9 +38,17 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    isWishlisted: {
+        type: Boolean,
+        default: false,
+    },
+    wishlistProcessing: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-const emit = defineEmits(['add', 'increase', 'decrease', 'remove']);
+const emit = defineEmits(['add', 'increase', 'decrease', 'remove', 'toggle-wishlist']);
 
 const { formatPrice, toPersianDigits } = useFormat();
 
@@ -62,6 +70,21 @@ const trust = [
 
 <template>
     <div class="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4">
+        <button
+            type="button"
+            class="flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-sm font-bold transition disabled:opacity-50"
+            :class="
+                isWishlisted
+                    ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+            "
+            :disabled="wishlistProcessing"
+            @click="emit('toggle-wishlist')"
+        >
+            <Icon :icon="uiIcons.heart" />
+            {{ isWishlisted ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها' }}
+        </button>
+
         <ul class="flex flex-col gap-3">
             <li
                 v-for="item in trust"
