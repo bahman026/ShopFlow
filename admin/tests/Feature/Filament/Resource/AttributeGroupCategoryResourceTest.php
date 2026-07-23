@@ -96,3 +96,14 @@ it('cannot delete attributeGroupCategory model.', function () {
     ])
         ->assertActionDoesNotExist(DeleteAction::class);
 });
+
+it('reads the attributeGroups/categories pivot without querying a non-existent order column', function () {
+    // Regression test: AttributeGroup::categories() and Category::attributeGroups()
+    // used to declare ->withPivot(['as_filter', 'required', 'order']) even though
+    // attribute_group_category has no `order` column, which threw a SQLSTATE
+    // "undefined column" error the instant either relation was queried.
+    $attributeGroupCategory = AttributeGroupCategory::factory()->create();
+
+    expect($attributeGroupCategory->attributeGroup->categories()->get())->toHaveCount(1);
+    expect($attributeGroupCategory->category->attributeGroups()->get())->toHaveCount(1);
+});
