@@ -34,6 +34,8 @@ import {
     faPenToSquare,
     faTrashCan,
     faCreditCard,
+    faPrint,
+    faFileInvoice,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -76,4 +78,6 @@ export const uiIcons = {
     edit: faPenToSquare,
     trash: faTrashCan,
     creditCard: faCreditCard,
+    print: faPrint,
+    invoice: faFileInvoice,
 };

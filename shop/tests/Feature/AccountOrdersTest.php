@@ -129,6 +129,39 @@ it('forbids viewing another user\'s order', function (): void {
         ->assertForbidden();
 });
 
+it('shows a printable receipt with its line items, address and totals', function (): void {
+    $user = User::factory()->create();
+    $order = makeOrder($user);
+
+    $this->actingAs($user)
+        ->get('/account/orders/'.$order->id.'/receipt')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->component('Account/Orders/Receipt')
+            ->where('order.id', $order->id)
+            ->where('order.trackingCode', $order->tracking_code)
+            ->where('order.totalPrice', 220000)
+            ->has('order.lines', 1)
+            ->where('order.address.name', 'منزل')
+        );
+});
+
+it('forbids downloading another user\'s receipt', function (): void {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $order = makeOrder($owner);
+
+    $this->actingAs($other)
+        ->get('/account/orders/'.$order->id.'/receipt')
+        ->assertForbidden();
+});
+
+it('redirects guests away from the receipt page', function (): void {
+    $order = makeOrder(User::factory()->create());
+
+    $this->get('/account/orders/'.$order->id.'/receipt')->assertRedirect('/login');
+});
+
 it('redirects guests away from the returns list', function (): void {
     $this->get('/account/returns')->assertRedirect('/login');
 });

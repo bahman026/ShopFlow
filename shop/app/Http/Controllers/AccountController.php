@@ -83,6 +83,17 @@ class AccountController extends Controller
         ]);
     }
 
+    public function receipt(Request $request, Order $order, BuildOrderDTO $buildOrderDTO): Response
+    {
+        if ($order->user_id !== $this->user($request)->id) {
+            abort(403);
+        }
+
+        return Inertia::render('Account/Orders/Receipt', [
+            'order' => $buildOrderDTO($order)->toArray(),
+        ]);
+    }
+
     public function retryOrder(Request $request, Order $order, RetryOrderPayment $retryPayment): RedirectResponse|SymfonyResponse
     {
         $user = $this->user($request);

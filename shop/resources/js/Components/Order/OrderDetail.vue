@@ -25,6 +25,10 @@ const fullAddress = computed(() => {
     ].filter(Boolean);
     return parts.join('، ');
 });
+
+function lineDiscount(line) {
+    return line.unitPrice * line.quantity - line.finalPrice;
+}
 </script>
 
 <template>
@@ -61,8 +65,13 @@ const fullAddress = computed(() => {
                         </p>
                     </div>
 
-                    <div class="shrink-0 self-center text-sm font-bold text-gray-900">
-                        {{ formatPrice(line.finalPrice) }}
+                    <div class="shrink-0 self-center text-left">
+                        <p v-if="lineDiscount(line) > 0" class="text-xs font-medium text-red-500">
+                            {{ formatPrice(lineDiscount(line)) }} تخفیف
+                        </p>
+                        <p class="text-sm font-bold text-gray-900">
+                            {{ formatPrice(line.finalPrice) }}
+                        </p>
                     </div>
                 </div>
             </div>

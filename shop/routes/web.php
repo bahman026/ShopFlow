@@ -49,6 +49,7 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::put('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
     Route::get('/orders', [AccountController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [AccountController::class, 'showOrder'])->name('orders.show');
+    Route::get('/orders/{order}/receipt', [AccountController::class, 'receipt'])->name('orders.receipt');
     Route::post('/orders/{order}/retry', [AccountController::class, 'retryOrder'])->name('orders.retry');
     Route::get('/returns', [AccountController::class, 'returns'])->name('returns');
     Route::get('/wishlist', [AccountController::class, 'wishlist'])->name('wishlist');
