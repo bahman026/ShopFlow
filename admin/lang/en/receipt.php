@@ -6,7 +6,7 @@ return [
     'label' => 'Receipt',
     'plural_label' => 'Receipts',
     'navigation_group' => 'Commerce',
-    'subheading' => 'Payment receipts recorded against users and (optionally) orders, including bank transfer details.',
+    'subheading' => 'Manual/offline payments only (card-to-card, Paya transfer, prepayment) recorded against users and (optionally) orders. Online gateway payments (Zarinpal, Mellat, Parsian) never appear here — check the Transactions table for those instead.',
 
     'user_id' => 'User',
     'card_id' => 'Card ID',
