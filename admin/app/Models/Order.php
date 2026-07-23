@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
+ * @property string $tracking_code
  * @property positive-int|null $user_id
  * @property positive-int|null $coupon_id
  * @property OrderStatusEnum $status
@@ -111,6 +112,26 @@ class Order extends Model
         'collector_reminded_at' => 'datetime',
         'notified_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order): void {
+            $order->tracking_code ??= self::generateTrackingCode();
+        });
+    }
+
+    /**
+     * A random 10-digit number, not the sequential `id`, so a customer's
+     * tracking code never reveals order volume/growth over time.
+     */
+    private static function generateTrackingCode(): string
+    {
+        do {
+            $code = (string) random_int(1_000_000_000, 9_999_999_999);
+        } while (self::query()->where('tracking_code', $code)->exists());
+
+        return $code;
+    }
 
     public function user(): BelongsTo
     {

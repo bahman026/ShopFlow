@@ -16,6 +16,7 @@ return [
     'section_collection' => 'وصول',
     'section_notification' => 'اطلاع‌رسانی به مشتری',
 
+    'tracking_code' => 'کد رهگیری',
     'user_id' => 'مشتری',
     'coupon_id' => 'کوپن',
     'status' => 'وضعیت',

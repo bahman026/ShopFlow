@@ -19,6 +19,10 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table): void {
             $table->id();
+            // Customer-facing order identifier (e.g. "1168407691"): an opaque
+            // random 10-digit number, not the sequential `id`, so a customer
+            // can't infer order volume/growth from their own tracking code.
+            $table->string('tracking_code', 10)->unique();
             $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(Coupon::class)->nullable()->constrained()->nullOnDelete();
             $table->unsignedTinyInteger('status')->default(OrderStatusEnum::PENDING->value);

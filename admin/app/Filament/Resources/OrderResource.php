@@ -214,6 +214,10 @@ class OrderResource extends Resource
                 TextColumn::make('id')
                     ->label('#')
                     ->sortable(),
+                TextColumn::make('tracking_code')
+                    ->label(trans('order.tracking_code'))
+                    ->searchable()
+                    ->copyable(),
                 TextColumn::make('user.email')
                     ->label(trans('order.user_id'))
                     ->searchable()

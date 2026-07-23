@@ -16,6 +16,7 @@ return [
     'section_collection' => 'Collection',
     'section_notification' => 'Customer Notification',
 
+    'tracking_code' => 'Tracking Code',
     'user_id' => 'Customer',
     'coupon_id' => 'Coupon',
     'status' => 'Status',
