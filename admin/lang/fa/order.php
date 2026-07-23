@@ -47,6 +47,7 @@ return [
     'notifier_id' => 'اطلاع‌رسان',
     'notified_at' => 'تاریخ اطلاع‌رسانی',
 
+    'address_id' => 'نشانی ارسال',
     'shipping_line_id' => 'خط ارسال',
     'shipping_method_id' => 'روش ارسال',
     'send_description' => 'توضیحات ارسال',

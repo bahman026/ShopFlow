@@ -118,6 +118,12 @@ class OrderResource extends Resource
                     ]),
                 Fieldset::make(trans('order.section_shipping'))
                     ->schema([
+                        Select::make('address_id')
+                            ->label(trans('order.address_id'))
+                            ->relationship('address', 'address')
+                            ->searchable()
+                            ->preload()
+                            ->native(false),
                         Select::make('shipping_line_id')
                             ->label(trans('order.shipping_line_id'))
                             ->relationship('shippingLine', 'name')

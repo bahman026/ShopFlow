@@ -473,6 +473,7 @@ Implementation notes:
 * `collector_description`: Collection-related description.  
 * `notifier_id`: Customer notification.  
 * `notified_at`: Customer notification date.  
+* `address_id`: Specifies the address the order ships to. Not in the original doc — added when online payment/order creation was implemented, since the doc otherwise had no way to record a shipping destination.  
 * `shipping_line_id`: Specifies which shipping line.  
 * `shipping_method_id`: Specifies which shipping method.  
 * `send_description`: Provides the shipping description.  
@@ -485,6 +486,7 @@ Implementation notes:
 * `user_id`: Nullable FK to `users`, `nullOnDelete` so orders survive user deletion.
 * `confirmed_id`, `collector_id`, `notifier_id`: Nullable FKs to `users` (`nullOnDelete`).
 * `accounting_id`, `bijack_image_id`: Plain nullable columns with no FK constraint, because the accounting table is not built yet and images are stored polymorphically elsewhere.
+* `address_id`: Nullable FK to `addresses`, `nullOnDelete`. Addresses are immutable history (edits create a new row), so this always points at the exact address snapshot chosen at checkout.
 * Money columns (`coupon_discount`, `discount`, `shipping_cost`, `total_products_price`, `tax`, `total_price`): `decimal(12,2)`, default `0`.
 * No `seller_id` (single-vendor). The seller-centric `sub_orders` / `sub_order_logs` tables are intentionally not implemented.
 * Only the `orders` table is implemented so far; `order_varieties` and the other order_* tables are not built yet.

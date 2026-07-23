@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\OrderSrcEnum;
 use App\Enums\OrderStatusEnum;
+use App\Models\Address;
 use App\Models\Coupon;
 use App\Models\ShippingLine;
 use App\Models\ShippingMethod;
@@ -54,6 +55,11 @@ return new class extends Migration
 
             $table->foreignId('notifier_id')->nullable()->constrained('users')->nullOnDelete();
             $table->dateTime('notified_at')->nullable();
+
+            // The address the order ships to. Addresses are immutable history
+            // (edits create a new row), so this always points at the exact
+            // address snapshot the customer chose at checkout.
+            $table->foreignIdFor(Address::class)->nullable()->constrained()->nullOnDelete();
 
             $table->foreignIdFor(ShippingLine::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(ShippingMethod::class)->nullable()->constrained()->nullOnDelete();

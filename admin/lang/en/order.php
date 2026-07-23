@@ -47,6 +47,7 @@ return [
     'notifier_id' => 'Notified By',
     'notified_at' => 'Notified At',
 
+    'address_id' => 'Shipping Address',
     'shipping_line_id' => 'Shipping Line',
     'shipping_method_id' => 'Shipping Method',
     'send_description' => 'Shipping Description',
