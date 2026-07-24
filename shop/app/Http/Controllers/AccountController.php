@@ -63,7 +63,7 @@ class AccountController extends Controller
 
         $user->save();
 
-        return back()->with('status', 'اطلاعات حساب با موفقیت ذخیره شد.');
+        return back()->with('status', trans('messages.profile_saved'));
     }
 
     public function orders(Request $request, GetUserOrders $getUserOrders): Response
@@ -111,7 +111,7 @@ class AccountController extends Controller
 
         if ($url === null) {
             return redirect()->route('account.orders.show', $order)
-                ->with('status', 'متأسفانه موجودی برخی از کالاهای این سفارش دیگر کافی نیست.');
+                ->with('status', trans('messages.orders.retry_insufficient_stock'));
         }
 
         return Inertia::location($url);
@@ -121,9 +121,9 @@ class AccountController extends Controller
     {
         return Inertia::render('Account/Orders/Index', [
             'orders' => $getUserOrders($this->user($request), OrderStatusEnum::RETURNED),
-            'title' => 'مرجوعی‌های من',
-            'emptyTitle' => 'هنوز مرجوعی‌ای ثبت نشده است',
-            'emptyDescription' => 'سفارش‌های مرجوع‌شده شما اینجا نمایش داده می‌شوند.',
+            'title' => trans('messages.orders.returns_title'),
+            'emptyTitle' => trans('messages.orders.returns_empty_title'),
+            'emptyDescription' => trans('messages.orders.returns_empty_description'),
             'baseUrl' => '/account/returns',
         ]);
     }
@@ -137,7 +137,7 @@ class AccountController extends Controller
 
     public function reviews(): Response
     {
-        return $this->comingSoon('نظرات ثبت‌شده');
+        return $this->comingSoon(trans('messages.account.reviews_coming_soon'));
     }
 
     private function comingSoon(string $title): Response

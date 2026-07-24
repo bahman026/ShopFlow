@@ -83,7 +83,7 @@ class GetUserOrders
             'totalPrice' => $order->total_price,
             'itemCount' => (int) $order->orderVarieties->sum('quantity'),
             // @phpstan-ignore nullsafe.neverNull (nullable snapshot FK; see BuildOrderDTO::line())
-            'firstItemHeading' => $product?->heading ?? 'محصول حذف‌شده',
+            'firstItemHeading' => $product?->heading ?? trans('messages.deleted_product'),
             'image' => $image?->toArray(),
             'url' => '/account/orders/'.$order->id,
         ];

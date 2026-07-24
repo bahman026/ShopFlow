@@ -22,6 +22,6 @@ class WishlistController extends Controller
 
         $wishlisted = $toggle($user, $product);
 
-        return back()->with('status', $wishlisted ? 'به علاقه‌مندی‌ها اضافه شد.' : 'از علاقه‌مندی‌ها حذف شد.');
+        return back()->with('status', trans($wishlisted ? 'messages.wishlist.added' : 'messages.wishlist.removed'));
     }
 }

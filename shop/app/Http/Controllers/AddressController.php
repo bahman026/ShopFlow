@@ -54,7 +54,7 @@ class AddressController extends Controller
 
         $store($user, $data);
 
-        return back()->with('status', 'نشانی با موفقیت ثبت شد.');
+        return back()->with('status', trans('messages.address.created'));
     }
 
     public function update(Request $request, Address $address, NormalizeMobile $normalize, UpdateUserAddress $update): RedirectResponse
@@ -63,7 +63,7 @@ class AddressController extends Controller
 
         $update($address, $this->validated($request, $normalize));
 
-        return back()->with('status', 'نشانی با موفقیت ویرایش شد.');
+        return back()->with('status', trans('messages.address.updated'));
     }
 
     public function setPrimary(Request $request, Address $address): RedirectResponse
@@ -73,7 +73,7 @@ class AddressController extends Controller
         // Saving with prime=true demotes the user's other addresses (model hook).
         $address->update(['prime' => true]);
 
-        return back()->with('status', 'نشانی پیش‌فرض تغییر کرد.');
+        return back()->with('status', trans('messages.address.primary_changed'));
     }
 
     public function destroy(Request $request, Address $address): RedirectResponse
@@ -94,7 +94,7 @@ class AddressController extends Controller
                 ?->update(['prime' => true]);
         }
 
-        return back()->with('status', 'نشانی حذف شد.');
+        return back()->with('status', trans('messages.address.deleted'));
     }
 
     public function cities(Request $request): JsonResponse
@@ -163,33 +163,13 @@ class AddressController extends Controller
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'prime' => ['boolean'],
-        ], [
-            'required' => 'وارد کردن :attribute الزامی است.',
-            'string' => ':attribute باید متن باشد.',
-            'integer' => ':attribute نامعتبر است.',
-            'numeric' => ':attribute نامعتبر است.',
-            'exists' => ':attribute انتخاب‌شده معتبر نیست.',
-            'max' => ':attribute نباید بیشتر از :max نویسه باشد.',
-            'between' => ':attribute خارج از محدوده مجاز است.',
-            'boolean' => ':attribute نامعتبر است.',
-        ], [
-            'name' => 'عنوان نشانی',
-            'city_id' => 'شهر',
-            'address' => 'نشانی',
-            'plate' => 'پلاک',
-            'unit' => 'واحد',
-            'postal_code' => 'کد پستی',
-            'phone' => 'شماره موبایل',
-            'note' => 'توضیحات',
-            'latitude' => 'موقعیت مکانی',
-            'longitude' => 'موقعیت مکانی',
         ]);
 
         $phone = $normalize($validated['phone']);
 
         if ($phone === null) {
             throw ValidationException::withMessages([
-                'phone' => 'شماره موبایل معتبر نیست.',
+                'phone' => trans('messages.address.invalid_phone'),
             ]);
         }
 
@@ -197,7 +177,7 @@ class AddressController extends Controller
 
         if (preg_match('/^\d{10}$/', $postal) !== 1) {
             throw ValidationException::withMessages([
-                'postal_code' => 'کد پستی باید ۱۰ رقم باشد.',
+                'postal_code' => trans('messages.address.invalid_postal_code'),
             ]);
         }
 

@@ -5,27 +5,28 @@ declare(strict_types=1);
 namespace App\Actions\Home;
 
 use App\Actions\Catalog\TransformImage;
+use App\Enums\SliderPositionEnum;
 use App\Models\Slide;
 use App\Models\Slider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
-class GetHeroSlides
+class GetSliderByPosition
 {
-    /**
-     * Admin-defined slider position the storefront home reads.
-     */
-    private const POSITION = 'home-main';
-
     public function __construct(private TransformImage $transformImage) {}
 
     /**
+     * The published slider assigned to a given position, as an ordered list of
+     * its slides. Empty when no published slider is assigned there. The
+     * position is a SliderPositionEnum (shared with the admin) rather than a
+     * loose string, so the admin's choice and this lookup can't drift apart.
+     *
      * @return array<int, array<string, mixed>>
      */
-    public function __invoke(): array
+    public function __invoke(SliderPositionEnum $position): array
     {
         $slider = Slider::query()
             ->published()
-            ->where('position', self::POSITION)
+            ->where('position', $position->value)
             ->with(['slides' => fn (Relation $query) => $query->orderBy('order'), 'slides.image'])
             ->first();
 

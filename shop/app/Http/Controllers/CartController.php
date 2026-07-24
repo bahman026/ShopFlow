@@ -42,12 +42,12 @@ class CartController extends Controller
         $variety = Variety::query()->findOrFail($validated['variety_id']);
 
         if (! $variety->has_stock || $variety->inventory < 1) {
-            throw ValidationException::withMessages(['variety_id' => 'این کالا موجود نیست.']);
+            throw ValidationException::withMessages(['variety_id' => trans('messages.cart.unavailable')]);
         }
 
         $add(($this->owner)($request), $variety, (int) ($validated['count'] ?? 1));
 
-        return back()->with('status', 'کالا به سبد خرید اضافه شد.');
+        return back()->with('status', trans('messages.cart.added'));
     }
 
     public function update(Request $request, Cart $cart): RedirectResponse
@@ -70,7 +70,7 @@ class CartController extends Controller
 
         $cart->delete();
 
-        return back()->with('status', 'کالا از سبد خرید حذف شد.');
+        return back()->with('status', trans('messages.cart.removed'));
     }
 
     private function ensureOwner(Request $request, Cart $cart): void

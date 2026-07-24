@@ -34,7 +34,7 @@ class OpenZarinpalSession
 
         $result = ($this->requestPayment)(
             $order->total_price,
-            'سفارش شماره '.$order->id,
+            trans('messages.payment.order_number', ['id' => $order->id]),
             $callbackUrl,
             $user->hasPlaceholderEmail() ? null : $user->email,
             $user->mobile,

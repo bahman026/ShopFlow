@@ -225,6 +225,7 @@ The shop UI uses **Inertia + Vue 3** (SSR enabled). Clean, readable code is a ha
 ## Language, RTL & fonts
 
 - **The storefront is Persian only.** There is no language switcher and no English UI. Set `<html lang="fa" dir="rtl">` in the root template, and write all user-facing text in Persian.
+- **Server-side user-facing strings go through Laravel's lang system, not hardcoded Persian literals in PHP.** The default locale is `fa` (`config('app.locale')` / `APP_LOCALE=fa` in both `.env` and `phpunit.xml`); `fallback_locale` stays `en` so framework strings still resolve when a `fa` key is missing. Reference translations with `trans('file.key')`. The `lang/fa/` files are: **`enums.php`** (every enum `label()` — order/transaction/product/category/brand/page/banner/variety/user/review status, order src, transaction port, slider status + position — keyed `enums.<enum>.<case>`), **`messages.php`** (controller/action flash + `withErrors` + `abort` strings, breadcrumb labels, footer titles, home row titles, payment/result messages incl. `payment.order_number` with an `:id` placeholder, and UI fallbacks like `deleted_product`/`guest_user`), and **`validation.php`** (the standard Laravel file — rule messages + an `attributes` map; because it exists, controllers just call `$request->validate([...rules...])` with NO inline `$messages`/`$attributes`, and every form gets Persian errors for free). **Do NOT move data or comments**: Persian/Arabic *digit-normalization maps* (`NormalizeMobile`, `AuthController`, `AddressController::toEnglishDigits`) are data, and Persian in code comments stays. Vue-side text is still written inline in Persian in the components (not in lang files).
 - Build RTL-first: use Tailwind logical utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`) instead of left/right so layout flows right to left.
 - **Font: `A Iranian Sans` (IranSans).** Reuse the same font as the admin app. The file lives in admin at `public/fonts/AIranianSans.ttf`; copy it into this app's `public/fonts/AIranianSans.ttf` and load it with an `@font-face` (family name `A Iranian Sans`), then set it as the default `font-family` on `body`.
 - Show Persian digits and Jalali (Shamsi) dates. Format on the server so SSR output is already correct.
@@ -275,9 +276,9 @@ Keep controllers thin and push logic into single-purpose actions that return typ
 
 ## Enums
 
-- Backed enums (usually `int`) in `app/Enums/`, e.g. `ProductStatusEnum: int` with explicit case values (`DELETED = 10`).
-- Provide `label(): string` and, where shown to users, `color(): string`, both using `match ($this)`.
-- Mirror the admin app's enum values so both apps agree on the shared schema.
+- Backed enums (usually `int`; string-backed when the column stores a slug, e.g. `SliderPositionEnum: string` mapping `HOME_MAIN => 'home-main'`) in `app/Enums/`, with explicit case values (`DELETED = 10`).
+- Provide `label(): string` via `match ($this)`. New enums return the label through `trans('domain.key')` (see the Language section) — not a hardcoded Persian literal. `color()` is NOT defined on shop enums (badge colors are client-side, e.g. `useOrderStatus.js`); that stays admin/Filament-only.
+- Mirror the admin app's enum values so both apps agree on the shared schema. **Constrain shared "position/location" string columns with an enum** (e.g. `sliders.position` → `SliderPositionEnum`, used both by the admin Filament `Select` and the storefront lookup) rather than free text, so the value an admin picks and the value the frontend queries can never drift.
 
 ## Migrations
 

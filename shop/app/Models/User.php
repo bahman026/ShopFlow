@@ -74,7 +74,7 @@ class User extends Authenticatable
     {
         $name = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
 
-        return $name !== '' ? $name : ($this->mobile ?? $this->email ?? 'کاربر');
+        return $name !== '' ? $name : ($this->mobile ?? $this->email ?? trans('messages.guest_user'));
     }
 
     public static function placeholderEmail(string $mobile): string

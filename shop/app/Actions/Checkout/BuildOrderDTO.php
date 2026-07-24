@@ -75,7 +75,7 @@ class BuildOrderDTO
 
         return new OrderLineDTO(
             // @phpstan-ignore nullsafe.neverNull (see comment above)
-            heading: $product?->heading ?? 'محصول حذف‌شده',
+            heading: $product?->heading ?? trans('messages.deleted_product'),
             url: $product === null ? null : '/products/'.$product->slug,
             image: $image,
             color: $variety?->color,

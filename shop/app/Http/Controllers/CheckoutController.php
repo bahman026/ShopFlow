@@ -37,7 +37,7 @@ class CheckoutController extends Controller
         $lines = $getLines(($this->owner)($request));
 
         if ($lines->isEmpty()) {
-            return redirect()->route('cart')->with('status', 'سبد خرید شما خالی است.');
+            return redirect()->route('cart')->with('status', trans('messages.cart.empty'));
         }
 
         $addresses = Address::query()
@@ -103,7 +103,7 @@ class CheckoutController extends Controller
         $available = collect($this->methodsFor($address));
 
         if (! $available->contains(fn (array $method): bool => $method['id'] === (int) $validated['shipping_method_id'])) {
-            return back()->withErrors(['shipping_method_id' => 'روش ارسال انتخاب‌شده معتبر نیست.']);
+            return back()->withErrors(['shipping_method_id' => trans('messages.checkout.invalid_method')]);
         }
 
         $request->session()->put('checkout.address_id', (int) $validated['address_id']);
@@ -121,7 +121,7 @@ class CheckoutController extends Controller
         $lines = $getLines(($this->owner)($request));
 
         if ($lines->isEmpty()) {
-            return redirect()->route('cart')->with('status', 'سبد خرید شما خالی است.');
+            return redirect()->route('cart')->with('status', trans('messages.cart.empty'));
         }
 
         $addressId = $request->session()->get('checkout.address_id');
@@ -130,7 +130,7 @@ class CheckoutController extends Controller
             : Address::query()->forUser($user->id)->with('city.province')->find($addressId);
 
         if ($address === null) {
-            return redirect()->route('checkout.shipping')->with('status', 'لطفاً نشانی ارسال را انتخاب کنید.');
+            return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_address'));
         }
 
         $methodId = $request->session()->get('checkout.shipping_method_id');
@@ -138,7 +138,7 @@ class CheckoutController extends Controller
             ->firstWhere('id', $methodId === null ? 0 : (int) $methodId);
 
         if ($method === null) {
-            return redirect()->route('checkout.shipping')->with('status', 'لطفاً روش ارسال را انتخاب کنید.');
+            return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_method'));
         }
 
         return Inertia::render('Checkout/Payment', [

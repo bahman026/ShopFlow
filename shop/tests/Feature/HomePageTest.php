@@ -6,6 +6,7 @@ use App\Enums\BannerStatusEnum;
 use App\Enums\BrandStatusEnum;
 use App\Enums\CategoryStatusEnum;
 use App\Enums\ProductStatusEnum;
+use App\Enums\SliderPositionEnum;
 use App\Enums\SliderStatusEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Banner;
@@ -137,4 +138,19 @@ it('renders the home page when the catalog is empty', function (): void {
             ->where('productRows', [])
             ->where('brands', [])
         );
+});
+
+it('only shows the slider assigned to the home-main position', function (): void {
+    // A published slider at a different position must not leak onto the home
+    // hero — the home page asks GetSliderByPosition for HOME_MAIN only.
+    $other = Slider::create([
+        'name' => 'sidebar slider',
+        'position' => SliderPositionEnum::PRODUCT_SIDE->value,
+        'status' => SliderStatusEnum::PUBLISHED,
+    ]);
+    Slide::create(['slider_id' => $other->id, 'heading' => 'کنار', 'order' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('slides', []));
 });

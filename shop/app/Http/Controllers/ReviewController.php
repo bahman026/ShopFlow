@@ -32,6 +32,6 @@ class ReviewController extends Controller
             'rating' => (int) $validated['rating'],
         ]);
 
-        return back()->with('status', 'دیدگاه شما ثبت شد و پس از تأیید نمایش داده می‌شود.');
+        return back()->with('status', trans('messages.review.submitted'));
     }
 }

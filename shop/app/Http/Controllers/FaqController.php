@@ -16,8 +16,8 @@ class FaqController extends Controller
             'position' => $position,
             'faqs' => $getFaqs($position),
             'breadcrumbs' => [
-                ['heading' => 'خانه', 'url' => '/'],
-                ['heading' => 'سوالات متداول', 'url' => null],
+                ['heading' => trans('messages.breadcrumb.home'), 'url' => '/'],
+                ['heading' => trans('messages.breadcrumb.faq'), 'url' => null],
             ],
         ]);
     }

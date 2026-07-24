@@ -16,8 +16,8 @@ enum BrandStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => 'فعال',
-            self::INACTIVE => 'غیرفعال',
+            self::ACTIVE => trans('enums.brand_status.active'),
+            self::INACTIVE => trans('enums.brand_status.inactive'),
         };
     }
 }

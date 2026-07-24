@@ -16,8 +16,8 @@ enum UserStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => 'فعال',
-            self::BLOCK => 'مسدود',
+            self::ACTIVE => trans('enums.user_status.active'),
+            self::BLOCK => trans('enums.user_status.block'),
         };
     }
 }

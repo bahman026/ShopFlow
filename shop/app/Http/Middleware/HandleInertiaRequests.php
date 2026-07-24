@@ -74,11 +74,11 @@ class HandleInertiaRequests extends Middleware
             'footer' => [
                 'about' => $this->value($settings, 'footer_about'),
                 'columns' => [
-                    ['title' => 'فروشگاه', 'links' => $this->json($settings, 'footer_links_shop')],
-                    ['title' => 'پشتیبانی', 'links' => $this->json($settings, 'footer_links_support')],
+                    ['title' => trans('messages.footer.shop'), 'links' => $this->json($settings, 'footer_links_shop')],
+                    ['title' => trans('messages.footer.support'), 'links' => $this->json($settings, 'footer_links_support')],
                 ],
                 'contact' => [
-                    'title' => 'ارتباط با ما',
+                    'title' => trans('messages.footer.contact'),
                     'phone' => $this->value($settings, 'site_phone'),
                     'email' => $this->value($settings, 'site_email'),
                     'hours' => $this->json($settings, 'site_working_hours'),

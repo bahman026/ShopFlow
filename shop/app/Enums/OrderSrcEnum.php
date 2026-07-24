@@ -18,10 +18,10 @@ enum OrderSrcEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::PWA => 'اپلیکیشن وب',
-            self::WEB => 'وبسایت',
-            self::APP => 'اپلیکیشن موبایل',
-            self::OLD => 'سامانه قدیم',
+            self::PWA => trans('enums.order_src.pwa'),
+            self::WEB => trans('enums.order_src.web'),
+            self::APP => trans('enums.order_src.app'),
+            self::OLD => trans('enums.order_src.old'),
         };
     }
 }
