@@ -36,6 +36,15 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!--
+            Zarinpal HTTP calls are always faked in tests, but RequestZarinpal-
+            Payment bails out early when merchant_id is empty. Pin the config
+            here so the checkout/retry tests are deterministic regardless of
+            whether the machine's .env happens to set ZARINPAL_* (it does
+            locally, but CI does not — which silently broke these tests).
+        -->
+        <env name="ZARINPAL_MERCHANT_ID" value="00000000-0000-0000-0000-000000000000"/>
+        <env name="ZARINPAL_BASE_URL" value="https://sandbox.zarinpal.com"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
