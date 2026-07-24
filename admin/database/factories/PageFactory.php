@@ -38,7 +38,7 @@ class PageFactory extends Factory
     {
         return $this->afterCreating(function (Page $page): void {
             $page->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'alt_text' => fake()->words(2, true),
             ]);
         });

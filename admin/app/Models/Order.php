@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
+ * @property string $tracking_code
  * @property positive-int|null $user_id
  * @property positive-int|null $coupon_id
  * @property OrderStatusEnum $status
@@ -41,6 +42,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $collector_description
  * @property positive-int|null $notifier_id
  * @property Carbon|null $notified_at
+ * @property positive-int|null $address_id
  * @property positive-int|null $shipping_line_id
  * @property positive-int|null $shipping_method_id
  * @property string|null $send_description
@@ -53,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property User|null $confirmer
  * @property User|null $collector
  * @property User|null $notifier
+ * @property Address|null $address
  * @property ShippingLine|null $shippingLine
  * @property ShippingMethod|null $shippingMethod
  * @property Collection<OrderVariety> $orderVarieties
@@ -92,6 +95,7 @@ class Order extends Model
         'collector_description',
         'notifier_id',
         'notified_at',
+        'address_id',
         'shipping_line_id',
         'shipping_method_id',
         'send_description',
@@ -108,6 +112,26 @@ class Order extends Model
         'collector_reminded_at' => 'datetime',
         'notified_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order): void {
+            $order->tracking_code ??= self::generateTrackingCode();
+        });
+    }
+
+    /**
+     * A random 10-digit number, not the sequential `id`, so a customer's
+     * tracking code never reveals order volume/growth over time.
+     */
+    private static function generateTrackingCode(): string
+    {
+        do {
+            $code = (string) random_int(1_000_000_000, 9_999_999_999);
+        } while (self::query()->where('tracking_code', $code)->exists());
+
+        return $code;
+    }
 
     public function user(): BelongsTo
     {
@@ -132,6 +156,11 @@ class Order extends Model
     public function notifier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'notifier_id');
+    }
+
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class);
     }
 
     public function shippingLine(): BelongsTo

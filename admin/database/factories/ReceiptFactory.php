@@ -39,7 +39,7 @@ class ReceiptFactory extends Factory
     {
         return $this->afterCreating(function (Receipt $receipt): void {
             $receipt->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'alt_text' => fake()->words(2, true),
             ]);
         });

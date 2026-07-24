@@ -34,9 +34,13 @@ class TestSeeder extends Seeder
             GatewaySeeder::class,
             UserConfigSeeder::class,
             AddressSeeder::class,
-            ShippingLineSeeder::class,
-            ShippingMethodSeeder::class,
-            ShippingCitySeeder::class,
+            // ShippingLineSeeder/ShippingMethodSeeder/ShippingCitySeeder are
+            // deliberately NOT called here: each does `Model::all()->each->delete()`
+            // then creates 20 random rows, which wipes out ShippingSeeder's real,
+            // checkout-critical shipping methods (called by DatabaseSeeder) and
+            // replaces them with random fake ones (no nationwide fallback), so
+            // the storefront checkout can no longer find a shipping method for
+            // most addresses. Re-run ShippingSeeder if real shipping data is lost.
         ]);
     }
 }

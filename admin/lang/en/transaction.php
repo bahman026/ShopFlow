@@ -6,7 +6,7 @@ return [
     'label' => 'Transaction',
     'plural_label' => 'Transactions',
     'navigation_group' => 'Commerce',
-    'subheading' => 'Online gateway payment transactions (Mellat, Parsian, Zarinpal) recorded against users and orders.',
+    'subheading' => 'Online gateway payment transactions (Mellat, Parsian, Zarinpal) recorded against users and orders. Manual/offline payments (card-to-card, Paya, prepayment) never appear here — check the Receipts table for those instead.',
 
     'user_id' => 'User',
     'order_id' => 'Order',

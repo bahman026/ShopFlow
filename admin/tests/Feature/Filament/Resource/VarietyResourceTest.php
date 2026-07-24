@@ -147,6 +147,22 @@ it('can attach additional attributes to a variety via the resource.', function (
         ->first()->id->toBe($attribute->id);
 });
 
+it('creates a featured image for a variety via the withImage factory state.', function () {
+    $variety = Variety::factory()->withImage()->create();
+
+    expect($variety->refresh()->image)->not->toBeNull()
+        ->and($variety->image->is_featured)->toBeTrue();
+});
+
+it('deletes the variety image when the variety is deleted.', function () {
+    $variety = Variety::factory()->withImage()->create();
+    $imageId = $variety->image->id;
+
+    $variety->delete();
+
+    $this->assertDatabaseMissing('images', ['id' => $imageId]);
+});
+
 it('cascade-deletes variety_attribute pivot rows when variety is deleted.', function () {
     $variety = Variety::factory()->create();
     $attribute = Attribute::factory()->create();

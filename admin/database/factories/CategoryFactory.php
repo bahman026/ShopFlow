@@ -40,7 +40,7 @@ class CategoryFactory extends Factory
     {
         return $this->afterCreating(function (Category $category) {
             $category->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'imageable_type' => Category::class,
                 'imageable_id' => $category->id,
             ]);

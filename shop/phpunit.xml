@@ -23,12 +23,28 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="DB_URL" value=""/>
+        <!--
+            The shop is a read-only consumer of the admin-owned database, so its
+            tests run against the shared Postgres schema (built by admin's
+            migrations) instead of a throwaway sqlite file. Only the database
+            name is forced here; host/user/password come from the environment
+            (local .env or CI job env). Use a dedicated test database so tests
+            never touch real data.
+        -->
+        <env name="DB_CONNECTION" value="pgsql"/>
+        <env name="DB_DATABASE" value="shop_flow_test"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!--
+            Zarinpal HTTP calls are always faked in tests, but RequestZarinpal-
+            Payment bails out early when merchant_id is empty. Pin the config
+            here so the checkout/retry tests are deterministic regardless of
+            whether the machine's .env happens to set ZARINPAL_* (it does
+            locally, but CI does not — which silently broke these tests).
+        -->
+        <env name="ZARINPAL_MERCHANT_ID" value="00000000-0000-0000-0000-000000000000"/>
+        <env name="ZARINPAL_BASE_URL" value="https://sandbox.zarinpal.com"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

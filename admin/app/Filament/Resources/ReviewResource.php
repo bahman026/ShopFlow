@@ -64,6 +64,13 @@ class ReviewResource extends Resource
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('review.content_hint')),
+                Select::make('rating')
+                    ->label(trans('review.rating'))
+                    ->options([1 => '۱', 2 => '۲', 3 => '۳', 4 => '۴', 5 => '۵'])
+                    ->nullable()
+                    ->native(false)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip(trans('review.rating_hint')),
                 Select::make('product_id')
                     ->label(trans('review.product_id'))
                     ->relationship('product', 'heading')
@@ -139,6 +146,10 @@ class ReviewResource extends Resource
                     ->label(trans('review.heading'))
                     ->limit(40)
                     ->searchable(),
+                TextColumn::make('rating')
+                    ->label(trans('review.rating'))
+                    ->placeholder('—')
+                    ->sortable(),
                 TextColumn::make('user.email')
                     ->label(trans('review.user'))
                     ->placeholder(trans('review.anonymous'))

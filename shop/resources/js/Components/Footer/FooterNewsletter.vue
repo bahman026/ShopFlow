@@ -32,20 +32,15 @@ const submit = () => {
         <p class="mb-2 font-bold text-gray-800">{{ title }}</p>
         <p class="mb-3 text-sm text-gray-600">{{ description }}</p>
 
-        <form
-            class="flex gap-2"
-            @submit.prevent="submit"
-        >
+        <form class="flex gap-2" @submit.prevent="submit">
             <input
                 v-model="email"
                 type="email"
                 required
                 placeholder="آدرس ایمیل"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand focus:outline-none"
-            >
-            <BaseButton type="submit">
-                ثبت
-            </BaseButton>
+                class="focus:border-brand w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none"
+            />
+            <BaseButton type="submit"> ثبت </BaseButton>
         </form>
     </div>
 </template>

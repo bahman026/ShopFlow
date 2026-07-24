@@ -27,6 +27,10 @@ return [
     'additional_attributes' => 'Additional Attributes',
     'additional_attributes_hint' => 'Secondary attributes for this variety from other groups, e.g. Color when the primary group is Size.',
 
+    'image' => 'Image',
+    'path' => 'Image File',
+    'alt_text' => 'Alt Text',
+
     'product' => 'Product',
     'attribute_value' => 'Value',
     'created_at' => 'Created At',

@@ -15,6 +15,7 @@ use App\Models\Attribute as AttributeModel;
 use App\Models\AttributeGroup;
 use App\Models\AttributeGroupCategory;
 use App\Models\Product;
+use App\Models\Variety;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -27,6 +28,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -356,6 +358,27 @@ class ProductResource extends Resource
                             ->required()
                             ->options(VarietyStatusEnum::options())
                             ->default(VarietyStatusEnum::PUBLISHED->value),
+                        Fieldset::make(trans('product.variety_image'))
+                            ->relationship('image')
+                            ->schema([
+                                FileUpload::make('path')
+                                    ->label(trans('product.path'))
+                                    ->image()
+                                    ->nullable()
+                                    ->columnSpanFull(),
+                                TextInput::make('alt_text')
+                                    ->label(trans('product.alt_text'))
+                                    ->nullable()
+                                    ->maxLength(255),
+                            ])
+                            ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Variety $record): array {
+                                if (empty($data['path'])) {
+                                    $record->image?->delete();
+                                }
+
+                                return $data;
+                            })
+                            ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
             ]);

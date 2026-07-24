@@ -56,6 +56,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Image Base URL
+    |--------------------------------------------------------------------------
+    |
+    | Base URL for catalog images. Filament (admin) saves uploads to the admin
+    | app's public storage, served at `<admin host>/storage`. The storefront is
+    | a separate app, so point this at the admin's storage to resolve relative
+    | `images.path` values. This is intentionally separate from `ASSET_URL`
+    | (which would also rewrite the storefront's own Vite build assets).
+    | Absolute image URLs (e.g. seeded placeholders) are left untouched by the
+    | Image model's `url` accessor.
+    |
+    */
+
+    'image_url' => env('IMAGE_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

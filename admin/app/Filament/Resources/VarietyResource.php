@@ -15,14 +15,17 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -130,6 +133,27 @@ class VarietyResource extends Resource
                     ->columnSpanFull()
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('variety.additional_attributes_hint')),
+                Fieldset::make(trans('variety.image'))
+                    ->relationship('image')
+                    ->schema([
+                        FileUpload::make('path')
+                            ->label(trans('variety.path'))
+                            ->image()
+                            ->nullable()
+                            ->columnSpanFull(),
+                        TextInput::make('alt_text')
+                            ->label(trans('variety.alt_text'))
+                            ->nullable()
+                            ->maxLength(255),
+                    ])
+                    ->mutateRelationshipDataBeforeSaveUsing(function (array $data, Variety $record): array {
+                        if (empty($data['path'])) {
+                            $record->image?->delete();
+                        }
+
+                        return $data;
+                    })
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -137,6 +161,8 @@ class VarietyResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('image.path')
+                    ->label(trans('variety.image')),
                 TextColumn::make('product.heading')
                     ->label(trans('variety.product'))
                     ->limit(30)

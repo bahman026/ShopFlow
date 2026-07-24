@@ -33,7 +33,7 @@ class SlideFactory extends Factory
     {
         return $this->afterCreating(function (Slide $slide): void {
             $slide->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'is_featured' => true,
                 'order' => 0,
                 'alt_text' => $slide->heading,

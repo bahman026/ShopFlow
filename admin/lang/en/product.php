@@ -81,6 +81,7 @@ return [
     'variety_inventory' => 'Inventory',
     'variety_has_stock' => 'Has Stock',
     'variety_status' => 'Status',
+    'variety_image' => 'Variety Image',
 
     // Table columns
     'featured' => 'Featured',

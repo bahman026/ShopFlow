@@ -57,7 +57,9 @@
             "./vendor/bin/pest",
             "./vendor/bin/pint -v --ansi --bail",
             "./vendor/bin/pest --memory-limit=2048M --type-coverage --min=100",
-            "./vendor/bin/phpstan analyze -c ./phpstan.neon --memory-limit=512M"
+            "./vendor/bin/phpstan analyze -c ./phpstan.neon --memory-limit=512M",
+            "npm run lint",
+            "npm run format:check"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

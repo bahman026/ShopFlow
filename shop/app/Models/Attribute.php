@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property positive-int $attribute_group_id
  * @property string|null $color
  * @property string $value
+ * @property AttributeGroup|null $attributeGroup
  * @property Collection<int, Variety> $varieties
  * @property Collection<int, Variety> $directVarieties
  * @property Collection<int, Product> $products
@@ -25,6 +27,11 @@ class Attribute extends Model
         'value',
         'color',
     ];
+
+    public function attributeGroup(): BelongsTo
+    {
+        return $this->belongsTo(AttributeGroup::class);
+    }
 
     /** Varieties linked via the attribute_variety pivot (additional attributes). */
     public function varieties(): BelongsToMany

@@ -35,7 +35,7 @@ class GatewayFactory extends Factory
     {
         return $this->afterCreating(function (Gateway $gateway): void {
             $gateway->image()->create([
-                'path' => fake()->imageUrl(),
+                'path' => ImageFactory::placeholderUrl(),
                 'alt_text' => fake()->words(2, true),
             ]);
         });

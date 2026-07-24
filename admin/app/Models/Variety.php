@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
  * @property positive-int $id
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Collection<Attribute> $attributes
  * @property Collection<Discount> $discounts
  * @property Collection<Review> $reviews
+ * @property Image|null $image
  */
 class Variety extends Model
 {
@@ -68,6 +70,8 @@ class Variety extends Model
 
         static::saved(fn (Variety $variety) => $variety->syncProductVarietyCount());
         static::deleted(fn (Variety $variety) => $variety->syncProductVarietyCount());
+
+        static::deleting(fn (Variety $variety) => $variety->image?->delete());
     }
 
     public function syncProductVarietyCount(): void
@@ -92,6 +96,11 @@ class Variety extends Model
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class);
+    }
+
+    public function image(): MorphOne
+    {
+        return $this->morphOne(Image::class, 'imageable');
     }
 
     public function attributes(): BelongsToMany

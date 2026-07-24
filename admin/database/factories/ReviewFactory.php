@@ -22,6 +22,7 @@ class ReviewFactory extends Factory
         return [
             'heading' => fake()->sentence(5),
             'content' => fake()->paragraph(),
+            'rating' => fake()->numberBetween(1, 5),
             'user_id' => null,
             'product_id' => Product::factory(),
             'variety_id' => null,
@@ -35,6 +36,8 @@ class ReviewFactory extends Factory
         return $this->state([
             'parent_id' => $parent->id,
             'product_id' => $parent->product_id,
+            // A reply is not itself a rated review.
+            'rating' => null,
         ]);
     }
 }

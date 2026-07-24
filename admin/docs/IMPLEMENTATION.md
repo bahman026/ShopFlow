@@ -20,7 +20,7 @@ Catalog layer and platform basics.
 - [x] Attributes
 - [x] Attribute-Group-Categories
 - [x] Products (+ `product_attribute` pivot, product images)
-- [x] Varieties (+ `variety_counts` auto-sync on Product)
+- [x] Varieties (+ `variety_counts` auto-sync on Product; optional polymorphic image via `images` table — `withImage()` factory state, upload in VarietyResource and the ProductResource variety repeater, deleted with the variety)
 - [x] Discounts (auto-applied price rules per variety)
 - [x] Coupons (+ `coupon_product`, `coupon_variety`, `category_coupon` scoping pivots)
 - [x] Images (polymorphic, used via uploads - no standalone resource by design)
@@ -29,7 +29,7 @@ Catalog layer and platform basics.
 - [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
-- [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
+- [x] Reviews (user reviews for products; `rating` 1–5 nullable star rating; `parent_id` for replies; `status` moderation). Reviews are submitted from the storefront (created `PENDING`); staff approve/reject via the Edit form's `status` dropdown
 - [x] Wishlists (`user_id` + `product_id` pivot; cascades on user/product delete; list + delete resource)
 - [x] Addresses (immutable history: model, factory, seeder, Filament resource (+ pages), tests. Editing creates a NEW address instead of mutating; the new address inherits the edited one's primary status; records are never deleted, so orders keep an accurate address history. One primary per user enforced via a model `saved` hook)
 
@@ -41,6 +41,8 @@ Cross-cutting improvements landed:
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
 - Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`, `ORDER.md`).
 - **Inventory rule** (`ORDER.md`): stock is decremented only on successful payment (Strategy A); carts never change `varieties.inventory`.
+- **Placeholder images**: factories generate images via `ImageFactory::placeholderUrl()` (`placehold.co`); the dead `via.placeholder.com` service was removed. `ProductSeeder`/`VarietySeeder` attach images by default (`withImages()` / `withImage()`).
+- **Seeder robustness**: `CitySeeder` advances Postgres sequences with `setval` after explicit-ID inserts; `CityFactory`/`AddressFactory` reuse existing province/city rows before creating new ones, fixing `TestSeeder` unique-constraint failures.
 - **Localisation (fa / en)**: `SetLocale` middleware + `/locale/{locale}` route + user-menu switcher. All resources (Brand, Category, Product, Variety, City, Province, Coupon, Discount, ShippingLine, ShippingMethod, ShippingCity, Ancestor, AttributeGroup, AttributeGroupCategory, Attribute, Slider, Slide, Banner, Menu, MenuItem, Page, FAQ, Review, Wishlist, User) have `lang/en` + `lang/fa` files, `trans()`-based labels on all form fields and table columns, and translated enum `label()` methods. List-page subheadings are set via `mount()`. Filament vendor translations published for built-in UI strings.
 - **Persian font**: `A Iranian Sans` loaded from `public/fonts/AIranianSans.ttf`; applied globally when locale is `fa` via `public/css/persian-font.css` and a `renderHook` in `AdminPanelProvider`.
 - **Locale switching** (`en` / `fa`): `SetLocale` middleware reads the locale from session and calls `App::setLocale()`. A `/locale/{locale}` route stores the choice. Two user-menu items (English / فارسی) in `AdminPanelProvider` let admins switch. All Filament sub-package translations (`filament`, `filament-forms`, `filament-tables`, `filament-actions`, `filament-notifications`) are published to `lang/vendor/`.
@@ -99,7 +101,7 @@ Depend mostly on Images only.
 The main goal; depends on most of phases 1-3.
 
 - [~] Carts (migration, model, factory, seeder, tests; no Filament resource by design. Each row is one line item: variety + count, per user or guest session. Inventory rule in `ORDER.md`)
-- [x] Orders (`orders` table only: model, migration, factory, seeder, Filament resource (+ pages), tests. `OrderStatusEnum` + `OrderSrcEnum`; staff/finance refs to not-yet-built tables kept nullable without FK. Inventory rule in `ORDER.md`)
+- [x] Orders (`orders` table only: model, migration, factory, seeder, Filament resource (+ pages), tests. `OrderStatusEnum` + `OrderSrcEnum`; staff/finance refs to not-yet-built tables kept nullable without FK. Inventory rule in `ORDER.md`. `address_id` (nullable FK to `addresses`, `nullOnDelete`) added when the storefront's checkout/order-creation flow was implemented — the original doc had no way to record which address an order ships to. `tracking_code` (unique random 10-digit string, auto-generated via a `creating` model event in both apps' `Order` model) added as the customer-facing order identifier, shown instead of the sequential `id`; also a searchable/copyable column in the Filament table)
 - [x] `order_varieties` (line items: model, migration, factory, seeder, Filament resource (+ pages), tests. Stores a per-line price/discount snapshot; `sub_order_id` kept nullable without FK since `sub_orders` is not implemented. An order's many varieties are also editable inline on the Order edit page via `OrderVarietiesRelationManager`)
 - [~] Sub Orders + `sub_order_logs` — NOT IMPLEMENTED (single-vendor). These are seller-centric; with no sellers an order maps 1:1 to fulfillment, so they add no value. Fulfillment lives on the order itself / `order_shippings`.
 - [x] `order_shippings` (fulfillment/shipment records: model, migration, factory, seeder, `OrderShippingPaymentTypeEnum`, Filament resource (+ pages), inline relation manager on Order, tests)

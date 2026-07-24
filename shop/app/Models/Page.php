@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property string|null $canonical
  * @property PageStatusEnum $status
  * @property Carbon|null $published_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property Image|null $image
  */
 class Page extends Model

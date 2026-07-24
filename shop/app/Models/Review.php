@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ReviewStatusEnum;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -15,11 +16,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property positive-int $id
  * @property string $heading
  * @property string $content
+ * @property int<1, 5>|null $rating
  * @property positive-int|null $user_id
  * @property positive-int $product_id
  * @property positive-int|null $variety_id
  * @property positive-int|null $parent_id
  * @property ReviewStatusEnum $status
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property User|null $user
  * @property Product $product
  * @property Variety|null $variety
@@ -31,6 +35,7 @@ class Review extends Model
     protected $fillable = [
         'heading',
         'content',
+        'rating',
         'user_id',
         'product_id',
         'variety_id',
@@ -39,6 +44,7 @@ class Review extends Model
     ];
 
     protected $casts = [
+        'rating' => 'integer',
         'status' => ReviewStatusEnum::class,
     ];
 
