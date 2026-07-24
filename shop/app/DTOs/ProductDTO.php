@@ -39,6 +39,7 @@ readonly class ProductDTO
         public array $specs,
         public array $reviews,
         public int $reviewCount,
+        public ?float $averageRating,
     ) {}
 
     /**
@@ -69,6 +70,7 @@ readonly class ProductDTO
             'specs' => $this->specs,
             'reviews' => array_map(fn (ReviewDTO $review): array => $review->toArray(), $this->reviews),
             'reviewCount' => $this->reviewCount,
+            'averageRating' => $this->averageRating,
         ];
     }
 }

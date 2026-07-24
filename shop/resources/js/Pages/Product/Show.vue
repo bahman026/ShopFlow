@@ -35,6 +35,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    canReview: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();
@@ -250,7 +254,10 @@ const jsonLd = computed(() => {
                         </AppLink>
 
                         <a href="#reviews">
-                            <RatingStars :rating="0" :count="product.reviewCount" />
+                            <RatingStars
+                                :rating="product.averageRating ?? 0"
+                                :count="product.reviewCount"
+                            />
                         </a>
                     </div>
 
@@ -292,7 +299,13 @@ const jsonLd = computed(() => {
 
             <ProductSpecs :specs="product.specs" />
 
-            <ProductReviews :reviews="product.reviews" />
+            <ProductReviews
+                :product-id="product.id"
+                :reviews="product.reviews"
+                :average-rating="product.averageRating"
+                :review-count="product.reviewCount"
+                :can-review="canReview"
+            />
 
             <ProductCarousel v-if="related.length" title="محصولات مشابه" :products="related" />
         </div>

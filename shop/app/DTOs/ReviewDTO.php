@@ -10,8 +10,10 @@ readonly class ReviewDTO
         public int $id,
         public ?string $heading,
         public ?string $content,
+        public ?int $rating = null,
         public ?string $author = null,
         public ?string $date = null,
+        public bool $isBuyer = false,
     ) {}
 
     /**

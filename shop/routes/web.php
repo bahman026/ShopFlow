@@ -14,6 +14,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WishlistController;
@@ -100,6 +101,12 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 Route::post('/products/{product}/wishlist', [WishlistController::class, 'toggle'])
     ->middleware('auth')
     ->name('wishlist.toggle');
+
+// Any logged-in user can submit a review; it's created PENDING and only shows
+// once an admin approves it. Verified-buyer badge is computed at read time.
+Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])
+    ->middleware('auth')
+    ->name('reviews.store');
 
 // CMS pages use clean top-level slugs (e.g. /about-us). Keep this LAST so it
 // only matches single-segment paths no other route claimed; unknown slugs 404.

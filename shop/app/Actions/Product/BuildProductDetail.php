@@ -6,6 +6,7 @@ namespace App\Actions\Product;
 
 use App\Actions\Catalog\CalculatePricing;
 use App\Actions\Catalog\TransformImage;
+use App\Actions\Review\FindProductBuyers;
 use App\DTOs\ImageDTO;
 use App\DTOs\ProductDTO;
 use App\DTOs\ReviewDTO;
@@ -24,6 +25,7 @@ class BuildProductDetail
         private TransformImage $transformImage,
         private BuildVariantAxes $buildVariantAxes,
         private VarietyAttributes $varietyAttributes,
+        private FindProductBuyers $findProductBuyers,
     ) {}
 
     /**
@@ -35,6 +37,20 @@ class BuildProductDetail
         $varieties = $product->varieties;
 
         $pricing = $this->pricing->forVarieties($varieties, (int) $product->price);
+
+        /** @var array<int, int> $reviewerIds */
+        $reviewerIds = $product->reviews
+            ->pluck('user_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $buyerIds = ($this->findProductBuyers)($product->id, $reviewerIds);
+
+        $ratings = $product->reviews
+            ->pluck('rating')
+            ->filter(fn (?int $rating): bool => $rating !== null);
 
         return new ProductDTO(
             id: $product->id,
@@ -74,11 +90,14 @@ class BuildProductDetail
                     id: $review->id,
                     heading: $review->heading,
                     content: $review->content,
-                    author: $review->user?->name,
+                    rating: $review->rating,
+                    author: $review->user?->displayName(),
                     date: $review->created_at?->toIso8601String(),
+                    isBuyer: $review->user_id !== null && in_array($review->user_id, $buyerIds, true),
                 ))
                 ->all(),
             reviewCount: $product->reviews->count(),
+            averageRating: $ratings->isEmpty() ? null : round((float) $ratings->avg(), 1),
         );
     }
 

@@ -55,6 +55,8 @@ class ProductController extends Controller
             'related' => $getRelatedProducts($product),
             'cartItems' => $this->cartItems($request, $resolveOwner, $product),
             'isWishlisted' => $this->isWishlisted($request, $product),
+            // Any logged-in user may review; the form is hidden for guests.
+            'canReview' => $request->user() instanceof User,
         ]);
     }
 
