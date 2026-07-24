@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\SliderPositionEnum;
 use App\Enums\SliderStatusEnum;
 use App\Filament\Resources\SliderResource\Pages\CreateSlider;
 use App\Filament\Resources\SliderResource\Pages\EditSlider;
@@ -52,10 +53,11 @@ class SliderResource extends Resource
                     ->maxLength(255)
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('slider.name_hint')),
-                TextInput::make('position')
+                Select::make('position')
                     ->label(trans('slider.position'))
                     ->required()
-                    ->maxLength(255)
+                    ->options(SliderPositionEnum::options())
+                    ->native(false)
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('slider.position_hint')),
                 Select::make('status')
@@ -77,6 +79,7 @@ class SliderResource extends Resource
                     ->searchable(),
                 TextColumn::make('position')
                     ->label(trans('slider.position'))
+                    ->formatStateUsing(fn (string $state): string => SliderPositionEnum::tryFrom($state)?->label() ?? $state)
                     ->searchable(),
                 TextColumn::make('slides_count')
                     ->label(trans('slider.slides_count'))

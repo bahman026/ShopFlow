@@ -731,7 +731,7 @@ A specific service tier offered by a shipping carrier. References `shipping_line
 
 * For creating various sliders.  
 * `name`: Human-readable label for the slider, e.g. "Home Page Main Slider." Not shown on the frontend.  
-* `position`: The key used by the frontend to fetch this slider, e.g. "home-main". Must be unique per placement.  
+* `position`: Where the frontend shows this slider (e.g. `home-main`). Constrained to `App\Enums\SliderPositionEnum` (mirrored in both apps): `home-main`, `home-secondary`, `category-top`, `product-side`. The admin picks it from a dropdown; the storefront looks it up by the same enum value. Keep one published slider per position (the column is not DB-unique; the frontend takes the first published match). Only `home-main` is rendered so far (home hero).
 * `status`: Publication status — 10 for deleted, 20 for published (default), 30 for draft.  
 * Deleting a slider cascades to its slides (and their images).
 
