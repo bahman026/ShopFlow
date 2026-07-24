@@ -24,6 +24,18 @@ const iconFor = (social) => {
         return socialIcons.telegram;
     }
 
+    if (haystack.includes('facebook') || haystack.includes('فیسبوک')) {
+        return socialIcons.facebook;
+    }
+
+    if (
+        haystack.includes('wa.me') ||
+        haystack.includes('whatsapp') ||
+        haystack.includes('واتساپ')
+    ) {
+        return socialIcons.whatsapp;
+    }
+
     if (haystack.includes('linkedin') || haystack.includes('لینکدین')) {
         return socialIcons.linkedin;
     }

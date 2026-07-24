@@ -16,6 +16,7 @@ return [
     'section_collection' => 'وصول',
     'section_notification' => 'اطلاع‌رسانی به مشتری',
 
+    'tracking_code' => 'کد رهگیری',
     'user_id' => 'مشتری',
     'coupon_id' => 'کوپن',
     'status' => 'وضعیت',
@@ -47,6 +48,7 @@ return [
     'notifier_id' => 'اطلاع‌رسان',
     'notified_at' => 'تاریخ اطلاع‌رسانی',
 
+    'address_id' => 'نشانی ارسال',
     'shipping_line_id' => 'خط ارسال',
     'shipping_method_id' => 'روش ارسال',
     'send_description' => 'توضیحات ارسال',

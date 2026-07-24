@@ -48,7 +48,7 @@ class AttributeGroup extends Model
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'attribute_group_category')
-            ->withPivot(['as_filter', 'required', 'order'])
+            ->withPivot(['as_filter', 'required'])
             ->withTimestamps();
     }
 

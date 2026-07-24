@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Actions\Cart\ResolveCartOwner;
 use App\Enums\CategoryStatusEnum;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -46,13 +49,27 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'auth' => [
+                'user' => $this->authUser($request),
+            ],
+            'flash' => [
+                'status' => $request->session()->get('status'),
+                'authStep' => $request->session()->get('authStep'),
+                'authMobile' => $request->session()->get('authMobile'),
+                'authResendIn' => $request->session()->get('authResendIn'),
+                'authOtpDev' => $request->session()->get('authOtpDev'),
+            ],
             'seo' => [
                 'siteName' => (string) config('app.name'),
                 'url' => $this->canonicalUrl($request),
+                'origin' => rtrim((string) config('app.url'), '/'),
                 'locale' => 'fa_IR',
             ],
             'nav' => [
                 'categories' => $this->navCategories(),
+            ],
+            'cart' => [
+                'count' => $this->cartCount($request),
             ],
             'footer' => [
                 'about' => $this->value($settings, 'footer_about'),
@@ -71,6 +88,40 @@ class HandleInertiaRequests extends Middleware
                 'copyright' => $this->value($settings, 'footer_copyright'),
             ],
         ];
+    }
+
+    /**
+     * The authenticated user as a small payload for the header/account UI.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function authUser(Request $request): ?array
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            return null;
+        }
+
+        return [
+            'id' => $user->id,
+            'name' => $user->displayName(),
+            'mobile' => $user->mobile,
+        ];
+    }
+
+    /**
+     * Total item count in the current cart (user or guest session), shared so
+     * the header badge stays in sync on every page. Guarded so the storefront
+     * still renders if the shared carts table is unavailable.
+     */
+    private function cartCount(Request $request): int
+    {
+        return rescue(function () use ($request): int {
+            $owner = app(ResolveCartOwner::class)($request);
+
+            return (int) Cart::query()->where($owner)->sum('count');
+        }, 0, false);
     }
 
     /**

@@ -19,6 +19,8 @@ uses(
     DatabaseTransactions::class,
 )->in('Feature');
 
+require_once __DIR__.'/Helpers.php';
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

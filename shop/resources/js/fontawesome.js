@@ -1,6 +1,12 @@
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { faInstagram, faTelegram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
+import {
+    faInstagram,
+    faTelegram,
+    faLinkedinIn,
+    faFacebookF,
+    faWhatsapp,
+} from '@fortawesome/free-brands-svg-icons';
 import {
     faLink,
     faChevronLeft,
@@ -20,6 +26,16 @@ import {
     faCheck,
     faPlus,
     faMinus,
+    faBorderAll,
+    faHeart,
+    faLocationDot,
+    faClipboardList,
+    faRightFromBracket,
+    faPenToSquare,
+    faTrashCan,
+    faCreditCard,
+    faPrint,
+    faFileInvoice,
 } from '@fortawesome/free-solid-svg-icons';
 
 // Vite bundles the CSS above, so disable runtime CSS injection (avoids SSR mismatch).
@@ -29,6 +45,8 @@ config.autoAddCss = false;
 export const socialIcons = {
     instagram: faInstagram,
     telegram: faTelegram,
+    facebook: faFacebookF,
+    whatsapp: faWhatsapp,
     linkedin: faLinkedinIn,
     fallback: faLink,
 };
@@ -52,4 +70,14 @@ export const uiIcons = {
     check: faCheck,
     plus: faPlus,
     minus: faMinus,
+    grid: faBorderAll,
+    heart: faHeart,
+    location: faLocationDot,
+    orders: faClipboardList,
+    logout: faRightFromBracket,
+    edit: faPenToSquare,
+    trash: faTrashCan,
+    creditCard: faCreditCard,
+    print: faPrint,
+    invoice: faFileInvoice,
 };

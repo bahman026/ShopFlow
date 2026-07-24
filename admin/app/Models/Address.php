@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $phone
  * @property string $postal_code
  * @property string $address
+ * @property string|null $latitude
+ * @property string|null $longitude
  * @property string|null $description
  * @property positive-int $city_id
  * @property positive-int $user_id
@@ -38,6 +40,8 @@ class Address extends Model
         'phone',
         'postal_code',
         'address',
+        'latitude',
+        'longitude',
         'description',
         'city_id',
         'user_id',

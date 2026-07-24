@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +41,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property positive-int|null $height
  * @property ProductStatusEnum $status
  * @property positive-int $seen
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property Image|null $featuredImage
  * @property Collection<int, Image> $images
  * @property Collection<int, Variety> $varieties
@@ -102,7 +105,10 @@ class Product extends Model
 
     public function varieties(): HasMany
     {
-        return $this->hasMany(Variety::class);
+        // Deterministic order (creation order): without it Postgres doesn't
+        // guarantee row order, which fed a real bug in the variety selector
+        // (axis/option order depending on accidental fetch order).
+        return $this->hasMany(Variety::class)->orderBy('id');
     }
 
     public function attributes(): BelongsToMany

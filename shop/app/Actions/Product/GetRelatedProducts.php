@@ -33,7 +33,7 @@ class GetRelatedProducts
             ->published()
             ->where('category_id', $product->category_id)
             ->whereKeyNot($product->id)
-            ->with(['featuredImage', 'varieties' => fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)])
+            ->with(['featuredImage', 'varieties' => fn (Relation $query) => $query->where('status', VarietyStatusEnum::PUBLISHED->value)->with('image')])
             ->latest('id')
             ->limit(self::LIMIT)
             ->get()

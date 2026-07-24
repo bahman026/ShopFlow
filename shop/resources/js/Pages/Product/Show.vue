@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppLink from '@/Components/AppLink.vue';
@@ -12,6 +12,7 @@ import BuyBox from '@/Components/Product/BuyBox.vue';
 import ProductSpecs from '@/Components/Product/ProductSpecs.vue';
 import ProductReviews from '@/Components/Product/ProductReviews.vue';
 import ProductCarousel from '@/Components/Home/ProductCarousel.vue';
+import { breadcrumbJsonLd } from '@/seo';
 
 const props = defineProps({
     product: {
@@ -25,6 +26,14 @@ const props = defineProps({
     related: {
         type: Array,
         default: () => [],
+    },
+    cartItems: {
+        type: Object,
+        default: () => ({}),
+    },
+    isWishlisted: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -108,6 +117,61 @@ const buyBox = computed(() => {
     };
 });
 
+const cartBusy = ref(false);
+
+// The cart line (id + quantity) for the chosen variety, mirrored from the cart.
+const cartEntry = computed(() =>
+    selectedVariety.value ? (props.cartItems[selectedVariety.value.id] ?? null) : null,
+);
+const cartCount = computed(() => cartEntry.value?.count ?? 0);
+
+const cartVisit = {
+    preserveScroll: true,
+    onStart: () => (cartBusy.value = true),
+    onFinish: () => (cartBusy.value = false),
+};
+
+// Cart lines reference a variety, so a variety must be chosen first.
+function addToCart() {
+    if (!selectedVariety.value) {
+        return;
+    }
+
+    router.post('/cart', { variety_id: selectedVariety.value.id, count: 1 }, cartVisit);
+}
+
+function increaseCart() {
+    if (cartEntry.value) {
+        router.patch('/cart/' + cartEntry.value.id, { count: cartCount.value + 1 }, cartVisit);
+    }
+}
+
+function decreaseCart() {
+    if (cartEntry.value && cartCount.value > 1) {
+        router.patch('/cart/' + cartEntry.value.id, { count: cartCount.value - 1 }, cartVisit);
+    }
+}
+
+function removeCart() {
+    if (cartEntry.value) {
+        router.delete('/cart/' + cartEntry.value.id, cartVisit);
+    }
+}
+
+const wishlistBusy = ref(false);
+
+function toggleWishlist() {
+    router.post(
+        `/products/${props.product.id}/wishlist`,
+        {},
+        {
+            preserveScroll: true,
+            onStart: () => (wishlistBusy.value = true),
+            onFinish: () => (wishlistBusy.value = false),
+        },
+    );
+}
+
 const metaTitle = computed(() => props.product.title || props.product.heading);
 const metaDescription = computed(
     () =>
@@ -136,15 +200,7 @@ const jsonLd = computed(() => {
                 url: props.product.canonical || seo.value.url || '',
             },
         },
-        {
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: props.breadcrumbs.map((item, index) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                name: item.heading,
-            })),
-        },
+        breadcrumbJsonLd(props.breadcrumbs, seo.value.origin),
     ];
 
     if (props.product.brand) {
@@ -213,6 +269,15 @@ const jsonLd = computed(() => {
                         :in-stock="buyBox.inStock"
                         :inventory="buyBox.inventory"
                         :selected="buyBox.selected"
+                        :processing="cartBusy"
+                        :cart-count="cartCount"
+                        :is-wishlisted="isWishlisted"
+                        :wishlist-processing="wishlistBusy"
+                        @add="addToCart"
+                        @increase="increaseCart"
+                        @decrease="decreaseCart"
+                        @remove="removeCart"
+                        @toggle-wishlist="toggleWishlist"
                     />
                 </div>
             </div>

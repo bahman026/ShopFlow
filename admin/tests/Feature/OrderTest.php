@@ -48,3 +48,15 @@ it('keeps the order but nulls user_id when the user is deleted.', function (): v
 
     expect($order->refresh()->user_id)->toBeNull();
 });
+
+it('auto-generates a unique 10-digit tracking code.', function (): void {
+    $order = Order::factory()->create();
+
+    expect($order->tracking_code)->toMatch('/^[1-9]\d{9}$/');
+});
+
+it('keeps an explicitly assigned tracking code instead of generating a new one.', function (): void {
+    $order = Order::factory()->create(['tracking_code' => '1234567890']);
+
+    expect($order->tracking_code)->toBe('1234567890');
+});
