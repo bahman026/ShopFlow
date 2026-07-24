@@ -18,6 +18,9 @@ return new class extends Migration
             $table->id();
             $table->string('heading');
             $table->text('content');
+            // 1–5 star rating. Nullable: replies (parent_id set) and legacy/
+            // admin-entered reviews may carry no rating.
+            $table->unsignedTinyInteger('rating')->nullable();
             $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Variety::class)->nullable()->constrained()->nullOnDelete();

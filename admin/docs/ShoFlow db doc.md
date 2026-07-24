@@ -667,6 +667,7 @@ Implementation notes:
 * Contains user reviews for each product.
 * `heading`: The review title written by the user (e.g. "Great product!").
 * `content`: The full review text.
+* `rating`: 1–5 star rating. Not in the original doc — added when storefront review submission was built. Nullable: replies (`parent_id` set) and admin-entered reviews may carry no rating. The storefront requires it on submit and shows the per-product average from approved reviews.
 * `user_id`: The user who submitted the review. Nullable; set to null if the user is deleted.
 * `product_id`: The product being reviewed. Cascade-deletes the review when the product is deleted.
 * `variety_id`: The specific variety (e.g. size/color) the user purchased. Nullable; set to null if the variety is deleted.

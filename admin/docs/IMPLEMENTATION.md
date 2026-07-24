@@ -29,7 +29,7 @@ Catalog layer and platform basics.
 - [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
-- [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
+- [x] Reviews (user reviews for products; `rating` 1–5 nullable star rating; `parent_id` for replies; `status` moderation). Reviews are submitted from the storefront (created `PENDING`); staff approve/reject via the Edit form's `status` dropdown
 - [x] Wishlists (`user_id` + `product_id` pivot; cascades on user/product delete; list + delete resource)
 - [x] Addresses (immutable history: model, factory, seeder, Filament resource (+ pages), tests. Editing creates a NEW address instead of mutating; the new address inherits the edited one's primary status; records are never deleted, so orders keep an accurate address history. One primary per user enforced via a model `saved` hook)
 

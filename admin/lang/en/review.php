@@ -12,6 +12,8 @@ return [
     'heading_hint' => 'The review title written by the user (e.g. "Great product!").',
     'content' => 'Review Text',
     'content_hint' => 'The full review text.',
+    'rating' => 'Rating',
+    'rating_hint' => 'The 1–5 star rating the user gave. Empty for replies or unrated reviews.',
     'product_id' => 'Product',
     'product_id_hint' => 'The product this review is about.',
     'variety_id' => 'Variety (optional)',
