@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLink from '@/Components/AppLink.vue';
 import Icon from '@/Components/Icon.vue';
 import { uiIcons } from '@/fontawesome';
 
@@ -225,9 +226,15 @@ onBeforeUnmount(() => {
                         ورود
                     </button>
 
-                    <button type="button" class="text-brand text-xs" @click="sendOtp">
-                        ورود با رمز یکبار مصرف
-                    </button>
+                    <div class="flex items-center justify-between text-xs">
+                        <button type="button" class="text-brand" @click="sendOtp">
+                            ورود با رمز یکبار مصرف
+                        </button>
+
+                        <AppLink href="/forgot-password" class="text-brand">
+                            رمز عبور را فراموش کرده‌اید؟
+                        </AppLink>
+                    </div>
                 </form>
 
                 <p
