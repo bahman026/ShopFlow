@@ -57,6 +57,17 @@ return [
         'approved' => 'تایید شده',
         'rejected' => 'رد شده',
     ],
+    'coupon_status' => [
+        'canceled' => 'لغو شده',
+        'used' => 'استفاده شده',
+        'under_review' => 'در انتظار بررسی',
+        'active' => 'فعال',
+    ],
+    'coupon_for' => [
+        'everyone' => 'همه',
+        'users' => 'کاربران',
+        'partners' => 'همکاران',
+    ],
     'transaction_status' => [
         'pending' => 'در انتظار',
         'success' => 'موفق',
