@@ -80,7 +80,8 @@ Depend mostly on Images only.
 - [x] FAQs
 - [x] Reviews
 - [x] Wishlists
-- [ ] Tags
+- [x] Tags (SEO landing page for a category and/or attribute filter; `tags` + `attribute_tag` pivot migrations, `Tag` model + factory + seeder, `TagResource` + pages + lang, tests. `category_id` nullable + attributes many-to-many, at-least-one-required; SEO columns added — `title`/`description`/`no_index`/`canonical`; source single `attribute_id` replaced by the pivot and `type` column dropped, single-vendor. See shop `TAGS.md`)
+- [x] Home Sections (admin side only). New ShopFlow table `home_sections` (not in the source schema) so staff compose the storefront home page instead of it being hardcoded: `HomeSection` model + factory + `HomeSectionSeeder` (seeds the current hardcoded order), `HomeSectionTypeEnum` (`slider`/`tags`/`categories`/`banners`/`products`/`brands`, mirrored in the shop), `HomeSectionResource` (drag-to-reorder table; the form shows only the fields the chosen `type` needs — slider/banner `config.position` from the matching position enum, product `config.sort` + `title`) + lang + tests. **The storefront does not read this table yet** — see shop `STOREFRONT_IMPLEMENTATION.md`
 - [ ] Brand-Category pages
 - [ ] Redirects
 - [ ] Helps

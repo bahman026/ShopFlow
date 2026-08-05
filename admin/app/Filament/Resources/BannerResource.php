@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\BannerPositionEnum;
 use App\Enums\BannerStatusEnum;
 use App\Filament\Resources\BannerResource\Pages\CreateBanner;
 use App\Filament\Resources\BannerResource\Pages\EditBanner;
 use App\Filament\Resources\BannerResource\Pages\ListBanners;
 use App\Models\Banner;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -50,18 +52,31 @@ class BannerResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('position')
+                Select::make('position')
                     ->label(trans('banner.position'))
                     ->required()
-                    ->maxLength(255),
+                    ->options(BannerPositionEnum::options())
+                    ->native(false)
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip(trans('banner.position_hint')),
                 TextInput::make('heading')
                     ->label(trans('banner.heading'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('url')
                     ->label(trans('banner.url'))
-                    ->url()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    // Allow an absolute URL (https://…) or an internal path
+                    // (/tags/…, /categories/…) so banners can link to tag
+                    // pages. Wrapped in an outer closure so Filament returns
+                    // the rule to Laravel instead of evaluating it itself.
+                    ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+                        if ($value !== null && $value !== '' && (! is_string($value) || preg_match('#^(https?://|/)#', $value) !== 1)) {
+                            $fail(trans('banner.url_invalid'));
+                        }
+                    })
+                    ->hintIcon('heroicon-o-information-circle')
+                    ->hintIconTooltip(trans('banner.url_hint')),
                 TextInput::make('sort')
                     ->label(trans('banner.sort'))
                     ->numeric()
@@ -97,6 +112,7 @@ class BannerResource extends Resource
             ->columns([
                 TextColumn::make('position')
                     ->label(trans('banner.position'))
+                    ->formatStateUsing(fn (string $state): string => BannerPositionEnum::tryFrom($state)?->label() ?? $state)
                     ->searchable(),
                 TextColumn::make('heading')
                     ->label(trans('banner.heading'))

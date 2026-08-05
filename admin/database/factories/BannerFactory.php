@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\BannerPositionEnum;
 use App\Enums\BannerStatusEnum;
 use App\Models\Banner;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,7 +22,7 @@ class BannerFactory extends Factory
     public function definition(): array
     {
         return [
-            'position' => fake()->randomElement(['home-top', 'home-middle', 'category-side']),
+            'position' => fake()->randomElement(BannerPositionEnum::cases())->value,
             'heading' => fake()->words(3, true),
             'url' => fake()->url(),
             'sort' => fake()->numberBetween(0, 20),
