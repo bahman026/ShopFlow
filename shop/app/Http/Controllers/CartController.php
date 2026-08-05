@@ -8,6 +8,7 @@ use App\Actions\Cart\AddToCart;
 use App\Actions\Cart\BuildCartSummary;
 use App\Actions\Cart\GetCartLines;
 use App\Actions\Cart\ResolveCartOwner;
+use App\Actions\Coupon\PreviewCoupon;
 use App\DTOs\CartLineDTO;
 use App\Models\Cart;
 use App\Models\Variety;
@@ -20,16 +21,78 @@ use Inertia\Response;
 
 class CartController extends Controller
 {
+    /**
+     * Session key holding the discount code being previewed on the cart.
+     */
+    private const COUPON_KEY = 'cart_coupon_code';
+
     public function __construct(private ResolveCartOwner $owner) {}
 
-    public function index(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary): Response
+    public function index(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, PreviewCoupon $previewCoupon): Response
     {
         $lines = $getLines(($this->owner)($request));
 
+        // The cart changes under a coupon (lines added, removed, re-counted),
+        // so the stored code is re-checked on every render rather than trusted.
+        $code = $this->couponCode($request);
+        $preview = $code === null
+            ? ['coupon' => null, 'error' => null]
+            : $previewCoupon($code, $request->user(), $lines);
+
+        $coupon = $preview['coupon'];
+
+        if ($code !== null && $coupon === null) {
+            $request->session()->forget(self::COUPON_KEY);
+        }
+
         return Inertia::render('Cart/Index', [
             'lines' => $lines->map(fn (CartLineDTO $line): array => $line->toArray())->all(),
-            'summary' => $buildSummary($lines)->toArray(),
+            'summary' => $buildSummary($lines, $coupon === null ? 0 : $coupon->discount)->toArray(),
+            'coupon' => $coupon?->toArray(),
+            'couponError' => $preview['error'],
         ]);
+    }
+
+    /**
+     * Preview a discount code against the current cart. Nothing is committed:
+     * the code is only remembered in the session so the cart can show what it
+     * would save (checkout applying it is Phase 4 work).
+     */
+    public function applyCoupon(Request $request, GetCartLines $getLines, PreviewCoupon $previewCoupon): RedirectResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:255'],
+        ]);
+
+        $lines = $getLines(($this->owner)($request));
+        $preview = $previewCoupon($validated['code'], $request->user(), $lines);
+
+        if ($preview['coupon'] === null) {
+            $request->session()->forget(self::COUPON_KEY);
+
+            throw ValidationException::withMessages(['code' => $preview['error']]);
+        }
+
+        $request->session()->put(self::COUPON_KEY, $preview['coupon']->code);
+
+        return back()->with('status', trans('messages.cart.coupon.applied'));
+    }
+
+    public function removeCoupon(Request $request): RedirectResponse
+    {
+        $request->session()->forget(self::COUPON_KEY);
+
+        return back()->with('status', trans('messages.cart.coupon.removed'));
+    }
+
+    /**
+     * The discount code the customer is currently previewing, if any.
+     */
+    private function couponCode(Request $request): ?string
+    {
+        $code = $request->session()->get(self::COUPON_KEY);
+
+        return is_string($code) && $code !== '' ? $code : null;
     }
 
     public function store(Request $request, AddToCart $add): RedirectResponse
