@@ -129,7 +129,7 @@ The main goal; depends on most of phases 1-3.
 - [ ] `user_statuses` (per-user status restriction) — niche, not needed now
 - [ ] Category Partner, Partner Requests, Organizational Requests, Contact Us
 - [ ] Points, Newsletters, Notifications, System Notifications
-- [ ] `email_histories`, `mobile_histories`, `mobile_password_resets`
+- [ ] `email_histories`, `mobile_histories`, `mobile_password_resets` (the storefront's mobile password reset uses cache-backed OTP, so `mobile_password_resets` is only needed if codes must become auditable — see the db doc)
 - [ ] Working Hours
 - [ ] `user_category_percent`, `user_price_conditions`
 - [ ] eMalls Products, Short URLs, Bank SMS
