@@ -202,6 +202,13 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `started_at`: When the coupon becomes usable.  
 * `expired_at`: When the coupon can no longer be used.
 
+**Storefront usage (preview only, so far).** The cart previews a coupon — `App\Actions\Coupon\PreviewCoupon` + `CalculateCouponDiscount`, code held in the session — and **writes nothing**: no order, and `total_used` is NOT incremented. Committing a coupon to an order (filling `orders.coupon_id` / `orders.coupon_discount`, bumping `total_used`, applying `shipping`) is checkout work, not built yet — see shop `STOREFRONT_IMPLEMENTATION.md` Phase 4. Reading rules the storefront applies:
+
+* `status` and `is_for` are int-backed enums (`CouponStatusEnum`: 10 canceled / 20 used / 30 under review / 40 active; `CouponForEnum`: 10 everyone / 20 users / 30 partners), mirrored in both apps. Only `ACTIVE` is usable; `PARTNERS` never is (single-vendor storefront) and `USERS` requires a logged-in customer.
+* Money columns are `decimal` in the schema but Toman integers everywhere in the app, so the shop model casts `amount` / `min_price` / `max_discount` to int.
+* **Scoping:** no `coupon_product` / `coupon_variety` / `category_coupon` rows at all means the whole cart is eligible; otherwise only lines matching a variety, a product, or a **category or any of its descendants** (the same descendant rule catalog pages use). A percentage applies to the eligible lines' total after variety sale prices, is then capped by `max_discount`, and can never exceed what those lines are worth.
+* `min_price` is checked against the whole cart's payable total, not just the eligible lines.
+
 # coupon\_product
 
 * Scopes a coupon so it can only be applied to certain products.  
@@ -453,6 +460,8 @@ Implementation notes:
 
 # mobile\_password\_resets
 
+> **Not created, and no longer needed.** The storefront's mobile password reset (`/forgot-password`, Phase 2) reuses the login OTP, which lives in the **cache** (`SendOtpCode`/`VerifyOtpCode`) — verified codes are consumed there and the verified mobile is held in the session, so no table backs it. Only build this if one-time codes ever have to be auditable or survive a cache flush.
+
 * Resetting the password via mobile. The mechanism works similarly to password recovery via email, but instead of sending an email, an SMS containing the password recovery code is sent to the user's mobile number. The user can set their new password by entering this code on the current page.  
 * `mobile`: Stores the user's mobile number.  
 * `token`: Stores the user's token to verify the received token code.  
@@ -588,11 +597,14 @@ Implementation notes:
 
 # password\_resets
 
+> **As built the table is `password_reset_tokens`** (Laravel's own, created in `create_users_table` alongside `users` and `sessions`), not `password_resets`. It differs from the description below in one way that matters: `email` is the **primary key**, so a customer has at most ONE outstanding request — asking again replaces the previous token instead of adding a row. Tokens expire after `config('auth.passwords.users.expire')` (60 minutes) and a fresh link can only be requested every `throttle` (60) seconds.
+
 * The password recovery process is such that the user is not logged in and goes to the password recovery page. After clicking the password recovery button, an email containing a token and the password reset page link is sent to the user. The user then sets their new password on this page. Since the user's password is hashed, it cannot be recovered, and password recovery means setting a new password.  
-* According to company policies, these requests might need to be deleted every X hours/days. Each request creates a new record, regardless of whether the user has previously sent a request, and a new token is sent. The lifespan of this token for password recovery is limited.  
 * `email`: Stores the email address for which the password reset request is sent.  
 * `token`: Stores the token to ensure that the user has access to this email and received the token in their email.  
 * `created_at`: Stores the password reset request date.
+
+**Storefront usage.** `/forgot-password` (`PasswordResetController`) offers two channels. The **email** channel is the one that uses this table, through Laravel's password broker. The **mobile** channel does not touch it at all — it reuses the cache-backed login OTP (`SendOtpCode`/`VerifyOtpCode`) and keeps the verified mobile in the session for 15 minutes. Nothing here is admin-managed; see shop `STOREFRONT_IMPLEMENTATION.md` (Phase 2) and `AGENTS.md` for the non-enumeration and placeholder-email rules.
 
 # permissions
 
