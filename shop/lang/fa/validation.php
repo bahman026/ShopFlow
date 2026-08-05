@@ -16,6 +16,7 @@ return [
     'email' => ':attribute معتبر نیست.',
     'exists' => ':attribute انتخاب‌شده معتبر نیست.',
     'unique' => ':attribute قبلاً استفاده شده است.',
+    'confirmed' => ':attribute با تکرار آن مطابقت ندارد.',
 
     'max' => [
         'numeric' => ':attribute نباید بیشتر از :max باشد.',
@@ -54,5 +55,9 @@ return [
         'heading' => 'عنوان',
         'content' => 'متن دیدگاه',
         'count' => 'تعداد',
+        'password' => 'رمز عبور',
+        'mobile' => 'شماره موبایل',
+        'code' => 'کد تایید',
+        'token' => 'کد بازیابی',
     ],
 ];
