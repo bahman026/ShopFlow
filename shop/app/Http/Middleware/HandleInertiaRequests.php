@@ -58,6 +58,11 @@ class HandleInertiaRequests extends Middleware
                 'authMobile' => $request->session()->get('authMobile'),
                 'authResendIn' => $request->session()->get('authResendIn'),
                 'authOtpDev' => $request->session()->get('authOtpDev'),
+                'resetStep' => $request->session()->get('resetStep'),
+                'resetMobile' => $request->session()->get('resetMobile'),
+                'resetResendIn' => $request->session()->get('resetResendIn'),
+                'resetChannel' => $request->session()->get('resetChannel'),
+                'resetEmailSent' => $request->session()->get('resetEmailSent'),
             ],
             'seo' => [
                 'siteName' => (string) config('app.name'),
