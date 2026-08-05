@@ -11,6 +11,7 @@ readonly class CartSummaryDTO
         public int $itemsTotal,
         public int $discount,
         public int $payable,
+        public int $couponDiscount = 0,
     ) {}
 
     /**
@@ -22,6 +23,7 @@ readonly class CartSummaryDTO
             'count' => $this->count,
             'itemsTotal' => $this->itemsTotal,
             'discount' => $this->discount,
+            'couponDiscount' => $this->couponDiscount,
             'payable' => $this->payable,
         ];
     }
