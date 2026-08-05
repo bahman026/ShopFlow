@@ -5,6 +5,7 @@ import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import HeroSlider from '@/Components/Home/HeroSlider.vue';
 import CategoryStrip from '@/Components/Home/CategoryStrip.vue';
+import TagStrip from '@/Components/Home/TagStrip.vue';
 import BannerGrid from '@/Components/Home/BannerGrid.vue';
 import ProductCarousel from '@/Components/Home/ProductCarousel.vue';
 import BrandStrip from '@/Components/Home/BrandStrip.vue';
@@ -15,6 +16,10 @@ defineProps({
         default: () => [],
     },
     categories: {
+        type: Array,
+        default: () => [],
+    },
+    tags: {
         type: Array,
         default: () => [],
     },
@@ -61,6 +66,8 @@ const jsonLd = computed(() => [
     <AppLayout>
         <div class="flex flex-col gap-10">
             <HeroSlider :slides="slides" />
+
+            <TagStrip :tags="tags" />
 
             <CategoryStrip :categories="categories" />
 

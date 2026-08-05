@@ -17,6 +17,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,9 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('/brands/{slug}', [BrandController::class, 'show'])->name('brands.show');
+
+// Tag = SEO landing page for a category+attribute filter (see docs/TAGS.md).
+Route::get('/tags/{slug}', [TagController::class, 'show'])->name('tags.show');
 
 Route::get('/faq/{position?}', [FaqController::class, 'show'])->name('faqs.show');
 

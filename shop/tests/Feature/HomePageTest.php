@@ -16,6 +16,7 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Models\Slide;
 use App\Models\Slider;
+use App\Models\Tag;
 use App\Models\Variety;
 use Inertia\Testing\AssertableInertia;
 
@@ -137,6 +138,27 @@ it('renders the home page when the catalog is empty', function (): void {
             ->where('slides', [])
             ->where('productRows', [])
             ->where('brands', [])
+        );
+});
+
+it('shows only featured tags on the home page, in order', function (): void {
+    $category = Category::create([
+        'heading' => 'دسته تگ',
+        'slug' => 'tag-cat',
+        'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    Tag::create(['name' => 'تگ دوم', 'slug' => 'tag-b', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 2]);
+    Tag::create(['name' => 'تگ اول', 'slug' => 'tag-a', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+    Tag::create(['name' => 'تگ مخفی', 'slug' => 'tag-hidden', 'category_id' => $category->id, 'show_on_home' => false]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tags', 2) // only the two featured, not the hidden one
+            ->where('tags.0.name', 'تگ اول') // home_order 1 first
+            ->where('tags.0.url', '/tags/tag-a')
+            ->where('tags.1.name', 'تگ دوم')
         );
 });
 

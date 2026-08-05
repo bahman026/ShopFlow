@@ -79,4 +79,9 @@ return [
         'category_top' => 'صفحه دسته‌بندی — بالا',
         'product_side' => 'صفحه محصول — کنار',
     ],
+    'banner_position' => [
+        'home_top' => 'صفحه خانه — بالا',
+        'home_middle' => 'صفحه خانه — شبکه میانی',
+        'category_side' => 'صفحه دسته‌بندی — کنار',
+    ],
 ];

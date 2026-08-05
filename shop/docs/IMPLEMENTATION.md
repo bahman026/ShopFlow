@@ -80,7 +80,8 @@ Depend mostly on Images only.
 - [x] FAQs
 - [x] Reviews
 - [x] Wishlists
-- [ ] Tags
+- [x] Tags (admin owns the schema; storefront renders `/tags/{slug}` — see shop `TAGS.md` and `STOREFRONT_IMPLEMENTATION.md`)
+- [~] Home Sections (`home_sections`: admin can compose/reorder the home page; the storefront still renders a hardcoded order and does not read the table yet — see `STOREFRONT_IMPLEMENTATION.md`)
 - [ ] Brand-Category pages
 - [ ] Redirects
 - [ ] Helps

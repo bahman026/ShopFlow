@@ -9,6 +9,7 @@ use App\Models\Attribute;
 use App\Models\AttributeGroup;
 use App\Models\Brand;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +42,7 @@ class GetCategoryFilters
     {
         $counts = Product::query()
             ->published()
-            ->whereIn('category_id', $categoryIds)
+            ->when($categoryIds !== [], fn (Builder $q): Builder => $q->whereIn('category_id', $categoryIds))
             ->whereNotNull('brand_id')
             ->selectRaw('brand_id, count(*) as aggregate')
             ->groupBy('brand_id')
@@ -129,7 +130,7 @@ class GetCategoryFilters
     {
         $base = Product::query()
             ->published()
-            ->whereIn('category_id', $categoryIds);
+            ->when($categoryIds !== [], fn (Builder $q): Builder => $q->whereIn('category_id', $categoryIds));
 
         return [
             'min' => (int) ((clone $base)->min('price') ?? 0),

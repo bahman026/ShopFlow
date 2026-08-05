@@ -97,9 +97,9 @@ The **`attribute_group_category`** table (singular) manages the relationship bet
 
 Used to store banners.
 
-* `position` specifies the advertisement location, which is an arbitrary name to retrieve the corresponding record from the database.  
+* `position` specifies where the banner appears. Constrained to `App\Enums\BannerPositionEnum` (mirrored in both apps): `home-top`, `home-middle`, `category-side`. Admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetBannersByPosition`). A position can be rendered as a grid (all published banners) or a single banner (`->first()`) — the enum doesn't dictate that. Only `home-middle` is rendered today (the home grid).  
 * `heading` specifies the banner item title or the alt text of the image.  
-* `url` specifies the item link, which redirects when the image or title is clicked.  
+* `url` specifies the item link (image/title click target). Accepts an absolute URL (`https://…`) or an internal path (`/tags/…`, `/categories/…`) — the admin field validates for either, so banners can link to tag pages. `sliders`/`slides` `url` accepts the same.  
 * `sort` specifies the item order.  
 * `status` stores the publication status of the banner, with values 10 for deleted, 20 for published, and 30 for draft.
 
@@ -386,6 +386,19 @@ Implementation notes:
 * `label`: Specifies the label placement on the page.  
 * `content`: Displays the help content.  
 * `position`: Specifies which section the help is for (admin, sellers, etc.).
+
+# home_sections
+
+**Not in the source schema — added by ShopFlow.** The ordered list of blocks the storefront home page is composed from, so staff can add/reorder/disable home rows instead of the layout being hardcoded in `Home.vue`. Admin manages them via `HomeSectionResource` (drag-to-reorder table).
+
+* `type`: Which block to render. `App\Enums\HomeSectionTypeEnum` (string-backed, mirrored in both apps): `slider`, `tags`, `categories`, `banners`, `products`, `brands`. Each type maps to one storefront component + data action. Defaults to `products`.
+* `title`: Optional heading shown above the block. Only meaningful for `products` rows (the other types carry their own heading); nullable.
+* `config`: JSON bag of type-specific settings, nullable. `slider` → `{"position": "<SliderPositionEnum>"}`, `banners` → `{"position": "<BannerPositionEnum>"}`, `products` → `{"sort": "newest"|"popular"}`. `tags`/`categories`/`brands` need none. The admin form shows only the fields the chosen `type` uses and requires them.
+* `order`: Display order, ascending (set by drag-to-reorder in the admin table).
+* `status`: Boolean; `false` hides the block without deleting it. Indexed together with `order`.
+* `created_at` / `updated_at`.
+
+> **Storefront wiring is not built yet** — `HomeController`/`Home.vue` still render a hardcoded section order and ignore this table. See shop `STOREFRONT_IMPLEMENTATION.md`.
 
 # holidays
 
@@ -1000,15 +1013,22 @@ This table is used to store "Contact Us" information.
 
 # tags
 
-This table is for storing tags.
+**Built.** A tag is an SEO landing page for a category **and/or** attribute filter (see `TAGS.md`) — its own URL (`/tags/{slug}`) listing the products in `category_id` (and descendants), or across all categories when no category, that carry the tag's attribute(s). Not a free-form product label; there is no `product_tag` pivot.
 
-* `slug`: Stores the tag's slug.  
-* `name`: Stores the tag's name.  
-* `category_id`: Stores the category ID.  
-* `attribute_id`: Stores the attribute ID.  
-* `content`: Stores the content related to the tag.  
-* `type`: Specifies the type of the question, for example, for users or sellers.  
-* `created_at`: Stores the creation date.
+* `name`: Tag display name.
+* `slug`: URL slug, unique, stable.
+* `category_id`: FK → `categories`, **nullable**, `cascadeOnDelete`.
+* `content`: Editor HTML shown on the tag page (nullable).
+* `title`, `description`, `no_index` (bool, default false), `canonical`: SEO fields, mirroring `categories`/`products`. Added when tags were built (the original source schema had none of these).
+* `show_on_home` (bool, default false) + `home_order` (unsigned int, default 0): whether the tag appears in the storefront home-page featured-tags strip, and its order there. Its image is a polymorphic `images` row (like categories/slides).
+* `created_at` / `updated_at`.
+* Attributes are **many-to-many** via the `attribute_tag` pivot (`attribute_id` + `tag_id`, unique pair, cascade). A tag has zero or more attributes.
+* **Rule:** category and attributes are each optional, but **at least one must be set** (enforced in the admin form, not the DB).
+* **Not** carried over from the source schema: the old single `attribute_id` column (now the pivot) and the `type` (user/seller) column — ShopFlow is single-vendor, so `type` was dropped.
+
+# attribute_tag
+
+Pivot linking `tags` to their `attributes` (many-to-many). `attribute_id` + `tag_id` (unique pair), both `cascadeOnDelete`, plus timestamps.
 
 # points
 
