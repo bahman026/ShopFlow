@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\LoginUser;
 use App\Actions\Auth\NormalizeMobile;
 use App\Actions\Auth\SendOtpCode;
 use App\Actions\Auth\VerifyOtpCode;
-use App\Actions\Cart\MergeGuestCart;
 use App\Enums\UserStatusEnum;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -183,14 +183,7 @@ class AuthController extends Controller
 
     private function login(Request $request, User $user): RedirectResponse
     {
-        // Capture the guest session id before regeneration so any cart built
-        // while logged out is carried onto the account.
-        $guestSession = $request->session()->getId();
-
-        Auth::login($user, remember: true);
-        $request->session()->regenerate();
-
-        app(MergeGuestCart::class)($user, $guestSession);
+        app(LoginUser::class)($request, $user);
 
         return redirect()->intended('/');
     }
