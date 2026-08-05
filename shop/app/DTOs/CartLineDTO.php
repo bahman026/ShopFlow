@@ -12,6 +12,8 @@ readonly class CartLineDTO
     public function __construct(
         public int $id,
         public int $varietyId,
+        public int $productId,
+        public ?int $categoryId,
         public string $heading,
         public string $url,
         public ?ImageDTO $image,
@@ -43,6 +45,7 @@ readonly class CartLineDTO
         return [
             'id' => $this->id,
             'varietyId' => $this->varietyId,
+            'productId' => $this->productId,
             'heading' => $this->heading,
             'url' => $this->url,
             'image' => $this->image?->toArray(),
