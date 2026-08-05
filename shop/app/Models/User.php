@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\UserStatusEnum;
+use App\Notifications\ResetPasswordLink;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * @property positive-int $id
@@ -26,6 +28,8 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
+
+    use Notifiable;
 
     /**
      * Domain used for the synthetic email given to OTP-only sign-ups (the
@@ -88,5 +92,14 @@ class User extends Authenticatable
     public function hasPlaceholderEmail(): bool
     {
         return $this->email !== null && str_ends_with($this->email, self::PLACEHOLDER_EMAIL_DOMAIN);
+    }
+
+    /**
+     * Send the storefront's own Persian reset mail instead of the framework's
+     * English notification.
+     */
+    public function sendPasswordResetNotification(mixed $token): void
+    {
+        $this->notify(new ResetPasswordLink((string) $token));
     }
 }
