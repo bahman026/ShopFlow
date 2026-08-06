@@ -1,0 +1,30 @@
+# Build context for docker/Dockerfile.prod. Anything listed here is rebuilt
+# inside the image, so shipping the host's copy would only invalidate layers.
+.git
+.gitignore
+.dockerignore
+docker/volumes
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+bootstrap/ssr
+bootstrap/cache/*.php
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+storage/debugbar
+.env
+.env.*
+!.env.example
+tests
+.phpunit.cache
+.phpunit.result.cache
+.idea
+.vscode
+.fleet
+.junie
+.ai
+.claude
