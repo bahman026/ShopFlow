@@ -1,0 +1,31 @@
+# Caddy obtains and renews Let's Encrypt certificates for both domains by
+# itself; the only requirement is that the DNS A/AAAA records already point at
+# this VPS and that ports 80 and 443 are reachable.
+{
+	email {$LETSENCRYPT_EMAIL}
+}
+
+(common) {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Caddy advertises itself otherwise.
+		-Server
+	}
+}
+
+{$SHOP_DOMAIN} {
+	import common
+	# Caddy sets X-Forwarded-For/Proto/Host, which Laravel reads through the
+	# trustProxies middleware in bootstrap/app.php.
+	reverse_proxy shop_web:80
+}
+
+{$ADMIN_DOMAIN} {
+	import common
+	reverse_proxy admin_web:80
+}
