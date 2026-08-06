@@ -27,8 +27,8 @@ class GetProductRows
     public function __invoke(): array
     {
         $rows = [
-            ['title' => 'جدیدترین محصولات', 'viewAllUrl' => '/products?sort=newest', 'query' => fn (Builder $q) => $q->latest('id')],
-            ['title' => 'پربازدیدترین محصولات', 'viewAllUrl' => '/products?sort=popular', 'query' => fn (Builder $q) => $q->orderByDesc('seen')],
+            ['title' => trans('messages.home.row_newest'), 'viewAllUrl' => '/products?sort=newest', 'query' => fn (Builder $q) => $q->latest('id')],
+            ['title' => trans('messages.home.row_popular'), 'viewAllUrl' => '/products?sort=popular', 'query' => fn (Builder $q) => $q->orderByDesc('seen')],
         ];
 
         return array_values(array_filter(array_map(function (array $row): array {

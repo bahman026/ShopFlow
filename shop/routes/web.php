@@ -12,11 +12,13 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +41,29 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login/password', [AuthController::class, 'password'])
         ->middleware('throttle:10,1')
         ->name('login.password');
+
+    // Password reset over two channels: a one-time code to the account's
+    // mobile, or a signed link to its email (Laravel's password broker).
+    Route::get('/forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password/otp', [PasswordResetController::class, 'sendOtp'])
+        ->middleware('throttle:6,1')
+        ->name('password.otp');
+    Route::post('/forgot-password/otp/resend', [PasswordResetController::class, 'resendOtp'])
+        ->middleware('throttle:6,1')
+        ->name('password.otp.resend');
+    Route::post('/forgot-password/otp/verify', [PasswordResetController::class, 'verifyOtp'])
+        ->middleware('throttle:10,1')
+        ->name('password.otp.verify');
+    Route::post('/forgot-password/mobile', [PasswordResetController::class, 'updateWithMobile'])
+        ->middleware('throttle:10,1')
+        ->name('password.mobile.update');
+    Route::post('/forgot-password/email', [PasswordResetController::class, 'sendEmailLink'])
+        ->middleware('throttle:6,1')
+        ->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])
+        ->middleware('throttle:10,1')
+        ->name('password.update');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
@@ -70,8 +95,16 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
 // Cart works for guests (by session) and logged-in users (by user id).
 Route::get('/cart', [CartController::class, 'index'])->name('cart');
 Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
-Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
-Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
+
+// Coupon preview only — the code is held in the session and shown as a saving
+// on the cart; committing it to an order is checkout work (Phase 4). Declared
+// before the `{cart}` routes (and those constrained to numbers) so /cart/coupon
+// is never mistaken for a cart-line id.
+Route::post('/cart/coupon', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+Route::delete('/cart/coupon', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
+
+Route::patch('/cart/{cart}', [CartController::class, 'update'])->whereNumber('cart')->name('cart.update');
+Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->whereNumber('cart')->name('cart.destroy');
 
 // Checkout requires login; the shipping step collects a delivery address.
 Route::middleware('auth')->prefix('checkout')->name('checkout.')->group(function (): void {
@@ -91,6 +124,9 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 Route::get('/categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('/brands/{slug}', [BrandController::class, 'show'])->name('brands.show');
+
+// Tag = SEO landing page for a category+attribute filter (see docs/TAGS.md).
+Route::get('/tags/{slug}', [TagController::class, 'show'])->name('tags.show');
 
 Route::get('/faq/{position?}', [FaqController::class, 'show'])->name('faqs.show');
 

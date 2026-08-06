@@ -17,9 +17,9 @@ enum TransactionPortEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::MELLAT => 'ملت',
-            self::PARSIAN => 'پارسیان',
-            self::ZARINPAL => 'زرین‌پال',
+            self::MELLAT => trans('enums.transaction_port.mellat'),
+            self::PARSIAN => trans('enums.transaction_port.parsian'),
+            self::ZARINPAL => trans('enums.transaction_port.zarinpal'),
         };
     }
 }

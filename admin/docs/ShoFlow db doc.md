@@ -97,9 +97,9 @@ The **`attribute_group_category`** table (singular) manages the relationship bet
 
 Used to store banners.
 
-* `position` specifies the advertisement location, which is an arbitrary name to retrieve the corresponding record from the database.  
+* `position` specifies where the banner appears. Constrained to `App\Enums\BannerPositionEnum` (mirrored in both apps): `home-top`, `home-middle`, `category-side`. Admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetBannersByPosition`). A position can be rendered as a grid (all published banners) or a single banner (`->first()`) — the enum doesn't dictate that. Only `home-middle` is rendered today (the home grid).  
 * `heading` specifies the banner item title or the alt text of the image.  
-* `url` specifies the item link, which redirects when the image or title is clicked.  
+* `url` specifies the item link (image/title click target). Accepts an absolute URL (`https://…`) or an internal path (`/tags/…`, `/categories/…`) — the admin field validates for either, so banners can link to tag pages. `sliders`/`slides` `url` accepts the same.  
 * `sort` specifies the item order.  
 * `status` stores the publication status of the banner, with values 10 for deleted, 20 for published, and 30 for draft.
 
@@ -201,6 +201,13 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `is_for`: Whether the coupon is usable by everyone, or only by users, or only by partners.  
 * `started_at`: When the coupon becomes usable.  
 * `expired_at`: When the coupon can no longer be used.
+
+**Storefront usage (preview only, so far).** The cart previews a coupon — `App\Actions\Coupon\PreviewCoupon` + `CalculateCouponDiscount`, code held in the session — and **writes nothing**: no order, and `total_used` is NOT incremented. Committing a coupon to an order (filling `orders.coupon_id` / `orders.coupon_discount`, bumping `total_used`, applying `shipping`) is checkout work, not built yet — see shop `STOREFRONT_IMPLEMENTATION.md` Phase 4. Reading rules the storefront applies:
+
+* `status` and `is_for` are int-backed enums (`CouponStatusEnum`: 10 canceled / 20 used / 30 under review / 40 active; `CouponForEnum`: 10 everyone / 20 users / 30 partners), mirrored in both apps. Only `ACTIVE` is usable; `PARTNERS` never is (single-vendor storefront) and `USERS` requires a logged-in customer.
+* Money columns are `decimal` in the schema but Toman integers everywhere in the app, so the shop model casts `amount` / `min_price` / `max_discount` to int.
+* **Scoping:** no `coupon_product` / `coupon_variety` / `category_coupon` rows at all means the whole cart is eligible; otherwise only lines matching a variety, a product, or a **category or any of its descendants** (the same descendant rule catalog pages use). A percentage applies to the eligible lines' total after variety sale prices, is then capped by `max_discount`, and can never exceed what those lines are worth.
+* `min_price` is checked against the whole cart's payable total, not just the eligible lines.
 
 # coupon\_product
 
@@ -387,6 +394,19 @@ Implementation notes:
 * `content`: Displays the help content.  
 * `position`: Specifies which section the help is for (admin, sellers, etc.).
 
+# home_sections
+
+**Not in the source schema — added by ShopFlow.** The ordered list of blocks the storefront home page is composed from, so staff can add/reorder/disable home rows instead of the layout being hardcoded in `Home.vue`. Admin manages them via `HomeSectionResource` (drag-to-reorder table).
+
+* `type`: Which block to render. `App\Enums\HomeSectionTypeEnum` (string-backed, mirrored in both apps): `slider`, `tags`, `categories`, `banners`, `products`, `brands`. Each type maps to one storefront component + data action. Defaults to `products`.
+* `title`: Optional heading shown above the block. Only meaningful for `products` rows (the other types carry their own heading); nullable.
+* `config`: JSON bag of type-specific settings, nullable. `slider` → `{"position": "<SliderPositionEnum>"}`, `banners` → `{"position": "<BannerPositionEnum>"}`, `products` → `{"sort": "newest"|"popular"}`. `tags`/`categories`/`brands` need none. The admin form shows only the fields the chosen `type` uses and requires them.
+* `order`: Display order, ascending (set by drag-to-reorder in the admin table).
+* `status`: Boolean; `false` hides the block without deleting it. Indexed together with `order`.
+* `created_at` / `updated_at`.
+
+> **Storefront wiring is not built yet** — `HomeController`/`Home.vue` still render a hardcoded section order and ignore this table. See shop `STOREFRONT_IMPLEMENTATION.md`.
+
 # holidays
 
 * Stores holidays when no product delivery is made.  
@@ -439,6 +459,8 @@ Implementation notes:
 * `changer_id`: Indicates who deleted or replaced this mobile number.
 
 # mobile\_password\_resets
+
+> **Not created, and no longer needed.** The storefront's mobile password reset (`/forgot-password`, Phase 2) reuses the login OTP, which lives in the **cache** (`SendOtpCode`/`VerifyOtpCode`) — verified codes are consumed there and the verified mobile is held in the session, so no table backs it. Only build this if one-time codes ever have to be auditable or survive a cache flush.
 
 * Resetting the password via mobile. The mechanism works similarly to password recovery via email, but instead of sending an email, an SMS containing the password recovery code is sent to the user's mobile number. The user can set their new password by entering this code on the current page.  
 * `mobile`: Stores the user's mobile number.  
@@ -575,11 +597,14 @@ Implementation notes:
 
 # password\_resets
 
+> **As built the table is `password_reset_tokens`** (Laravel's own, created in `create_users_table` alongside `users` and `sessions`), not `password_resets`. It differs from the description below in one way that matters: `email` is the **primary key**, so a customer has at most ONE outstanding request — asking again replaces the previous token instead of adding a row. Tokens expire after `config('auth.passwords.users.expire')` (60 minutes) and a fresh link can only be requested every `throttle` (60) seconds.
+
 * The password recovery process is such that the user is not logged in and goes to the password recovery page. After clicking the password recovery button, an email containing a token and the password reset page link is sent to the user. The user then sets their new password on this page. Since the user's password is hashed, it cannot be recovered, and password recovery means setting a new password.  
-* According to company policies, these requests might need to be deleted every X hours/days. Each request creates a new record, regardless of whether the user has previously sent a request, and a new token is sent. The lifespan of this token for password recovery is limited.  
 * `email`: Stores the email address for which the password reset request is sent.  
 * `token`: Stores the token to ensure that the user has access to this email and received the token in their email.  
 * `created_at`: Stores the password reset request date.
+
+**Storefront usage.** `/forgot-password` (`PasswordResetController`) offers two channels. The **email** channel is the one that uses this table, through Laravel's password broker. The **mobile** channel does not touch it at all — it reuses the cache-backed login OTP (`SendOtpCode`/`VerifyOtpCode`) and keeps the verified mobile in the session for 15 minutes. Nothing here is admin-managed; see shop `STOREFRONT_IMPLEMENTATION.md` (Phase 2) and `AGENTS.md` for the non-enumeration and placeholder-email rules.
 
 # permissions
 
@@ -731,7 +756,7 @@ A specific service tier offered by a shipping carrier. References `shipping_line
 
 * For creating various sliders.  
 * `name`: Human-readable label for the slider, e.g. "Home Page Main Slider." Not shown on the frontend.  
-* `position`: The key used by the frontend to fetch this slider, e.g. "home-main". Must be unique per placement.  
+* `position`: Where the frontend shows this slider (e.g. `home-main`). Constrained to `App\Enums\SliderPositionEnum` (mirrored in both apps): `home-main`, `home-secondary`, `category-top`, `product-side`. The admin picks it from a dropdown; the storefront looks it up by the same enum value. Keep one published slider per position (the column is not DB-unique; the frontend takes the first published match). Only `home-main` is rendered so far (home hero).
 * `status`: Publication status — 10 for deleted, 20 for published (default), 30 for draft.  
 * Deleting a slider cascades to its slides (and their images).
 
@@ -1000,15 +1025,22 @@ This table is used to store "Contact Us" information.
 
 # tags
 
-This table is for storing tags.
+**Built.** A tag is an SEO landing page for a category **and/or** attribute filter (see shop `TAGS.md`) — its own URL (`/tags/{slug}`) listing the products in `category_id` (and descendants), or across all categories when no category, that carry the tag's attribute(s). Not a free-form product label; there is no `product_tag` pivot. Admin manages tags via `TagResource`.
 
-* `slug`: Stores the tag's slug.  
-* `name`: Stores the tag's name.  
-* `category_id`: Stores the category ID.  
-* `attribute_id`: Stores the attribute ID.  
-* `content`: Stores the content related to the tag.  
-* `type`: Specifies the type of the question, for example, for users or sellers.  
-* `created_at`: Stores the creation date.
+* `name`: Tag display name.
+* `slug`: URL slug, unique, stable.
+* `category_id`: FK → `categories`, **nullable**, `cascadeOnDelete`.
+* `content`: Editor HTML shown on the tag page (nullable).
+* `title`, `description`, `no_index` (bool, default false), `canonical`: SEO fields, mirroring `categories`/`products`. Added when tags were built (the original source schema had none of these).
+* `show_on_home` (bool, default false) + `home_order` (unsigned int, default 0): whether the tag appears in the storefront home-page featured-tags strip, and its order there. Its image is a polymorphic `images` row (like categories/slides).
+* `created_at` / `updated_at`.
+* Attributes are **many-to-many** via the `attribute_tag` pivot (`attribute_id` + `tag_id`, unique pair, cascade). A tag has zero or more attributes.
+* **Rule:** category and attributes are each optional, but **at least one must be set** (enforced in the admin form, not the DB).
+* **Not** carried over from the source schema: the old single `attribute_id` column (now the pivot) and the `type` (user/seller) column — ShopFlow is single-vendor, so `type` was dropped.
+
+# attribute_tag
+
+Pivot linking `tags` to their `attributes` (many-to-many). `attribute_id` + `tag_id` (unique pair), both `cascadeOnDelete`, plus timestamps.
 
 # points
 

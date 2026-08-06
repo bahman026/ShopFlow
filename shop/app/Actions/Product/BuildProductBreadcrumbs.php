@@ -28,7 +28,7 @@ class BuildProductBreadcrumbs
         }
 
         return [
-            ['heading' => 'خانه', 'url' => '/'],
+            ['heading' => trans('messages.breadcrumb.home'), 'url' => '/'],
             ...$chain,
             ['heading' => $product->heading, 'url' => null],
         ];

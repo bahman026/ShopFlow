@@ -43,25 +43,25 @@ class PaymentController extends Controller
         $lines = $getLines(($this->owner)($request));
 
         if ($lines->isEmpty()) {
-            return redirect()->route('cart')->with('status', 'سبد خرید شما خالی است.');
+            return redirect()->route('cart')->with('status', trans('messages.cart.empty'));
         }
 
         // Stock can change between adding to cart and reaching payment; never
         // open a Zarinpal payment session for something no longer available.
         if (! $validateStock($lines)) {
-            return redirect()->route('cart')->with('status', 'موجودی برخی از کالاهای سبد خرید شما تغییر کرده است. لطفاً سبد خرید را بررسی کنید.');
+            return redirect()->route('cart')->with('status', trans('messages.checkout.stock_changed'));
         }
 
         $address = $this->resolveAddress($request, $user);
 
         if ($address === null) {
-            return redirect()->route('checkout.shipping')->with('status', 'لطفاً نشانی ارسال را انتخاب کنید.');
+            return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_address'));
         }
 
         $method = $this->resolveMethod($request, $address);
 
         if ($method === null) {
-            return redirect()->route('checkout.shipping')->with('status', 'لطفاً روش ارسال را انتخاب کنید.');
+            return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_method'));
         }
 
         $summary = $buildSummary($lines);
@@ -77,7 +77,7 @@ class PaymentController extends Controller
         );
 
         if ($url === null) {
-            return back()->with('status', 'در اتصال به درگاه پرداخت خطایی رخ داد. لطفاً دوباره تلاش کنید.');
+            return back()->with('status', trans('messages.payment.gateway_error'));
         }
 
         return Inertia::location($url);
@@ -97,7 +97,7 @@ class PaymentController extends Controller
         $order = ($this->completePayment)($validated['Authority'], $validated['Status']);
 
         if ($order === null) {
-            return redirect()->route('checkout.payment')->with('status', 'پرداخت ناموفق بود.');
+            return redirect()->route('checkout.payment')->with('status', trans('messages.payment.failed'));
         }
 
         $request->session()->forget(['checkout.address_id', 'checkout.shipping_method_id']);

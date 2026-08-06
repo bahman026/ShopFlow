@@ -22,7 +22,7 @@ class PageController extends Controller
         return Inertia::render('Page/Show', [
             'page' => $buildPageDetail($page)->toArray(),
             'breadcrumbs' => [
-                ['heading' => 'خانه', 'url' => '/'],
+                ['heading' => trans('messages.breadcrumb.home'), 'url' => '/'],
                 ['heading' => $page->heading, 'url' => null],
             ],
         ]);

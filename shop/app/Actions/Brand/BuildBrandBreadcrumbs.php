@@ -16,7 +16,7 @@ class BuildBrandBreadcrumbs
     public function __invoke(Brand $brand): array
     {
         return [
-            ['heading' => 'خانه', 'url' => '/'],
+            ['heading' => trans('messages.breadcrumb.home'), 'url' => '/'],
             ['heading' => $brand->heading, 'url' => null],
         ];
     }

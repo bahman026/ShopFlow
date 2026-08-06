@@ -8,6 +8,7 @@ use App\Filament\Resources\SlideResource\Pages\CreateSlide;
 use App\Filament\Resources\SlideResource\Pages\EditSlide;
 use App\Filament\Resources\SlideResource\Pages\ListSlides;
 use App\Models\Slide;
+use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -70,9 +71,16 @@ class SlideResource extends Resource
                     ->hintIconTooltip(trans('slide.label_field_hint')),
                 TextInput::make('url')
                     ->label(trans('slide.url'))
-                    ->url()
                     ->nullable()
                     ->maxLength(255)
+                    // Absolute URL (https://…) or internal path (/tags/…) so a
+                    // slide can link to a tag/category page. Wrapped so Filament
+                    // returns the rule to Laravel instead of evaluating it.
+                    ->rule(static fn (): Closure => static function (string $attribute, mixed $value, Closure $fail): void {
+                        if ($value !== null && $value !== '' && (! is_string($value) || preg_match('#^(https?://|/)#', $value) !== 1)) {
+                            $fail(trans('slide.url_invalid'));
+                        }
+                    })
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('slide.url_hint')),
                 TextInput::make('order')

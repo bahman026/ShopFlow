@@ -18,10 +18,10 @@ enum TransactionStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::PENDING => 'در انتظار',
-            self::SUCCESS => 'موفق',
-            self::FAILED => 'ناموفق',
-            self::CANCELED => 'لغوشده',
+            self::PENDING => trans('enums.transaction_status.pending'),
+            self::SUCCESS => trans('enums.transaction_status.success'),
+            self::FAILED => trans('enums.transaction_status.failed'),
+            self::CANCELED => trans('enums.transaction_status.canceled'),
         };
     }
 }

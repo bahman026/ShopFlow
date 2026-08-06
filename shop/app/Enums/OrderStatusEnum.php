@@ -21,13 +21,13 @@ enum OrderStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::PENDING => 'در انتظار پرداخت',
-            self::PAID => 'پرداخت‌شده',
-            self::PROCESSING => 'در حال آماده‌سازی',
-            self::SHIPPED => 'ارسال‌شده',
-            self::DELIVERED => 'تحویل داده‌شده',
-            self::CANCELED => 'لغوشده',
-            self::RETURNED => 'مرجوع‌شده',
+            self::PENDING => trans('enums.order_status.pending'),
+            self::PAID => trans('enums.order_status.paid'),
+            self::PROCESSING => trans('enums.order_status.processing'),
+            self::SHIPPED => trans('enums.order_status.shipped'),
+            self::DELIVERED => trans('enums.order_status.delivered'),
+            self::CANCELED => trans('enums.order_status.canceled'),
+            self::RETURNED => trans('enums.order_status.returned'),
         };
     }
 }

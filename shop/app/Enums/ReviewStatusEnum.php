@@ -18,10 +18,10 @@ enum ReviewStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'حذف شده',
-            self::PENDING => 'در انتظار بررسی',
-            self::APPROVED => 'تایید شده',
-            self::REJECTED => 'رد شده',
+            self::DELETED => trans('enums.review_status.deleted'),
+            self::PENDING => trans('enums.review_status.pending'),
+            self::APPROVED => trans('enums.review_status.approved'),
+            self::REJECTED => trans('enums.review_status.rejected'),
         };
     }
 }

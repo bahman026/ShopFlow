@@ -56,6 +56,9 @@ class GetCartLines
         return new CartLineDTO(
             id: $line->id,
             varietyId: $variety->id,
+            productId: $product->id,
+            // Carried for coupon scoping (which lines a coupon may discount).
+            categoryId: $product->category_id,
             heading: $product->heading,
             url: '/products/'.$product->slug,
             image: $image,

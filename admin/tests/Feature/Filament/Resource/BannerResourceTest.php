@@ -80,6 +80,36 @@ it('can create banner model.', function () {
     ]);
 });
 
+it('accepts an internal path url (e.g. a tag link).', function () {
+    $banner = Banner::factory()->make();
+
+    livewire(BannerResource\Pages\CreateBanner::class)
+        ->fillForm([
+            'position' => $banner->position,
+            'heading' => $banner->heading,
+            'url' => '/tags/gaming-gear',
+            'status' => $banner->status->value,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $this->assertDatabaseHas(Banner::class, ['url' => '/tags/gaming-gear']);
+});
+
+it('rejects a url that is neither absolute nor an internal path.', function () {
+    $banner = Banner::factory()->make();
+
+    livewire(BannerResource\Pages\CreateBanner::class)
+        ->fillForm([
+            'position' => $banner->position,
+            'heading' => $banner->heading,
+            'url' => 'not a url',
+            'status' => $banner->status->value,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['url']);
+});
+
 it('can delete banner model.', function () {
     $banner = Banner::factory()->create();
 

@@ -44,7 +44,7 @@ class CompleteCheckoutPayment
         }
 
         if ($status !== 'OK') {
-            $this->fail($order, $transaction, TransactionStatusEnum::CANCELED, null, 'پرداخت توسط کاربر لغو شد.');
+            $this->fail($order, $transaction, TransactionStatusEnum::CANCELED, null, trans('messages.payment.canceled_by_user'));
 
             return null;
         }
@@ -52,7 +52,7 @@ class CompleteCheckoutPayment
         $verified = ($this->verifyPayment)($authority, $order->total_price);
 
         if ($verified === null || ! in_array($verified['code'], [100, 101], true)) {
-            $this->fail($order, $transaction, TransactionStatusEnum::FAILED, $verified['code'] ?? null, 'تأیید پرداخت ناموفق بود.');
+            $this->fail($order, $transaction, TransactionStatusEnum::FAILED, $verified['code'] ?? null, trans('messages.payment.verify_failed'));
 
             return null;
         }
@@ -94,7 +94,7 @@ class CompleteCheckoutPayment
             'ref_id' => $refId,
             'paid_at' => now(),
             'result_code' => '100',
-            'result_message' => 'پرداخت با موفقیت انجام شد ولی موجودی کالا کافی نبود — نیاز به بازگشت وجه به مشتری.',
+            'result_message' => trans('messages.payment.paid_but_oversold'),
         ]);
     }
 }

@@ -32,7 +32,9 @@ class GetCategoryProducts
     {
         $query = Product::query()
             ->published()
-            ->whereIn('category_id', $categoryIds)
+            // Empty category list = no category constraint (attribute-only tag
+            // pages span all categories); category pages always pass ids.
+            ->when($categoryIds !== [], fn (Builder $q): Builder => $q->whereIn('category_id', $categoryIds))
             ->with([
                 'featuredImage',
                 'varieties' => fn (Relation $relation) => $relation->where('status', VarietyStatusEnum::PUBLISHED->value)->with('image'),

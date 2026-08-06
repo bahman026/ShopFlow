@@ -6,6 +6,7 @@ use App\Enums\BannerStatusEnum;
 use App\Enums\BrandStatusEnum;
 use App\Enums\CategoryStatusEnum;
 use App\Enums\ProductStatusEnum;
+use App\Enums\SliderPositionEnum;
 use App\Enums\SliderStatusEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Banner;
@@ -15,6 +16,7 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Models\Slide;
 use App\Models\Slider;
+use App\Models\Tag;
 use App\Models\Variety;
 use Inertia\Testing\AssertableInertia;
 
@@ -137,4 +139,40 @@ it('renders the home page when the catalog is empty', function (): void {
             ->where('productRows', [])
             ->where('brands', [])
         );
+});
+
+it('shows only featured tags on the home page, in order', function (): void {
+    $category = Category::create([
+        'heading' => 'دسته تگ',
+        'slug' => 'tag-cat',
+        'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    Tag::create(['name' => 'تگ دوم', 'slug' => 'tag-b', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 2]);
+    Tag::create(['name' => 'تگ اول', 'slug' => 'tag-a', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+    Tag::create(['name' => 'تگ مخفی', 'slug' => 'tag-hidden', 'category_id' => $category->id, 'show_on_home' => false]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tags', 2) // only the two featured, not the hidden one
+            ->where('tags.0.name', 'تگ اول') // home_order 1 first
+            ->where('tags.0.url', '/tags/tag-a')
+            ->where('tags.1.name', 'تگ دوم')
+        );
+});
+
+it('only shows the slider assigned to the home-main position', function (): void {
+    // A published slider at a different position must not leak onto the home
+    // hero — the home page asks GetSliderByPosition for HOME_MAIN only.
+    $other = Slider::create([
+        'name' => 'sidebar slider',
+        'position' => SliderPositionEnum::PRODUCT_SIDE->value,
+        'status' => SliderStatusEnum::PUBLISHED,
+    ]);
+    Slide::create(['slider_id' => $other->id, 'heading' => 'کنار', 'order' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('slides', []));
 });

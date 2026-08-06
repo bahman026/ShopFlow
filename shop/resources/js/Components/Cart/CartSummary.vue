@@ -55,6 +55,14 @@ const total = computed(() => props.summary.payable + shippingCost.value);
                 <dd>{{ formatPrice(summary.discount) }}</dd>
             </div>
 
+            <div
+                v-if="summary.couponDiscount > 0"
+                class="flex items-center justify-between font-medium text-green-600"
+            >
+                <dt>تخفیف کد تخفیف</dt>
+                <dd>{{ formatPrice(summary.couponDiscount) }}</dd>
+            </div>
+
             <div v-if="showShipping" class="flex items-center justify-between text-gray-600">
                 <dt>هزینه ارسال</dt>
                 <dd v-if="!shipping" class="text-xs text-gray-400">روش حمل و نقل انتخاب نشده</dd>

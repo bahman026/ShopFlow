@@ -8,14 +8,17 @@ import EmptyState from '@/Components/EmptyState.vue';
 import CheckoutSteps from '@/Components/Checkout/CheckoutSteps.vue';
 import CartLine from '@/Components/Cart/CartLine.vue';
 import CartSummary from '@/Components/Cart/CartSummary.vue';
+import CouponBox from '@/Components/Cart/CouponBox.vue';
 import { uiIcons } from '@/fontawesome';
 
 const props = defineProps({
     lines: { type: Array, default: () => [] },
     summary: {
         type: Object,
-        default: () => ({ count: 0, itemsTotal: 0, discount: 0, payable: 0 }),
+        default: () => ({ count: 0, itemsTotal: 0, discount: 0, couponDiscount: 0, payable: 0 }),
     },
+    coupon: { type: Object, default: null },
+    couponError: { type: String, default: null },
 });
 
 const page = usePage();
@@ -73,7 +76,8 @@ function checkout() {
                     </div>
                 </div>
 
-                <div class="lg:col-span-4">
+                <div class="flex flex-col gap-6 lg:col-span-4">
+                    <CouponBox :coupon="coupon" :error="couponError" />
                     <CartSummary :summary="summary" @submit="checkout" />
                 </div>
             </div>

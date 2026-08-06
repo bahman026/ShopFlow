@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\SliderPositionEnum;
 use App\Enums\SliderStatusEnum;
 use App\Models\Slider;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,7 @@ class SliderFactory extends Factory
     {
         return [
             'name' => fake()->words(3, true),
-            'position' => fake()->randomElement(['home-main', 'home-secondary', 'category-top', 'product-side']),
+            'position' => fake()->randomElement(SliderPositionEnum::cases())->value,
             'status' => fake()->randomElement(SliderStatusEnum::cases()),
         ];
     }

@@ -28,7 +28,7 @@ class BuildCategoryBreadcrumbs
         }
 
         return [
-            ['heading' => 'خانه', 'url' => '/'],
+            ['heading' => trans('messages.breadcrumb.home'), 'url' => '/'],
             ...$chain,
             ['heading' => $category->heading, 'url' => null],
         ];

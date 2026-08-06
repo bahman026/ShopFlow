@@ -4,27 +4,32 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Home\GetBannersByPosition;
 use App\Actions\Home\GetFeaturedBrands;
-use App\Actions\Home\GetHeroSlides;
 use App\Actions\Home\GetHomeCategories;
+use App\Actions\Home\GetHomeTags;
 use App\Actions\Home\GetProductRows;
-use App\Actions\Home\GetPromoBanners;
+use App\Actions\Home\GetSliderByPosition;
+use App\Enums\BannerPositionEnum;
+use App\Enums\SliderPositionEnum;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class HomeController extends Controller
 {
     public function __invoke(
-        GetHeroSlides $getHeroSlides,
+        GetSliderByPosition $getSliderByPosition,
         GetHomeCategories $getHomeCategories,
-        GetPromoBanners $getPromoBanners,
+        GetHomeTags $getHomeTags,
+        GetBannersByPosition $getBannersByPosition,
         GetProductRows $getProductRows,
         GetFeaturedBrands $getFeaturedBrands,
     ): Response {
         return Inertia::render('Home', [
-            'slides' => $getHeroSlides(),
+            'slides' => $getSliderByPosition(SliderPositionEnum::HOME_MAIN),
             'categories' => $getHomeCategories(),
-            'banners' => $getPromoBanners(),
+            'tags' => $getHomeTags(),
+            'banners' => $getBannersByPosition(BannerPositionEnum::HOME_MIDDLE),
             'productRows' => $getProductRows(),
             'brands' => $getFeaturedBrands(),
         ]);

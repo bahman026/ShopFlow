@@ -17,9 +17,9 @@ enum VarietyStatusEnum: int
     public function label(): string
     {
         return match ($this) {
-            self::DELETED => 'حذف شده',
-            self::PUBLISHED => 'منتشر شده',
-            self::DRAFT => 'پیش‌نویس',
+            self::DELETED => trans('enums.variety_status.deleted'),
+            self::PUBLISHED => trans('enums.variety_status.published'),
+            self::DRAFT => trans('enums.variety_status.draft'),
         };
     }
 }

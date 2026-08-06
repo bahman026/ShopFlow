@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\LoginUser;
 use App\Actions\Auth\NormalizeMobile;
 use App\Actions\Auth\SendOtpCode;
 use App\Actions\Auth\VerifyOtpCode;
-use App\Actions\Cart\MergeGuestCart;
 use App\Enums\UserStatusEnum;
 use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -47,7 +47,7 @@ class AuthController extends Controller
 
         if ($remaining > 0) {
             return back()
-                ->withErrors(['code' => "کد قبلی هنوز معتبر است؛ لطفاً {$remaining} ثانیه دیگر برای دریافت کد جدید صبر کنید."])
+                ->withErrors(['code' => trans('messages.auth.code_still_valid', ['seconds' => $remaining])])
                 ->with('authStep', 'otp')
                 ->with('authMobile', $mobile)
                 ->with('authResendIn', $remaining);
@@ -67,7 +67,7 @@ class AuthController extends Controller
 
         if (! $verify($mobile, $code)) {
             return back()
-                ->withErrors(['code' => 'کد وارد شده نادرست یا منقضی شده است.'])
+                ->withErrors(['code' => trans('messages.auth.code_invalid')])
                 ->with('authStep', 'otp')
                 ->with('authMobile', $mobile);
         }
@@ -107,7 +107,7 @@ class AuthController extends Controller
 
         if ($user === null || ! Hash::check($password, $user->password ?? '')) {
             return back()
-                ->withErrors(['password' => 'رمز عبور نادرست است.'])
+                ->withErrors(['password' => trans('messages.auth.password_invalid')])
                 ->with('authStep', 'password')
                 ->with('authMobile', $mobile);
         }
@@ -139,7 +139,7 @@ class AuthController extends Controller
         if ($mobile === null) {
             throw new HttpResponseException(
                 back()
-                    ->withErrors(['mobile' => 'شماره موبایل معتبر نیست.'])
+                    ->withErrors(['mobile' => trans('messages.auth.mobile_invalid')])
                     ->with('authStep', 'mobile')
             );
         }
@@ -176,21 +176,14 @@ class AuthController extends Controller
     private function blocked(string $mobile): RedirectResponse
     {
         return back()
-            ->withErrors(['mobile' => 'حساب کاربری شما مسدود شده است.'])
+            ->withErrors(['mobile' => trans('messages.auth.blocked')])
             ->with('authStep', 'mobile')
             ->with('authMobile', $mobile);
     }
 
     private function login(Request $request, User $user): RedirectResponse
     {
-        // Capture the guest session id before regeneration so any cart built
-        // while logged out is carried onto the account.
-        $guestSession = $request->session()->getId();
-
-        Auth::login($user, remember: true);
-        $request->session()->regenerate();
-
-        app(MergeGuestCart::class)($user, $guestSession);
+        app(LoginUser::class)($request, $user);
 
         return redirect()->intended('/');
     }
