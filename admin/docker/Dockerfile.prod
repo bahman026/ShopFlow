@@ -1,0 +1,130 @@
+# Production image for the admin panel. Build context is admin/ (see
+# .dockerignore); the dev image lives in Dockerfile and is unrelated.
+#
+# Two images come out of this file, selected with --target:
+#   app -> php-fpm with the application baked in
+#   web -> nginx with only public/ baked in
+# Compose builds both, so they share every layer up to `app`.
+
+# --- PHP base --------------------------------------------------------------
+# Shared by the dependency build and the runtime, so composer resolves platform
+# requirements against exactly the extensions production will have.
+FROM php:8.5-fpm-bookworm AS base
+
+# One layer, no recommends, and the build-only -dev packages are purged again
+# after the extensions are compiled. This is the pattern the official PHP
+# images use; it keeps the shared libraries the extensions actually link to.
+# Retries matter: apt only warns when an index fails to download, so a flaky
+# network otherwise surfaces as a confusing "Unable to locate package".
+# opcache is absent from the list on purpose: PHP 8.5 links Zend OPcache in
+# statically, so there is no shared module to build. php.ini tunes it.
+RUN set -eux; \
+    savedAptMark="$(apt-mark showmanual)"; \
+    apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 update; \
+    apt-get install -y --no-install-recommends \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libpq-dev \
+        libwebp-dev \
+        libxml2-dev \
+        libxpm-dev \
+        libzip-dev \
+    ; \
+    docker-php-ext-configure gd \
+        --enable-gd \
+        --with-freetype \
+        --with-jpeg \
+        --with-webp \
+        --with-xpm \
+    ; \
+    docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        exif \
+        gd \
+        intl \
+        mbstring \
+        pcntl \
+        pdo_pgsql \
+        pgsql \
+        zip \
+    ; \
+    pecl install redis; \
+    docker-php-ext-enable redis; \
+    \
+    apt-mark auto '.*' > /dev/null; \
+    [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
+    find /usr/local/lib/php/extensions -name '*.so' -exec ldd '{}' ';' \
+        | awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) next; gsub("^/(usr/)?", "", so); print so }' \
+        | sort -u \
+        | xargs -r dpkg-query --search 2>/dev/null \
+        | cut -d: -f1 \
+        | sort -u \
+        | xargs -r apt-mark manual; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    rm -rf /var/lib/apt/lists/* /tmp/pear
+
+COPY docker/production/php.ini /usr/local/etc/php/conf.d/zz-production.ini
+COPY docker/production/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-www.conf
+
+WORKDIR /var/www/html
+
+# --- Front-end assets ------------------------------------------------------
+FROM node:20-bookworm-slim AS assets
+WORKDIR /app
+# Dependencies first: the install layer then survives any source-only change.
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# --- Application build -----------------------------------------------------
+# Runs on `base` so composer sees the production extension set. Composer itself
+# never reaches the runtime image.
+FROM base AS build
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-scripts \
+        --no-autoloader \
+        --no-interaction \
+        --prefer-dist
+
+COPY . .
+COPY --from=assets /app/public/build ./public/build
+
+# dump-autoload runs package:discover, which needs the full source. Filament
+# publishes its own JS/CSS into public/ so the web image can serve them.
+RUN set -eux; \
+    composer dump-autoload --no-dev --optimize --no-interaction; \
+    php artisan filament:assets; \
+    php artisan storage:link
+
+# --- Runtime ---------------------------------------------------------------
+FROM base AS app
+
+COPY --from=build /var/www/html /var/www/html
+
+# Code stays root-owned and read-only to the fpm workers; only the two paths
+# Laravel writes to are handed over.
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R u+rwX,g+rwX storage bootstrap/cache
+
+COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 9000
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["php-fpm"]
+
+# --- Web server ------------------------------------------------------------
+FROM nginx:1.27-alpine AS web
+COPY docker/production/nginx.conf /etc/nginx/conf.d/default.conf
+# Static files only. public/storage is a symlink resolved by the uploads volume
+# that compose mounts into this container as well.
+COPY --from=build /var/www/html/public /var/www/html/public
+EXPOSE 80
