@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use App\Enums\PermissionGroupEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\ProductResource\Pages\CreateProduct;
@@ -16,6 +17,7 @@ use App\Models\AttributeGroup;
 use App\Models\AttributeGroupCategory;
 use App\Models\Product;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -43,6 +45,13 @@ use Livewire\Component;
 
 class ProductResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Product::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\WishlistResource\Pages\CreateWishlist;
 use App\Filament\Resources\WishlistResource\Pages\ListWishlists;
 use App\Models\Wishlist;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +20,13 @@ use Filament\Tables\Table;
 
 class WishlistResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CUSTOMERS;
+    }
+
     protected static ?string $model = Wishlist::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-heart';

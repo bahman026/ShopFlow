@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\VarietyResource\Pages\CreateVariety;
 use App\Filament\Resources\VarietyResource\Pages\EditVariety;
@@ -11,6 +12,7 @@ use App\Filament\Resources\VarietyResource\Pages\ListVarieties;
 use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -32,6 +34,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class VarietyResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Variety::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
@@ -139,6 +148,12 @@ class VarietyResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('variety.path'))
                             ->image()
+                            ->imageEditor()
+                            // Product imagery is square everywhere it appears:
+                            // the card grid and the gallery are both
+                            // aspect-square.
+                            ->imageCropAspectRatio('1:1')
+                            ->helperText(trans('variety.path_hint'))
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')

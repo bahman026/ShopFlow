@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\UserConfigResource\Pages\CreateUserConfig;
 use App\Filament\Resources\UserConfigResource\Pages\EditUserConfig;
 use App\Filament\Resources\UserConfigResource\Pages\ListUserConfigs;
 use App\Models\UserConfig;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,6 +25,13 @@ use Filament\Tables\Table;
 
 class UserConfigResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CUSTOMERS;
+    }
+
     protected static ?string $model = UserConfig::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-horizontal';

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\ShippingLineResource\Pages\CreateShippingLine;
 use App\Filament\Resources\ShippingLineResource\Pages\EditShippingLine;
 use App\Filament\Resources\ShippingLineResource\Pages\ListShippingLines;
 use App\Models\ShippingLine;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,6 +21,13 @@ use Filament\Tables\Table;
 
 class ShippingLineResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SHIPPING;
+    }
+
     protected static ?string $model = ShippingLine::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';

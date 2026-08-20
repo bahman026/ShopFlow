@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\MenuItemResource\Pages\CreateMenuItem;
 use App\Filament\Resources\MenuItemResource\Pages\EditMenuItem;
 use App\Filament\Resources\MenuItemResource\Pages\ListMenuItems;
 use App\Models\MenuItem;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +27,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MenuItemResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = MenuItem::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-list-bullet';

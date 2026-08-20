@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\AncestorResource\Pages\CreateAncestor;
 use App\Filament\Resources\AncestorResource\Pages\EditAncestor;
 use App\Filament\Resources\AncestorResource\Pages\ListAncestors;
 use App\Models\Ancestor;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
@@ -19,6 +21,13 @@ use Filament\Tables\Table;
 
 class AncestorResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Ancestor::class;
 
     protected static ?int $navigationSort = 1;

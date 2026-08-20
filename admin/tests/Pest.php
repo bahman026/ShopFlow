@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use App\Enums\RolesEnum;
 use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -52,10 +53,36 @@ expect()->extend('toBeOne', function () {
 |
 */
 
+/**
+ * A logged-in super-admin.
+ *
+ * Roles and permissions come from RolePermissionSeeder rather than being
+ * hand-rolled, so resource authorization behaves in tests exactly as it does in
+ * the panel — a resource that a real super-admin could not reach must not be
+ * reachable here either.
+ */
 function login(?User $user = null): void
 {
     $user ??= User::factory()->create();
-    Role::create(['name' => RolesEnum::SUPER_ADMIN->value]);
+
+    app(RolePermissionSeeder::class)->run();
+
     $user->assignRole(RolesEnum::SUPER_ADMIN->value);
     actingAs($user);
+}
+
+/**
+ * A logged-in admin — the day-to-day staff role, which deliberately cannot
+ * reach settings, gateways or staff accounts.
+ */
+function loginAsAdmin(?User $user = null): User
+{
+    $user ??= User::factory()->create();
+
+    app(RolePermissionSeeder::class)->run();
+
+    $user->assignRole(RolesEnum::ADMIN->value);
+    actingAs($user);
+
+    return $user;
 }

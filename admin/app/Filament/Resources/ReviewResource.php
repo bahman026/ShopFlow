@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Enums\ReviewStatusEnum;
 use App\Filament\Resources\ReviewResource\Pages\CreateReview;
 use App\Filament\Resources\ReviewResource\Pages\EditReview;
 use App\Filament\Resources\ReviewResource\Pages\ListReviews;
 use App\Models\Review;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +27,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ReviewResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = Review::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';

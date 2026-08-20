@@ -6,10 +6,12 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\PageStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\PageResource\Pages\CreatePage;
 use App\Filament\Resources\PageResource\Pages\EditPage;
 use App\Filament\Resources\PageResource\Pages\ListPages;
 use App\Models\Page as PageModel;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -30,6 +32,13 @@ use Illuminate\Support\Str;
 
 class PageResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = PageModel::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\ProvinceResource\Pages\CreateProvince;
 use App\Filament\Resources\ProvinceResource\Pages\EditProvince;
 use App\Filament\Resources\ProvinceResource\Pages\ListProvinces;
 use App\Models\Province;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +21,13 @@ use Filament\Tables\Table;
 
 class ProvinceResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SHIPPING;
+    }
+
     protected static ?string $model = Province::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';

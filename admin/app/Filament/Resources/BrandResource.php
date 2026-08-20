@@ -6,10 +6,12 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\BrandStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\BrandResource\Pages\CreateBrand;
 use App\Filament\Resources\BrandResource\Pages\EditBrand;
 use App\Filament\Resources\BrandResource\Pages\ListBrands;
 use App\Models\Brand;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -27,6 +29,13 @@ use Illuminate\Support\Str;
 
 class BrandResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Brand::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';

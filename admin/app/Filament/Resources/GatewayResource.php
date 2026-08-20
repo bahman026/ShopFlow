@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\GatewayForEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\GatewayResource\Pages\CreateGateway;
 use App\Filament\Resources\GatewayResource\Pages\EditGateway;
 use App\Filament\Resources\GatewayResource\Pages\ListGateways;
 use App\Models\Gateway;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +27,13 @@ use Filament\Tables\Table;
 
 class GatewayResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SETTINGS;
+    }
+
     protected static ?string $model = Gateway::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-library';

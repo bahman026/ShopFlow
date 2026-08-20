@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\OrderNoteResource\Pages\CreateOrderNote;
 use App\Filament\Resources\OrderNoteResource\Pages\EditOrderNote;
 use App\Filament\Resources\OrderNoteResource\Pages\ListOrderNotes;
 use App\Models\OrderNote;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -20,6 +22,13 @@ use Filament\Tables\Table;
 
 class OrderNoteResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::ORDERS;
+    }
+
     protected static ?string $model = OrderNote::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-pencil-square';

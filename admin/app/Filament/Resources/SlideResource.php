@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
+use App\Enums\SliderPositionEnum;
 use App\Filament\Resources\SlideResource\Pages\CreateSlide;
 use App\Filament\Resources\SlideResource\Pages\EditSlide;
 use App\Filament\Resources\SlideResource\Pages\ListSlides;
 use App\Models\Slide;
+use App\Models\Slider;
+use App\Traits\AuthorizesWithPermissions;
 use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -17,6 +21,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -24,6 +29,13 @@ use Filament\Tables\Table;
 
 class SlideResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = Slide::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -50,6 +62,7 @@ class SlideResource extends Resource
         return $schema
             ->components([
                 Select::make('slider_id')
+                    ->live()
                     ->label(trans('slide.slider_id'))
                     ->relationship('slider', 'name')
                     ->searchable()
@@ -95,6 +108,12 @@ class SlideResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('slide.path'))
                             ->image()
+                            ->imageEditor()
+                            // A slide's shape comes from its slider's position:
+                            // a home hero is a wide band, a product sidebar is
+                            // a narrow portrait.
+                            ->imageCropAspectRatio(fn (Get $get): ?string => SlideResource::positionOf($get('../slider_id'))?->aspectRatio())
+                            ->helperText(fn (Get $get): string => SlideResource::imageHint(SlideResource::positionOf($get('../slider_id'))))
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')
@@ -111,6 +130,38 @@ class SlideResource extends Resource
                     })
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * The position of the slider a slide belongs to, or null while none is
+     * chosen. Drives the crop ratio, since a slide has no position of its own.
+     */
+    public static function positionOf(mixed $sliderId): ?SliderPositionEnum
+    {
+        if (blank($sliderId)) {
+            return null;
+        }
+
+        $slider = Slider::find($sliderId);
+
+        return $slider === null ? null : SliderPositionEnum::tryFrom($slider->position);
+    }
+
+    /**
+     * Tells the admin what to upload: the ratio the slot renders at and the
+     * pixel size that stays sharp on a retina screen.
+     */
+    public static function imageHint(?SliderPositionEnum $position): string
+    {
+        if (! $position instanceof SliderPositionEnum) {
+            return trans('slide.path_hint_no_slider');
+        }
+
+        return trans('slide.path_hint', [
+            'position' => $position->label(),
+            'ratio' => $position->aspectRatio(),
+            'size' => $position->recommendedSize(),
+        ]);
     }
 
     public static function table(Table $table): Table

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Enums\ReceiptTypeEnum;
 use App\Filament\Resources\ReceiptResource\Pages\CreateReceipt;
 use App\Filament\Resources\ReceiptResource\Pages\EditReceipt;
 use App\Filament\Resources\ReceiptResource\Pages\ListReceipts;
 use App\Models\Receipt;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,6 +28,13 @@ use Filament\Tables\Table;
 
 class ReceiptResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::ORDERS;
+    }
+
     protected static ?string $model = Receipt::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-banknotes';

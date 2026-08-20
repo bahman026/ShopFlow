@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\SettingResource\Pages\CreateSetting;
 use App\Filament\Resources\SettingResource\Pages\EditSetting;
 use App\Filament\Resources\SettingResource\Pages\ListSettings;
 use App\Models\Setting;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -22,6 +24,13 @@ use Filament\Tables\Table;
 
 class SettingResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SETTINGS;
+    }
+
     protected static ?string $model = Setting::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';

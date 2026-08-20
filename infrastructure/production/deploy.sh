@@ -43,6 +43,14 @@ compose up -d --wait db redis
 echo "==> running migrations (admin owns the schema)"
 compose run --rm --no-deps admin_app php artisan migrate --force
 
+# Every Filament resource is gated by a permission row, so these have to exist
+# before the panel is usable — without them staff log in to an empty panel with
+# no resources at all. RolePermissionSeeder is idempotent (findOrCreate +
+# syncPermissions), so running it on every deploy is safe and also picks up any
+# permission added since the last release.
+echo "==> syncing roles and permissions"
+compose run --rm --no-deps admin_app php artisan db:seed --class="Database\\Seeders\\RolePermissionSeeder" --force
+
 echo "==> replacing application containers"
 compose up -d --build --remove-orphans --wait
 

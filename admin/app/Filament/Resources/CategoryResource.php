@@ -6,11 +6,13 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\CategoryStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\CategoryResource\Pages\EditCategory;
 use App\Filament\Resources\CategoryResource\Pages\ListCategories;
 use App\Models\Category;
 use App\Models\Image;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -29,6 +31,13 @@ use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Category::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';

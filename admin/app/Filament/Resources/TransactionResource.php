@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Enums\TransactionPortEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Filament\Resources\TransactionResource\Pages\CreateTransaction;
 use App\Filament\Resources\TransactionResource\Pages\EditTransaction;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Models\Transaction;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,6 +26,13 @@ use Filament\Tables\Table;
 
 class TransactionResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::ORDERS;
+    }
+
     protected static ?string $model = Transaction::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-credit-card';

@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\OrderSrcEnum;
 use App\Enums\OrderStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\OrderResource\Pages\CreateOrder;
 use App\Filament\Resources\OrderResource\Pages\EditOrder;
 use App\Filament\Resources\OrderResource\Pages\ListOrders;
@@ -15,6 +16,7 @@ use App\Filament\Resources\OrderResource\RelationManagers\OrderVarietiesRelation
 use App\Filament\Resources\OrderResource\RelationManagers\ReceiptsRelationManager;
 use App\Filament\Resources\OrderResource\RelationManagers\TransactionsRelationManager;
 use App\Models\Order;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -33,6 +35,13 @@ use Filament\Tables\Table;
 
 class OrderResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::ORDERS;
+    }
+
     protected static ?string $model = Order::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';

@@ -410,6 +410,21 @@ Project-specific patterns. Match these when adding or editing code. All PHP file
 - Commit with this author: `Bahman026 <bahman026@gmail.com>` (use `git commit --author="Bahman026 <bahman026@gmail.com>"`).
 - Always ask before committing. NEVER commit without explicit user approval.
 
+## Authorization
+
+- Every Filament resource is gated by `App\Traits\AuthorizesWithPermissions` and declares a
+  `PermissionGroupEnum` (catalog / content / orders / customers / shipping / marketing / settings).
+  Permissions are `{view,create,update,delete}_{group}`, seeded by `RolePermissionSeeder`.
+- **A new resource must declare `permissionGroup()`** — `ResourcePermissionsTest` fails the build otherwise,
+  because an ungated resource would be reachable by anyone who can open the panel.
+- Where a model has a policy it still applies *on top of* the permission, but only for the abilities the
+  policy actually implements (Laravel denies any ability a policy omits, which would otherwise forbid
+  viewing categories just because `CategoryPolicy` defines only `delete`).
+- `super-admin` holds everything. `admin` runs catalogue/content/promotions fully, and processes orders,
+  shipping and customers without delete. Settings, gateways and staff accounts are super-admin only.
+- `User::canAccessPanel()` keeps storefront customers out of the panel entirely — the two apps share the
+  `users` table.
+
 ## Implementation order
 
 When adding a new entity, build the files in this order, matching the existing files:

@@ -6,11 +6,13 @@ namespace App\Filament\Resources;
 
 use App\Enums\CouponForEnum;
 use App\Enums\CouponStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\CouponResource\Pages\CreateCoupon;
 use App\Filament\Resources\CouponResource\Pages\EditCoupon;
 use App\Filament\Resources\CouponResource\Pages\ListCoupons;
 use App\Models\Coupon;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,6 +28,13 @@ use Filament\Tables\Table;
 
 class CouponResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::MARKETING;
+    }
+
     protected static ?string $model = Coupon::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-ticket';

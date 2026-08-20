@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\AttributeResource\Pages\CreateAttribute;
 use App\Filament\Resources\AttributeResource\Pages\EditAttribute;
 use App\Filament\Resources\AttributeResource\Pages\ListAttributes;
 use App\Models\Attribute;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -20,6 +22,13 @@ use Filament\Tables\Table;
 
 class AttributeResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Attribute::class;
 
     protected static ?int $navigationSort = 4;

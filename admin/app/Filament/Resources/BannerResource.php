@@ -6,20 +6,25 @@ namespace App\Filament\Resources;
 
 use App\Enums\BannerPositionEnum;
 use App\Enums\BannerStatusEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\BannerResource\Pages\CreateBanner;
 use App\Filament\Resources\BannerResource\Pages\EditBanner;
 use App\Filament\Resources\BannerResource\Pages\ListBanners;
 use App\Models\Banner;
+use App\Traits\AuthorizesWithPermissions;
 use Closure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -27,6 +32,13 @@ use Filament\Tables\Table;
 
 class BannerResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = Banner::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-photo';
@@ -52,13 +64,29 @@ class BannerResource extends Resource
     {
         return $schema
             ->components([
-                Select::make('position')
+                // Radio rather than a dropdown: each placement needs a line of
+                // explanation, and there are only three of them.
+                Radio::make('position')
                     ->label(trans('banner.position'))
                     ->required()
                     ->options(BannerPositionEnum::options())
-                    ->native(false)
+                    ->descriptions(BannerPositionEnum::descriptions())
+                    ->live()
+                    // Filament wraps each component in a wire:partial, and the
+                    // guide's own state never changes — so without this the
+                    // browser keeps the stale wireframe even though the server
+                    // renders the right one.
+                    ->partiallyRenderComponentsAfterStateUpdated(['position_guide'])
                     ->hintIcon('heroicon-o-information-circle')
                     ->hintIconTooltip(trans('banner.position_hint')),
+                // UI only — never written to the model.
+                ViewField::make('position_guide')
+                    ->label(trans('position_guide.label'))
+                    ->helperText(trans('position_guide.hint'))
+                    ->view('filament.forms.position-guide')
+                    ->viewData(['kind' => 'banner'])
+                    ->dehydrated(false)
+                    ->columnSpanFull(),
                 TextInput::make('heading')
                     ->label(trans('banner.heading'))
                     ->required()
@@ -93,6 +121,13 @@ class BannerResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('banner.path'))
                             ->image()
+                            ->imageEditor()
+                            // Crop to the ratio this position actually renders
+                            // at, so a tall or square upload cannot stretch the
+                            // storefront layout. Two levels up: repeater item,
+                            // then the form.
+                            ->imageCropAspectRatio(fn (Get $get): ?string => BannerPositionEnum::tryFrom((string) $get('../../position'))?->aspectRatio())
+                            ->helperText(fn (Get $get): string => BannerResource::imageHint(BannerPositionEnum::tryFrom((string) $get('../../position'))))
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
@@ -104,6 +139,23 @@ class BannerResource extends Resource
                     ])
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * Tells the admin what to upload: the ratio the slot renders at and the
+     * pixel size that stays sharp on a retina screen. Falls back to a nudge to
+     * pick a position first, since the ratio depends on it.
+     */
+    public static function imageHint(?BannerPositionEnum $position): string
+    {
+        if (! $position instanceof BannerPositionEnum) {
+            return trans('banner.path_hint_no_position');
+        }
+
+        return trans('banner.path_hint', [
+            'ratio' => $position->aspectRatio(),
+            'size' => $position->recommendedSize(),
+        ]);
     }
 
     public static function table(Table $table): Table
