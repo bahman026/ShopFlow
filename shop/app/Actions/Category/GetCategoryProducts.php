@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Category;
 
 use App\Actions\Catalog\BuildProductCard;
+use App\Actions\Catalog\GroupAttributeIds;
 use App\Enums\VarietyStatusEnum;
-use App\Models\Attribute;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Collection;
 
 class GetCategoryProducts
 {
@@ -19,7 +18,10 @@ class GetCategoryProducts
      */
     private const PER_PAGE = 24;
 
-    public function __construct(private BuildProductCard $buildProductCard) {}
+    public function __construct(
+        private BuildProductCard $buildProductCard,
+        private GroupAttributeIds $groupAttributeIds,
+    ) {}
 
     /**
      * Filtered, sorted, paginated product cards for a category.
@@ -59,7 +61,7 @@ class GetCategoryProducts
         // Faceted attribute filter through the product↔attribute pivot
         // (product_attribute is the documented "filters to products" link).
         // OR within a group, AND across groups.
-        foreach ($this->groupedAttributes($filters['attributes']) as $attributeIds) {
+        foreach (($this->groupAttributeIds)($filters['attributes']) as $attributeIds) {
             $query->whereHas('attributes', fn (Builder $attribute) => $attribute->whereIn('attributes.id', $attributeIds));
         }
 
@@ -81,28 +83,6 @@ class GetCategoryProducts
                 'to' => $paginator->lastItem(),
             ],
         ];
-    }
-
-    /**
-     * Group selected attribute ids by their attribute group, so each group
-     * becomes one AND-ed constraint while values inside it stay OR-ed.
-     *
-     * @param  array<int, int>  $attributeIds
-     * @return array<int, array<int, int>>
-     */
-    private function groupedAttributes(array $attributeIds): array
-    {
-        if ($attributeIds === []) {
-            return [];
-        }
-
-        return Attribute::query()
-            ->whereIn('id', $attributeIds)
-            ->get()
-            ->groupBy('attribute_group_id')
-            ->map(fn (Collection $group): array => $group->pluck('id')->all())
-            ->values()
-            ->all();
     }
 
     /**

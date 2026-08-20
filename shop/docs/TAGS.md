@@ -46,7 +46,7 @@ Attributes are a **many-to-many** through the `attribute_tag` pivot (`attribute_
 
 ## Surfacing tags on the home page
 
-This is how a customer discovers a tag. A tag has `show_on_home` (bool) + `home_order` (int) + a polymorphic image. Admins toggle **Show on Home Page** in `TagResource` and upload an image. The storefront home renders a **featured-tags strip** (`Components/Home/TagStrip.vue`, fed by `GetHomeTags` → `HomeController` `tags` prop, placed after the category strip): image cards, ordered by `home_order`, each linking to `/tags/{slug}`. Only `show_on_home = true` tags appear.
+This is how a customer discovers a tag. A tag has `show_on_home` (bool) + `home_order` (int). Admins toggle **Show on Home Page** in `TagResource`, which then shows a wireframe of where it lands. The storefront home renders **one product carousel per featured tag** (`GetTagRows` → `HomeController` `tagRows` prop → the shared `Components/ProductCarousel.vue`), placed after the newest/most-viewed rows and before the brand strip. Each row is titled with the tag name and links to `/tags/{slug}`. The products are resolved with the same category+attribute rules the tag page uses, so a row and the tag's own page never disagree. At most **six** rows render (`GetTagRows::MAX_ROWS`) — each row costs its own queries, so the cap is what keeps the home page's cost flat however many tags staff feature; extras wait their turn behind `home_order`. Only `show_on_home = true` tags appear, ordered by `home_order`; a tag whose filter matches no products is dropped rather than rendered as an empty carousel. (Before 2026-08-07 this was an image strip, `TagStrip.vue` fed by `GetHomeTags` — both removed.)
 
 ## Integrating with slides / banners / menus
 
