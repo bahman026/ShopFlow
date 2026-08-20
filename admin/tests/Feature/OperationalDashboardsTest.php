@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\RolesEnum;
 use App\Models\User;
+use Filament\Navigation\NavigationItem;
 use Illuminate\Support\Facades\File;
 use Spatie\Permission\Models\Role;
 
@@ -87,4 +88,51 @@ it('writes the shared channel where the viewer reads', function (): void {
     // viewer silently shows nothing.
     expect(config('logging.channels.shared'))->not->toBeNull()
         ->and(config('logging.channels.shared.driver'))->toBe('daily');
+});
+
+// The dashboards are navigation links that open in a new tab, not embedded
+// pages: both ship their own full-page layout, which an iframe squeezed into an
+// unusable frame. The link must still respect the gate, or the sidebar becomes
+// a way around it.
+
+/**
+ * @return array<string, NavigationItem>
+ */
+function sidebarLinks(): array
+{
+    Filament\Facades\Filament::setCurrentPanel(Filament\Facades\Filament::getPanel('admin'));
+
+    return collect(Filament\Facades\Filament::getNavigation())
+        ->flatMap(fn ($group) => $group->getItems())
+        ->mapWithKeys(fn ($item) => [$item->getLabel() => $item])
+        ->all();
+}
+
+it('shows both dashboard links to a super-admin, opening in a new tab', function (): void {
+    login();
+
+    $links = sidebarLinks();
+
+    foreach ([trans('system.health_label') => 'pulse', trans('system.logs_label') => 'log-viewer'] as $label => $path) {
+        expect($links)->toHaveKey($label)
+            ->and($links[$label]->getUrl())->toBe(url($path))
+            // Without this the panel is replaced by the dashboard and the only
+            // way back is the browser's back button.
+            ->and($links[$label]->shouldOpenUrlInNewTab())->toBeTrue();
+    }
+});
+
+it('hides both dashboard links from a plain admin', function (): void {
+    loginAsAdmin();
+
+    $labels = array_keys(sidebarLinks());
+
+    expect($labels)->not->toContain(trans('system.health_label'))
+        ->and($labels)->not->toContain(trans('system.logs_label'));
+});
+
+it('translates both link labels', function (): void {
+    // A missing key makes trans() echo the key back.
+    expect(trans('system.health_label'))->not->toContain('system.')
+        ->and(trans('system.logs_label'))->not->toContain('system.');
 });
