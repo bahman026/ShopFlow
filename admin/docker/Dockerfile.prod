@@ -114,6 +114,12 @@ COPY --from=build /var/www/html /var/www/html
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R u+rwX,g+rwX storage bootstrap/cache
 
+# Mount point for the shared log volume (LOG_SHARED_PATH). Docker initialises a
+# fresh named volume from whatever the image has at that path, ownership
+# included — so creating it here as www-data is what makes it writable. Left to
+# Docker, the volume is root-owned and php-fpm silently writes nothing.
+RUN mkdir -p /var/log/shopflow && chown www-data:www-data /var/log/shopflow
+
 COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

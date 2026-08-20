@@ -24,6 +24,30 @@ Commit rules, the shared database and the Docker basics are in `ai-context/claud
 - `User::canAccessPanel()` keeps storefront customers out of the panel entirely — the two apps share the
   `users` table.
 
+## Operational dashboards (Pulse + log viewer)
+
+- **`/pulse`** (Laravel Pulse) and **`/log-viewer`** (opcodesio/log-viewer) live in this app, both
+  gated to `super-admin` by `viewPulse` / `viewLogViewer` in `AppServiceProvider`. Neither is a
+  Filament resource, so `AuthorizesWithPermissions` does not reach them — those two gates are the
+  only thing in front of them, and both dashboards show slow queries, exception messages and full
+  stack traces. `OperationalDashboardsTest` fails the build if either opens up.
+- **Pulse records from both apps into the same `pulse_*` tables**, because the two apps share one
+  database. The storefront has the package too, but `config/pulse.php` there sets `'path' => null`
+  so no `/pulse` route is registered on a public site. Migrations live here only — admin owns the
+  schema, as always.
+- The **`pulse` service** in `compose.prod.yaml` runs `pulse:check`, which is what fills the Servers
+  card (CPU/memory/disk); the other cards are recorded by the apps as they serve requests.
+  `pulse:trim` prunes old samples and runs from the scheduler, which sits behind the `workers`
+  profile — until that profile is started the `pulse_*` tables only grow.
+- **Logging is `stack` = `stderr,shared` in production.** `stderr` keeps `docker logs` and Docker's
+  rotation working exactly as before; `shared` (a `daily` channel at `LOG_SHARED_PATH`) writes the
+  file the viewer reads. The two apps write into one **named volume** (`applogs` at
+  `/var/log/shopflow`), each in its own subdirectory, because the panel cannot see into another
+  container. The viewer shows them as two folders, `Admin panel` and `Storefront`.
+- **Both Dockerfiles create `/var/log/shopflow` owned by `www-data`.** Docker initialises a fresh
+  named volume from the image, ownership included; left to Docker the volume is `root:root` and
+  php-fpm silently writes no logs at all.
+
 ## Implementation order
 
 When adding a new entity, build the files in this order, matching the existing files:

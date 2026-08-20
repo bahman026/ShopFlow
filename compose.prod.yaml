@@ -102,8 +102,13 @@ services:
         <<: *admin-image
         volumes:
             # Uploads are the only state the app writes; everything else in
-            # storage/ is disposable and logs go to stderr.
+            # storage/ is disposable.
             - admin_storage:/var/www/html/storage/app/public
+            # Log files for the in-panel viewer. Shared with shop_app because
+            # the panel shows both apps' logs and cannot otherwise see into
+            # another container. stderr logging is unaffected — the apps write
+            # to both (LOG_STACK=stderr,shared).
+            - applogs:/var/log/shopflow
         healthcheck:
             test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9000'"]
             interval: 15s
@@ -137,6 +142,9 @@ services:
 
     shop_app:
         <<: *shop-image
+        volumes:
+            # Writes its logs where the admin panel's viewer can read them.
+            - applogs:/var/log/shopflow
         healthcheck:
             test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9000'"]
             interval: 15s
@@ -183,6 +191,19 @@ services:
             retries: 4
             start_period: 20s
         networks: [net]
+
+    # --- observability -----------------------------------------------------
+
+    # Feeds Pulse's Servers card (CPU, memory, disk). Every other card is
+    # recorded by the apps themselves as they serve requests; this one needs a
+    # process that samples the machine, so without it that card stays empty.
+    #
+    # Note: `pulse:trim` prunes old samples and runs from the scheduler, which
+    # lives behind the `workers` profile. Until that profile is started the
+    # pulse_* tables only grow — see infrastructure/production/README.md.
+    pulse:
+        <<: *admin-image
+        command: ["php", "artisan", "pulse:check"]
 
     # --- workers -----------------------------------------------------------
     # Nothing in the codebase queues a job or registers a scheduled task yet,
@@ -245,6 +266,7 @@ volumes:
     pgdata:
     redisdata:
     admin_storage:
+    applogs:
     caddy_data:
     caddy_config:
 
