@@ -1,8 +1,19 @@
-# Caddy obtains and renews Let's Encrypt certificates for both domains by
-# itself; the only requirement is that the DNS A/AAAA records already point at
-# this VPS and that ports 80 and 443 are reachable.
+# Caddy's automatic HTTPS calls Let's Encrypt's ACME API
+# (acme-v02.api.letsencrypt.org) directly from this host to request a
+# certificate, and needs port 80 reachable from the internet to prove control
+# of the domain. Both are unusable on a host that can't reach the wider
+# internet on those paths — this VPS included, see
+# infrastructure/production/README.md — so this Caddyfile does not use it.
+#
+# Instead TLS_CERT_FILE / TLS_KEY_FILE point at a certificate obtained
+# elsewhere (a DNS-01 challenge run from a workstation that can reach both
+# Let's Encrypt and this zone's DNS provider) and mounted read-only into this
+# container. Both are required — `tls` with no arguments is a Caddyfile parse
+# error, not a fallback to automatic management.
 {
-	email {$LETSENCRYPT_EMAIL}
+	servers {
+		trusted_proxies static {$TRUSTED_PROXIES:private_ranges}
+	}
 }
 
 (common) {
@@ -20,12 +31,24 @@
 
 {$SHOP_DOMAIN} {
 	import common
-	# Caddy sets X-Forwarded-For/Proto/Host, which Laravel reads through the
-	# trustProxies middleware in bootstrap/app.php.
+	tls {$TLS_CERT_FILE} {$TLS_KEY_FILE}
 	reverse_proxy shop_web:80
 }
 
 {$ADMIN_DOMAIN} {
 	import common
+	tls {$TLS_CERT_FILE} {$TLS_KEY_FILE}
 	reverse_proxy admin_web:80
+}
+
+# Former/alternate hostnames for the storefront. Kept on the same certificate
+# (SHOP_LEGACY_DOMAINS must be included as SANs — see certs/README.md) so the
+# redirect itself is a valid HTTPS response instead of a cert error. Leave
+# unset for none — `legacy.invalid` is an unroutable placeholder, never
+# reached by real traffic. Don't set it to an explicit empty string: unlike
+# `tls`, a blank site address is a Caddyfile parse error, not a no-op.
+{$SHOP_LEGACY_DOMAINS:legacy.invalid} {
+	import common
+	tls {$TLS_CERT_FILE} {$TLS_KEY_FILE}
+	redir https://{$SHOP_DOMAIN}{uri} permanent
 }

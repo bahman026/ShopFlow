@@ -1,2 +1,9 @@
 /.idea
 /.env.production
+
+# macOS finder metadata, at any depth
+.DS_Store
+
+# TLS certificate + key for the production proxy, obtained per-deployment
+# via infrastructure/production/certs/README.md.
+/infrastructure/production/certs/*.pem

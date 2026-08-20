@@ -224,9 +224,16 @@ services:
         environment:
             SHOP_DOMAIN: ${SHOP_DOMAIN}
             ADMIN_DOMAIN: ${ADMIN_DOMAIN}
-            LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+            SHOP_LEGACY_DOMAINS: ${SHOP_LEGACY_DOMAINS:-legacy.invalid}
+            TRUSTED_PROXIES: ${TRUSTED_PROXIES:-private_ranges}
+            # A certificate obtained off-box (see infrastructure/production/
+            # README.md) and mounted below — this host cannot reach Let's
+            # Encrypt's ACME API to get one on its own.
+            TLS_CERT_FILE: /etc/caddy/certs/fullchain.pem
+            TLS_KEY_FILE: /etc/caddy/certs/privkey.pem
         volumes:
             - ./infrastructure/production/Caddyfile:/etc/caddy/Caddyfile:ro
+            - ./infrastructure/production/certs:/etc/caddy/certs:ro
             - caddy_data:/data
             - caddy_config:/config
         depends_on:
