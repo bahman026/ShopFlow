@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
+use App\Contracts\SmsSender;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class SendOtpCode
 {
@@ -20,16 +20,25 @@ class SendOtpCode
      */
     public const TTL = 120;
 
+    public function __construct(private SmsSender $sms) {}
+
     /**
-     * Generate a one-time code, store it for verification, and "send" it.
+     * Generate a one-time code, send it, and store it for verification.
      *
      * It is idempotent within the validity window: while an unexpired code
      * exists it is reused (no new code, no SMS, no extended lifetime), so
-     * repeated requests cannot reset the expiry. SMS delivery is stubbed
-     * (logged) for now; swap in a provider later. The active code is returned so
-     * it can be surfaced in non-production environments for testing.
+     * repeated requests cannot reset the expiry — and a resend costs nothing.
+     *
+     * Returns null when the provider would not take the message. The code is
+     * deliberately **sent before it is stored**: storing one the customer never
+     * receives would lock them out for the whole TTL, unable to ask again,
+     * waiting for an SMS that does not exist. Nothing is cached on failure, so
+     * the next attempt starts clean.
+     *
+     * The active code is returned so it can be surfaced in non-production
+     * environments for testing.
      */
-    public function __invoke(string $mobile): string
+    public function __invoke(string $mobile): ?string
     {
         $existing = $this->current($mobile);
 
@@ -39,13 +48,20 @@ class SendOtpCode
 
         $code = str_pad((string) random_int(0, 10 ** self::LENGTH - 1), self::LENGTH, '0', STR_PAD_LEFT);
 
+        // One instant, used for the SMS text, the stored expiry and the cache
+        // lifetime alike, so the time the customer reads cannot drift from the
+        // moment the code actually stops working.
+        $expiresAt = now()->addSeconds(self::TTL);
+
+        if (! $this->sms->sendVerificationCode($mobile, $code, $expiresAt)) {
+            return null;
+        }
+
         Cache::put($this->key($mobile), [
             'code' => $code,
             'attempts' => 0,
-            'expires_at' => now()->addSeconds(self::TTL)->getTimestamp(),
-        ], now()->addSeconds(self::TTL));
-
-        Log::info('OTP sent', ['mobile' => $mobile, 'code' => $code]);
+            'expires_at' => $expiresAt->getTimestamp(),
+        ], $expiresAt);
 
         return $code;
     }
