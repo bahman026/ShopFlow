@@ -10,7 +10,7 @@ Each entity is considered "done" when it has: model, migration, factory, Filamen
 
 Catalog layer and platform basics.
 
-- [x] Users (resource) + Roles & Permissions (spatie, `RolePermissionSeeder`)
+- [x] Users (resource) + Roles & Permissions (spatie, `RolePermissionSeeder`). Every Filament resource is gated by `AuthorizesWithPermissions` + a `PermissionGroupEnum`; `ResourcePermissionsTest` fails the build on an ungated resource
 - [x] Provinces
 - [x] Cities
 - [x] Categories
@@ -81,7 +81,7 @@ Depend mostly on Images only.
 - [x] Reviews
 - [x] Wishlists
 - [x] Tags (SEO landing page for a category and/or attribute filter; `tags` + `attribute_tag` pivot migrations, `Tag` model + factory + seeder, `TagResource` + pages + lang, tests. `category_id` nullable + attributes many-to-many, at-least-one-required; SEO columns added — `title`/`description`/`no_index`/`canonical`; source single `attribute_id` replaced by the pivot and `type` column dropped, single-vendor. See shop `TAGS.md`)
-- [x] Home Sections (admin side only). New ShopFlow table `home_sections` (not in the source schema) so staff compose the storefront home page instead of it being hardcoded: `HomeSection` model + factory + `HomeSectionSeeder` (seeds the current hardcoded order), `HomeSectionTypeEnum` (`slider`/`tags`/`categories`/`banners`/`products`/`brands`, mirrored in the shop), `HomeSectionResource` (drag-to-reorder table; the form shows only the fields the chosen `type` needs — slider/banner `config.position` from the matching position enum, product `config.sort` + `title`) + lang + tests. **The storefront does not read this table yet** — see shop `STOREFRONT_IMPLEMENTATION.md`
+- [x] Position-driven home/category/product layout (replaced Home Sections, 2026-08-07). `home_sections` was dropped — the storefront never read it, so reordering in the panel changed nothing. What appears in each slot is driven by `BannerPositionEnum` / `SliderPositionEnum` instead; every case now has a render site, the Filament forms show a wireframe of where the chosen position lands, and uploads are cropped to that slot's ratio. See shop `BANNERS_SLIDERS.md`
 - [ ] Brand-Category pages
 - [ ] Redirects
 - [ ] Helps

@@ -97,7 +97,7 @@ The **`attribute_group_category`** table (singular) manages the relationship bet
 
 Used to store banners.
 
-* `position` specifies where the banner appears. Constrained to `App\Enums\BannerPositionEnum` (mirrored in both apps): `home-top`, `home-middle`, `category-side`. Admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetBannersByPosition`). A position can be rendered as a grid (all published banners) or a single banner (`->first()`) — the enum doesn't dictate that. Only `home-middle` is rendered today (the home grid).  
+* `position` specifies where the banner appears. Constrained to `App\Enums\BannerPositionEnum` (mirrored in both apps): `home-top`, `home-middle`, `category-side`. Admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetBannersByPosition`). A position can be rendered as a grid (all published banners) or a single banner — the enum doesn't dictate that. Every case has a render site: `home-top` (wide strip) and `home-middle` (grid) on the home page, `category-side` (sidebar stack) on the category listing — each renders nothing until a published banner is assigned.  
 * `heading` specifies the banner item title or the alt text of the image.  
 * `url` specifies the item link (image/title click target). Accepts an absolute URL (`https://…`) or an internal path (`/tags/…`, `/categories/…`) — the admin field validates for either, so banners can link to tag pages. `sliders`/`slides` `url` accepts the same.  
 * `sort` specifies the item order.  
@@ -157,7 +157,7 @@ Inventory note: a cart never changes `varieties.inventory`. Stock is decremented
 * `description` specifies the category description.  
 * `no_index` is a boolean. If true, the category should have a noindex meta tag.  
 * `canonical` prevents cannibalization by specifying the canonical link.  
-* `parent_id` specifies the parent category for nested structures.  
+* `parent_id` specifies the parent category for nested structures. Nullable self-referential FK; **restricts on delete** (added 2026-08-07), so a category with children cannot be deleted — it used to be an unconstrained integer, which let a deleted parent orphan its subtree out of the storefront silently.  
 * `status` specifies the category status.
 
 # Category\_Partner
@@ -202,7 +202,7 @@ Stores discount coupons. Unlike discounts, a coupon is applied manually: the cus
 * `started_at`: When the coupon becomes usable.  
 * `expired_at`: When the coupon can no longer be used.
 
-**Storefront usage (preview only, so far).** The cart previews a coupon — `App\Actions\Coupon\PreviewCoupon` + `CalculateCouponDiscount`, code held in the session — and **writes nothing**: no order, and `total_used` is NOT incremented. Committing a coupon to an order (filling `orders.coupon_id` / `orders.coupon_discount`, bumping `total_used`, applying `shipping`) is checkout work, not built yet — see shop `STOREFRONT_IMPLEMENTATION.md` Phase 4. Reading rules the storefront applies:
+**Storefront usage.** The cart previews a coupon — `App\Actions\Coupon\PreviewCoupon` + `CalculateCouponDiscount`, code held in the session by `ResolveCartCoupon` — and checkout commits it (built 2026-08-07): `CreatePendingOrder` fills `orders.coupon_id` / `orders.coupon_discount` and zeroes `shipping_cost` for a `shipping` coupon, and `total_used` is incremented **only** in `DecrementInventoryAndMarkPaid`, so an order that is never paid does not burn a use. The code is re-validated at payment, not just on the cart, so the amount charged always matches what the customer was shown. Note `total_used` is *not* incremented for an order that staff mark paid in the admin panel — see the caveat under `orders`. Reading rules the storefront applies:
 
 * `status` and `is_for` are int-backed enums (`CouponStatusEnum`: 10 canceled / 20 used / 30 under review / 40 active; `CouponForEnum`: 10 everyone / 20 users / 30 partners), mirrored in both apps. Only `ACTIVE` is usable; `PARTNERS` never is (single-vendor storefront) and `USERS` requires a logged-in customer.
 * Money columns are `decimal` in the schema but Toman integers everywhere in the app, so the shop model casts `amount` / `min_price` / `max_discount` to int.
@@ -394,18 +394,11 @@ Implementation notes:
 * `content`: Displays the help content.  
 * `position`: Specifies which section the help is for (admin, sellers, etc.).
 
-# home_sections
+# home_sections — removed (2026-08-07)
 
-**Not in the source schema — added by ShopFlow.** The ordered list of blocks the storefront home page is composed from, so staff can add/reorder/disable home rows instead of the layout being hardcoded in `Home.vue`. Admin manages them via `HomeSectionResource` (drag-to-reorder table).
+**Dropped by `2026_08_07_000000_drop_home_sections_table`.** It held an ordered list of blocks for an admin-composed home page, but the storefront never read it — `Home.vue` always rendered a fixed layout, so reordering or disabling a row changed nothing on the site.
 
-* `type`: Which block to render. `App\Enums\HomeSectionTypeEnum` (string-backed, mirrored in both apps): `slider`, `tags`, `categories`, `banners`, `products`, `brands`. Each type maps to one storefront component + data action. Defaults to `products`.
-* `title`: Optional heading shown above the block. Only meaningful for `products` rows (the other types carry their own heading); nullable.
-* `config`: JSON bag of type-specific settings, nullable. `slider` → `{"position": "<SliderPositionEnum>"}`, `banners` → `{"position": "<BannerPositionEnum>"}`, `products` → `{"sort": "newest"|"popular"}`. `tags`/`categories`/`brands` need none. The admin form shows only the fields the chosen `type` uses and requires them.
-* `order`: Display order, ascending (set by drag-to-reorder in the admin table).
-* `status`: Boolean; `false` hides the block without deleting it. Indexed together with `order`.
-* `created_at` / `updated_at`.
-
-> **Storefront wiring is not built yet** — `HomeController`/`Home.vue` still render a hardcoded section order and ignore this table. See shop `STOREFRONT_IMPLEMENTATION.md`.
+What appears on the home page is controlled by **banner and slider positions** instead (`BannerPositionEnum` / `SliderPositionEnum`, see `banners` and `sliders` below), which the storefront does read. See shop `BANNERS_SLIDERS.md`.
 
 # holidays
 
@@ -473,8 +466,11 @@ Implementation notes:
 * Used to store orders.  
 * `tracking_code`: Customer-facing order identifier (a random unique 10-digit number, e.g. `1168407691`). Not in the original doc — added so customers have an opaque tracking code instead of the sequential `id`, which would otherwise leak order volume/growth. Auto-generated on create (see Implementation notes).  
 * `user_id`: Indicates which user the order belongs to.  
-* `coupon_id`: Stores the coupon ID if the order used a coupon; otherwise, it is null.  
+* `coupon_id`: Stores the coupon ID if the order used a coupon; otherwise, it is null. Written by the storefront checkout (`CreatePendingOrder`); also editable by staff in the panel.  
 * `coupon_discount`: Specifies the discount amount applied through the coupon.  
+
+> **Caveat — `coupons.total_used` only counts gateway payments.** The storefront increments it in `DecrementInventoryAndMarkPaid`, i.e. when Zarinpal captures the money. An order that staff mark `PAID` in the panel (a card-to-card / Paya receipt, say) adjusts inventory through `OrderObserver` but does **not** touch `total_used`, so a coupon on such an order can be reused past its limit. Deciding the rule — spent permanently on first capture, or released again when the order is canceled or returned — is still open.
+
 * `discount`: Specifies the discount amount applied through the discounts table.  
 * `shipping_cost`: Stores the shipping cost; if it is zero or has a value, it does not affect the discount column.  
 * `total_products_price`: Stores the total amount for the products in the order.  
@@ -756,7 +752,7 @@ A specific service tier offered by a shipping carrier. References `shipping_line
 
 * For creating various sliders.  
 * `name`: Human-readable label for the slider, e.g. "Home Page Main Slider." Not shown on the frontend.  
-* `position`: Where the frontend shows this slider (e.g. `home-main`). Constrained to `App\Enums\SliderPositionEnum` (mirrored in both apps): `home-main`, `home-secondary`, `category-top`, `product-side`. The admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetSliderByPosition`). Keep one published slider per position (the column is not DB-unique; the frontend takes the first published match). Only `home-main` is rendered so far (home hero).
+* `position`: Where the frontend shows this slider (e.g. `home-main`). Constrained to `App\Enums\SliderPositionEnum` (mirrored in both apps): `home-main`, `home-secondary`, `category-top`, `product-side`. The admin picks it from a dropdown; the storefront looks it up by the same enum value (`GetSliderByPosition`). Keep one published slider per position (the column is not DB-unique; the frontend takes the first published match). Every case has a render site: `home-main` and `home-secondary` on the home page, `category-top` on the category listing, `product-side` beside the buy box — each renders nothing until a published slider is assigned.
 * `status`: Publication status — 10 for deleted, 20 for published (default), 30 for draft.  
 * Deleting a slider cascades to its slides (and their images).
 

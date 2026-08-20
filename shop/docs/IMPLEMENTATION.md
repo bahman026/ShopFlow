@@ -10,7 +10,7 @@ Each entity is considered "done" when it has: model, migration, factory, Filamen
 
 Catalog layer and platform basics.
 
-- [x] Users (resource) + Roles & Permissions (spatie, `RolePermissionSeeder`)
+- [x] Users (resource) + Roles & Permissions (spatie, `RolePermissionSeeder`). Every Filament resource is gated by `AuthorizesWithPermissions` + a `PermissionGroupEnum`; `ResourcePermissionsTest` fails the build on an ungated resource
 - [x] Provinces
 - [x] Cities
 - [x] Categories
@@ -81,7 +81,7 @@ Depend mostly on Images only.
 - [x] Reviews
 - [x] Wishlists
 - [x] Tags (admin owns the schema; storefront renders `/tags/{slug}` — see shop `TAGS.md` and `STOREFRONT_IMPLEMENTATION.md`)
-- [~] Home Sections (`home_sections`: admin can compose/reorder the home page; the storefront still renders a hardcoded order and does not read the table yet — see `STOREFRONT_IMPLEMENTATION.md`)
+- [x] Position-driven home/category/product layout (replaced Home Sections, 2026-08-07). `home_sections` was dropped — the storefront never read it, so reordering in the panel changed nothing. What appears in each slot is driven by `BannerPositionEnum` / `SliderPositionEnum` instead; every case now has a render site, the Filament forms show a wireframe of where the chosen position lands, and uploads are cropped to that slot's ratio. See shop `BANNERS_SLIDERS.md`
 - [ ] Brand-Category pages
 - [ ] Redirects
 - [ ] Helps
