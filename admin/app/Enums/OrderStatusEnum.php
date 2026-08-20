@@ -31,6 +31,22 @@ enum OrderStatusEnum: int
         };
     }
 
+    /**
+     * Whether an order in this status is holding stock.
+     *
+     * This is the single definition of the invariant docs/ORDER.md states:
+     * stock is consumed from the moment an order is paid and released again if
+     * it is canceled or returned. Everything that moves an order between these
+     * two sets has to keep `varieties.inventory` in step (OrderObserver).
+     */
+    public function consumesStock(): bool
+    {
+        return match ($this) {
+            self::PAID, self::PROCESSING, self::SHIPPED, self::DELIVERED => true,
+            self::PENDING, self::CANCELED, self::RETURNED => false,
+        };
+    }
+
     public function color(): string
     {
         return match ($this) {
