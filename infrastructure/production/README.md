@@ -46,6 +46,10 @@ A first deployment, in order. Each step is detailed below.
 
 Redeploys after that are `git pull && ./infrastructure/production/deploy.sh`.
 
+If the server cannot reach Docker Hub, `deb.debian.org`, packagist or the npm
+registry, none of that works and steps 3, 5 and 7 change — see
+[Building somewhere else](#building-somewhere-else) below.
+
 ## 1. DNS
 
 Create `A` records (and `AAAA` if you have IPv6) for the storefront and the
@@ -197,10 +201,23 @@ Later builds reuse the cache and are much faster.
 
 ## 8. First admin user
 
+Not `make:filament-user`. The panel gate is `User::canAccessPanel()`, which
+requires the `super-admin` or `admin` role, and that command assigns neither —
+the account it creates exists and cannot log in. Use `AdminSeeder`, which
+creates the user *and* gives it `super-admin`.
+
+Set the four `ADMIN_*` values in `admin/.env.production` first, or the account
+is created with the `config/admin.php` defaults — `admin@shopFlow.dev` with the
+password `password`. Then:
+
 ```bash
 docker compose -f compose.prod.yaml --env-file .env.production \
-    exec admin_app php artisan make:filament-user
+    run --rm --no-deps admin_app \
+    php artisan db:seed --class="Database\Seeders\AdminSeeder" --force
 ```
+
+It is `firstOrCreate` on the email, so re-running it is harmless — but note that
+it will not change the password of an account that already exists.
 
 Then log in at `https://admin.example.com/admin`.
 
@@ -221,6 +238,67 @@ docker run --rm -v shopflow_prod_admin_storage:/data -v "$PWD":/backup \
 
 Put both in a cron job that copies the archives *off* the server. A backup on
 the same disk is not a backup.
+
+## Building somewhere else
+
+`deploy.sh` builds on the server, and each build stage reaches out to the
+network: Docker Hub for the base images, `deb.debian.org` for the libraries the
+PHP extensions link against, packagist for `composer install`, the npm registry
+for `npm ci`. Where those are filtered — an Iranian IP, for one — the build dies
+at the first `apt-get update` inside `php:8.5-fpm-bookworm`. A registry mirror
+in `/etc/docker/daemon.json` does not rescue it: that fixes only the base image
+pull, and the three later stages still have nowhere to fetch from.
+
+Build on a workstation instead and ship the result. No registry is involved.
+
+```bash
+# On the workstation, from the repository root:
+./infrastructure/production/ship-images.sh deploy@203.0.113.10 9011
+
+# Then on the server:
+cd ~/ShopFlow
+IMAGE_TAG=<sha> ./infrastructure/production/deploy-prebuilt.sh
+```
+
+`ship-images.sh` builds the five images from a clean `git archive` of `HEAD`
+(not the working tree — the tag has to mean something for a rollback), pulls
+`postgres`/`redis`/`caddy` alongside them, checks every one is `linux/amd64`,
+and streams all eight through `docker save | ssh | docker load` as a single
+tarball so the two php-fpm images share their base layers instead of carrying
+them twice.
+
+The architecture check is the part not to remove. A plain `docker image
+inspect` resolves a multi-platform image to the *host* variant, so on an Apple
+Silicon machine the pulled `redis:7-alpine` reports `arm64` and looks fine;
+`--platform` is what makes the check mean anything. Ship the wrong variant and
+the containers crash-loop with `exec format error` long after the cause has
+scrolled off screen.
+
+`deploy-prebuilt.sh` is `deploy.sh` with the build dropped and `--pull never`
+added, so a missing tag fails immediately instead of hanging on a registry that
+will never answer. Migrations still run once from a throwaway container.
+
+Only the deploy files need to reach the server — `compose.prod.yaml`, the
+`Caddyfile`, `deploy-prebuilt.sh` and the three env files. The app source does
+not: Compose never stats a build context it is not building.
+
+### TLS when ACME is unreachable
+
+Caddy cannot issue a certificate on a host that cannot reach
+`acme-v02.api.letsencrypt.org`. Set `SITE_SCHEME=http://` in `.env.production`
+and it serves plain HTTP and asks for no certificate, leaving TLS to a CDN in
+front — Cloudflare, ArvanCloud — which reaches the origin over port 80. The
+apps still generate `https://` URLs, because the CDN's `X-Forwarded-Proto`
+survives the extra hop and `trustProxies` in both `bootstrap/app.php` files
+honours it. Keep `APP_URL` on `https://` and `SESSION_SECURE_COOKIE=true`: the
+browser's half of the connection is TLS even though this hop is not.
+
+Two consequences worth stating. Anyone who knows the origin IP can reach the
+site over plain HTTP with a spoofed `Host` header and bypass the CDN entirely,
+so an origin allowlist of the CDN's ranges belongs on the follow-up list. And
+with Cloudflare specifically, "Flexible" mode is the quick version; a Cloudflare
+Origin Certificate mounted into Caddy plus "Full (strict)" is the one to end up
+on, and it needs no ACME access.
 
 ## Redeploying
 
@@ -280,6 +358,8 @@ dcp --profile workers up -d
 | Product images 404 | `IMAGE_URL` does not match the admin domain, or the uploads volume is not mounted |
 | Panel redirects to `http://` | `APP_URL` is not `https://` |
 | Build killed during `npm run build` | Out of RAM — add swap (step 2) |
+| Containers exit with `exec format error` | Images built for the wrong architecture — see [Building somewhere else](#building-somewhere-else) |
+| `apt-get update` fails in the PHP base stage | The host cannot reach `deb.debian.org`; build elsewhere |
 
 ## Known follow-ups
 
