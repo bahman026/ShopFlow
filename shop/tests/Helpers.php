@@ -2,12 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Enums\BannerPositionEnum;
+use App\Enums\BannerStatusEnum;
 use App\Enums\CategoryStatusEnum;
 use App\Enums\ProductStatusEnum;
+use App\Enums\SliderPositionEnum;
+use App\Enums\SliderStatusEnum;
 use App\Enums\VarietyStatusEnum;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
+use App\Models\Slide;
+use App\Models\Slider;
 use App\Models\Variety;
 
 /**
@@ -68,5 +75,48 @@ if (! function_exists('catProduct')) {
         }
 
         return $product;
+    }
+}
+
+/**
+ * Fills a SliderPositionEnum slot with a published, one-slide slider.
+ */
+if (! function_exists('slotSlider')) {
+    function slotSlider(SliderPositionEnum $position, SliderStatusEnum $status = SliderStatusEnum::PUBLISHED): Slider
+    {
+        $slider = Slider::create([
+            'name' => 'اسلایدر '.$position->value,
+            'position' => $position->value,
+            'status' => $status,
+        ]);
+
+        $slide = Slide::create([
+            'slider_id' => $slider->id,
+            'heading' => 'اسلاید '.$position->value,
+            'url' => '/campaign',
+            'order' => 1,
+        ]);
+        catImage(Slide::class, $slide->id);
+
+        return $slider;
+    }
+}
+
+/**
+ * Fills a BannerPositionEnum slot with a published banner.
+ */
+if (! function_exists('slotBanner')) {
+    function slotBanner(BannerPositionEnum $position, BannerStatusEnum $status = BannerStatusEnum::PUBLISHED): Banner
+    {
+        $banner = Banner::create([
+            'position' => $position->value,
+            'heading' => 'بنر '.$position->value,
+            'url' => '/promo',
+            'sort' => 1,
+            'status' => $status,
+        ]);
+        catImage(Banner::class, $banner->id);
+
+        return $banner;
     }
 }

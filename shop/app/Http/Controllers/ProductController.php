@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\Cart\ResolveCartOwner;
+use App\Actions\Layout\GetSliderByPosition;
 use App\Actions\Product\BuildProductBreadcrumbs;
 use App\Actions\Product\BuildProductDetail;
 use App\Actions\Product\GetRelatedProducts;
 use App\Enums\ReviewStatusEnum;
+use App\Enums\SliderPositionEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Cart;
 use App\Models\Product;
@@ -28,6 +30,7 @@ class ProductController extends Controller
         BuildProductDetail $buildProductDetail,
         BuildProductBreadcrumbs $buildBreadcrumbs,
         GetRelatedProducts $getRelatedProducts,
+        GetSliderByPosition $getSliderByPosition,
     ): Response {
         $product = Product::query()
             ->published()
@@ -57,6 +60,9 @@ class ProductController extends Controller
             'isWishlisted' => $this->isWishlisted($request, $product),
             // Any logged-in user may review; the form is hidden for guests.
             'canReview' => $request->user() instanceof User,
+            // Shared across every product; empty until an admin assigns a
+            // published slider to the position.
+            'sideSlides' => $getSliderByPosition(SliderPositionEnum::PRODUCT_SIDE),
         ]);
     }
 

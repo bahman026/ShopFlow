@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SliderSlot from '@/Components/SliderSlot.vue';
 import AppLink from '@/Components/AppLink.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import RatingStars from '@/Components/RatingStars.vue';
@@ -11,7 +12,7 @@ import VarietySelector from '@/Components/Product/VarietySelector.vue';
 import BuyBox from '@/Components/Product/BuyBox.vue';
 import ProductSpecs from '@/Components/Product/ProductSpecs.vue';
 import ProductReviews from '@/Components/Product/ProductReviews.vue';
-import ProductCarousel from '@/Components/Home/ProductCarousel.vue';
+import ProductCarousel from '@/Components/ProductCarousel.vue';
 import { breadcrumbJsonLd } from '@/seo';
 
 const props = defineProps({
@@ -34,6 +35,10 @@ const props = defineProps({
     isWishlisted: {
         type: Boolean,
         default: false,
+    },
+    sideSlides: {
+        type: Array,
+        default: () => [],
     },
     canReview: {
         type: Boolean,
@@ -285,6 +290,13 @@ const jsonLd = computed(() => {
                         @decrease="decreaseCart"
                         @remove="removeCart"
                         @toggle-wishlist="toggleWishlist"
+                    />
+
+                    <SliderSlot
+                        :slides="sideSlides"
+                        aspect="portrait"
+                        rounded="rounded-xl"
+                        class="mt-4"
                     />
                 </div>
             </div>

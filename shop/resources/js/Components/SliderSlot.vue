@@ -4,12 +4,42 @@ import AppLink from '@/Components/AppLink.vue';
 import Icon from '@/Components/Icon.vue';
 import { uiIcons } from '@/fontawesome';
 
+/**
+ * Renders the slider assigned to one SliderPositionEnum slot.
+ *
+ * `aspect` is the only thing that differs between slots: the home hero is a
+ * wide band, a category header is shorter, and a product sidebar is a narrow
+ * portrait. Everything else — autoplay, arrows, dots, captions — is shared.
+ *
+ * Renders nothing at all when the slot has no slides, so a page can hand it an
+ * empty array without guarding.
+ */
 const props = defineProps({
     slides: {
         type: Array,
         default: () => [],
     },
+    aspect: {
+        type: String,
+        default: 'hero',
+        validator: (value) => ['hero', 'wide', 'portrait'].includes(value),
+    },
+    rounded: {
+        type: String,
+        default: 'rounded-2xl',
+    },
 });
+
+const aspectClasses = {
+    hero: 'aspect-[21/9] sm:aspect-[3/1]',
+    wide: 'aspect-[16/9] sm:aspect-[4/1]',
+    portrait: 'aspect-[4/5]',
+};
+
+const aspectClass = computed(() => aspectClasses[props.aspect] ?? aspectClasses.hero);
+
+// A narrow slot has no room for side arrows; dots are enough to navigate.
+const showArrows = computed(() => props.aspect !== 'portrait');
 
 const current = ref(0);
 const count = computed(() => props.slides.length);
@@ -43,10 +73,11 @@ onBeforeUnmount(() => {
 <template>
     <section
         v-if="count"
-        class="relative overflow-hidden rounded-2xl bg-gray-100"
+        class="relative overflow-hidden bg-gray-100"
+        :class="rounded"
         aria-roledescription="carousel"
     >
-        <div class="relative aspect-[21/9] w-full sm:aspect-[3/1]">
+        <div class="relative w-full" :class="aspectClass">
             <component
                 :is="slide.url ? AppLink : 'div'"
                 v-for="(slide, index) in slides"
@@ -76,22 +107,24 @@ onBeforeUnmount(() => {
         </div>
 
         <template v-if="count > 1">
-            <button
-                type="button"
-                class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition hover:bg-white"
-                aria-label="اسلاید قبلی"
-                @click="prev"
-            >
-                <Icon :icon="uiIcons.chevronRight" />
-            </button>
-            <button
-                type="button"
-                class="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition hover:bg-white"
-                aria-label="اسلاید بعدی"
-                @click="next"
-            >
-                <Icon :icon="uiIcons.chevronLeft" />
-            </button>
+            <template v-if="showArrows">
+                <button
+                    type="button"
+                    class="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition hover:bg-white"
+                    aria-label="اسلاید قبلی"
+                    @click="prev"
+                >
+                    <Icon :icon="uiIcons.chevronRight" />
+                </button>
+                <button
+                    type="button"
+                    class="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition hover:bg-white"
+                    aria-label="اسلاید بعدی"
+                    @click="next"
+                >
+                    <Icon :icon="uiIcons.chevronLeft" />
+                </button>
+            </template>
 
             <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
                 <button

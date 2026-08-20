@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Home;
+namespace App\Actions\Layout;
 
 use App\Actions\Catalog\TransformImage;
 use App\Enums\SliderPositionEnum;

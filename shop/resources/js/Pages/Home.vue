@@ -3,14 +3,17 @@ import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import HeroSlider from '@/Components/Home/HeroSlider.vue';
+import SliderSlot from '@/Components/SliderSlot.vue';
 import CategoryStrip from '@/Components/Home/CategoryStrip.vue';
-import TagStrip from '@/Components/Home/TagStrip.vue';
-import BannerGrid from '@/Components/Home/BannerGrid.vue';
-import ProductCarousel from '@/Components/Home/ProductCarousel.vue';
+import BannerSlot from '@/Components/BannerSlot.vue';
+import ProductCarousel from '@/Components/ProductCarousel.vue';
 import BrandStrip from '@/Components/Home/BrandStrip.vue';
 
 defineProps({
+    topBanners: {
+        type: Array,
+        default: () => [],
+    },
     slides: {
         type: Array,
         default: () => [],
@@ -19,15 +22,19 @@ defineProps({
         type: Array,
         default: () => [],
     },
-    tags: {
-        type: Array,
-        default: () => [],
-    },
     banners: {
         type: Array,
         default: () => [],
     },
+    secondarySlides: {
+        type: Array,
+        default: () => [],
+    },
     productRows: {
+        type: Array,
+        default: () => [],
+    },
+    tagRows: {
         type: Array,
         default: () => [],
     },
@@ -65,17 +72,27 @@ const jsonLd = computed(() => [
 
     <AppLayout>
         <div class="flex flex-col gap-10">
-            <HeroSlider :slides="slides" />
+            <BannerSlot :banners="topBanners" layout="wide" />
 
-            <TagStrip :tags="tags" />
+            <SliderSlot :slides="slides" />
 
             <CategoryStrip :categories="categories" />
 
-            <BannerGrid :banners="banners" />
+            <BannerSlot :banners="banners" />
+
+            <SliderSlot :slides="secondarySlides" aspect="wide" />
 
             <ProductCarousel
                 v-for="row in productRows"
                 :key="row.title"
+                :title="row.title"
+                :view-all-url="row.viewAllUrl"
+                :products="row.products"
+            />
+
+            <ProductCarousel
+                v-for="row in tagRows"
+                :key="row.viewAllUrl"
                 :title="row.title"
                 :view-all-url="row.viewAllUrl"
                 :products="row.products"

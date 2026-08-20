@@ -18,6 +18,7 @@ use App\Models\Slide;
 use App\Models\Slider;
 use App\Models\Tag;
 use App\Models\Variety;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 
 function featureImage(string $type, int $id, bool $featured = true): void
@@ -137,16 +138,14 @@ it('renders the home page when the catalog is empty', function (): void {
             ->component('Home')
             ->where('slides', [])
             ->where('productRows', [])
+            ->where('tagRows', [])
             ->where('brands', [])
         );
 });
 
-it('shows only featured tags on the home page, in order', function (): void {
-    $category = Category::create([
-        'heading' => 'دسته تگ',
-        'slug' => 'tag-cat',
-        'status' => CategoryStatusEnum::ACTIVE,
-    ]);
+it('shows a product carousel for each featured tag, in order', function (): void {
+    $category = catCategory('tag-cat');
+    catProduct($category);
 
     Tag::create(['name' => 'تگ دوم', 'slug' => 'tag-b', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 2]);
     Tag::create(['name' => 'تگ اول', 'slug' => 'tag-a', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
@@ -155,10 +154,28 @@ it('shows only featured tags on the home page, in order', function (): void {
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->has('tags', 2) // only the two featured, not the hidden one
-            ->where('tags.0.name', 'تگ اول') // home_order 1 first
-            ->where('tags.0.url', '/tags/tag-a')
-            ->where('tags.1.name', 'تگ دوم')
+            ->has('tagRows', 2) // only the two featured, not the hidden one
+            ->where('tagRows.0.title', 'تگ اول') // home_order 1 first
+            ->where('tagRows.0.viewAllUrl', '/tags/tag-a')
+            ->has('tagRows.0.products', 1)
+            ->where('tagRows.1.title', 'تگ دوم')
+        );
+});
+
+it('drops a featured tag whose filter matches no products', function (): void {
+    $withProducts = catCategory('tag-with-products');
+    catProduct($withProducts);
+    $empty = catCategory('tag-without-products');
+
+    Tag::create(['name' => 'پر', 'slug' => 'tag-full', 'category_id' => $withProducts->id, 'show_on_home' => true, 'home_order' => 1]);
+    Tag::create(['name' => 'خالی', 'slug' => 'tag-empty', 'category_id' => $empty->id, 'show_on_home' => true, 'home_order' => 2]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            // An empty carousel is worse than no carousel.
+            ->has('tagRows', 1)
+            ->where('tagRows.0.title', 'پر')
         );
 });
 
@@ -175,4 +192,58 @@ it('only shows the slider assigned to the home-main position', function (): void
     $this->get('/')
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('slides', []));
+});
+
+it('caps how many tag carousels the home page shows', function (): void {
+    $category = catCategory('capped-cat');
+    catProduct($category);
+
+    // Ten featured tags, all with products; only the first six by home_order
+    // may render — each row costs its own queries, so the page has to stay
+    // bounded no matter how many tags staff feature.
+    foreach (range(1, 10) as $i) {
+        Tag::create([
+            'name' => 'تگ '.$i,
+            'slug' => 'capped-tag-'.$i,
+            'category_id' => $category->id,
+            'show_on_home' => true,
+            'home_order' => $i,
+        ]);
+    }
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tagRows', 6)
+            ->where('tagRows.0.title', 'تگ 1')
+            ->where('tagRows.5.title', 'تگ 6')
+        );
+});
+
+it('keeps the home page query count flat as more tags are featured', function (): void {
+    $category = catCategory('query-cat');
+    catProduct($category);
+
+    $countQueries = function (): int {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->get('/')->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
+    };
+
+    foreach (range(1, 6) as $i) {
+        Tag::create(['name' => 'q'.$i, 'slug' => 'q-tag-'.$i, 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => $i]);
+    }
+
+    $atCap = $countQueries();
+
+    // Four more featured tags must cost nothing: they are past the cap.
+    foreach (range(7, 10) as $i) {
+        Tag::create(['name' => 'q'.$i, 'slug' => 'q-tag-'.$i, 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => $i]);
+    }
+
+    expect($countQueries())->toBe($atCap);
 });
