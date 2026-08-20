@@ -21,6 +21,8 @@ return [
     'order_hint' => 'Display order within the slider. Lower numbers appear first.',
     'image' => 'Image',
     'path' => 'Image File',
+    'path_hint' => ':position — cropped to :ratio. Upload at least :size pixels so it stays sharp.',
+    'path_hint_no_slider' => 'Choose a slider first — its position decides the crop ratio for this image.',
     'alt_text' => 'Alt Text',
     'slider' => 'Slider',
     'created_at' => 'Created At',

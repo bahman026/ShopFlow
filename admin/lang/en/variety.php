@@ -29,6 +29,7 @@ return [
 
     'image' => 'Image',
     'path' => 'Image File',
+    'path_hint' => 'Cropped to 1:1 — product images are square everywhere they appear. Upload at least 1000 × 1000 pixels.',
     'alt_text' => 'Alt Text',
 
     'product' => 'Product',
