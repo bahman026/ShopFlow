@@ -23,7 +23,6 @@ class DatabaseSeeder extends Seeder
             AttributeGroupCategorySeeder::class,
             ShippingSeeder::class,
             SettingSeeder::class,
-            HomeSectionSeeder::class,
         ]);
     }
 }
