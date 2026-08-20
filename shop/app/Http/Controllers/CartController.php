@@ -9,6 +9,7 @@ use App\Actions\Cart\BuildCartSummary;
 use App\Actions\Cart\GetCartLines;
 use App\Actions\Cart\ResolveCartOwner;
 use App\Actions\Coupon\PreviewCoupon;
+use App\Actions\Coupon\ResolveCartCoupon;
 use App\DTOs\CartLineDTO;
 use App\Models\Cart;
 use App\Models\Variety;
@@ -21,28 +22,22 @@ use Inertia\Response;
 
 class CartController extends Controller
 {
-    /**
-     * Session key holding the discount code being previewed on the cart.
-     */
-    private const COUPON_KEY = 'cart_coupon_code';
+    public function __construct(
+        private ResolveCartOwner $owner,
+        private ResolveCartCoupon $resolveCoupon,
+    ) {}
 
-    public function __construct(private ResolveCartOwner $owner) {}
-
-    public function index(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, PreviewCoupon $previewCoupon): Response
+    public function index(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary): Response
     {
         $lines = $getLines(($this->owner)($request));
 
         // The cart changes under a coupon (lines added, removed, re-counted),
         // so the stored code is re-checked on every render rather than trusted.
-        $code = $this->couponCode($request);
-        $preview = $code === null
-            ? ['coupon' => null, 'error' => null]
-            : $previewCoupon($code, $request->user(), $lines);
-
+        $preview = ($this->resolveCoupon)($request, $lines);
         $coupon = $preview['coupon'];
 
-        if ($code !== null && $coupon === null) {
-            $request->session()->forget(self::COUPON_KEY);
+        if ($coupon === null && $this->resolveCoupon->isApplied($request)) {
+            $this->resolveCoupon->forget($request);
         }
 
         return Inertia::render('Cart/Index', [
@@ -68,31 +63,21 @@ class CartController extends Controller
         $preview = $previewCoupon($validated['code'], $request->user(), $lines);
 
         if ($preview['coupon'] === null) {
-            $request->session()->forget(self::COUPON_KEY);
+            $this->resolveCoupon->forget($request);
 
             throw ValidationException::withMessages(['code' => $preview['error']]);
         }
 
-        $request->session()->put(self::COUPON_KEY, $preview['coupon']->code);
+        $this->resolveCoupon->remember($request, $preview['coupon']->code);
 
         return back()->with('status', trans('messages.cart.coupon.applied'));
     }
 
     public function removeCoupon(Request $request): RedirectResponse
     {
-        $request->session()->forget(self::COUPON_KEY);
+        $this->resolveCoupon->forget($request);
 
         return back()->with('status', trans('messages.cart.coupon.removed'));
-    }
-
-    /**
-     * The discount code the customer is currently previewing, if any.
-     */
-    private function couponCode(Request $request): ?string
-    {
-        $code = $request->session()->get(self::COUPON_KEY);
-
-        return is_string($code) && $code !== '' ? $code : null;
     }
 
     public function store(Request $request, AddToCart $add): RedirectResponse

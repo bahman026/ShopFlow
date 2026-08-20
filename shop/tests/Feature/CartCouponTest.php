@@ -333,15 +333,17 @@ it('drops a stored coupon that stopped being valid and explains why', function (
         ->etc());
 });
 
-it('leaves the checkout totals untouched while a coupon is only previewed', function (): void {
+it('carries the coupon through to the checkout totals', function (): void {
     $buyer = couponBuyer();
     cartWith($buyer, couponVariety(100000));
     $coupon = couponFor(['amount' => 20000]);
 
     $this->post('/cart/coupon', ['code' => $coupon->code])->assertSessionHasNoErrors();
 
+    // The saving the cart promised has to survive every step to payment,
+    // otherwise the customer is charged more than they were shown.
     $this->get('/checkout')->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-        ->where('summary.couponDiscount', 0)
-        ->where('summary.payable', 100000)
+        ->where('summary.couponDiscount', 20000)
+        ->where('summary.payable', 80000)
         ->etc());
 });

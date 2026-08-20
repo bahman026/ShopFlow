@@ -91,6 +91,7 @@ class PreviewCoupon
 
         return [
             'coupon' => new CouponDTO(
+                id: $coupon->id,
                 code: $coupon->code,
                 name: $coupon->name,
                 discount: $discount,

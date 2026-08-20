@@ -12,6 +12,7 @@ use App\Actions\Checkout\CompleteCheckoutPayment;
 use App\Actions\Checkout\GetShippingMethods;
 use App\Actions\Checkout\StartCheckoutPayment;
 use App\Actions\Checkout\ValidateCartStock;
+use App\Actions\Coupon\ResolveCartCoupon;
 use App\DTOs\ShippingMethodDTO;
 use App\Models\Address;
 use App\Models\Order;
@@ -30,6 +31,7 @@ class PaymentController extends Controller
         private StartCheckoutPayment $startPayment,
         private CompleteCheckoutPayment $completePayment,
         private BuildOrderDTO $buildOrderDTO,
+        private ResolveCartCoupon $resolveCoupon,
     ) {}
 
     /**
@@ -64,7 +66,33 @@ class PaymentController extends Controller
             return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_method'));
         }
 
-        $summary = $buildSummary($lines);
+        // Re-validate the applied code here, not just on the cart: this is the
+        // number the customer is actually charged.
+        $preview = ($this->resolveCoupon)($request, $lines);
+        $coupon = $preview['coupon'];
+
+        // A code that has stopped working since the cart must never be dropped
+        // silently — that would charge more than the customer was shown.
+        if ($coupon === null && $this->resolveCoupon->isApplied($request)) {
+            $this->resolveCoupon->forget($request);
+
+            return redirect()->route('cart')
+                ->with('status', $preview['error'] ?? trans('messages.cart.coupon.invalid'));
+        }
+
+        if ($coupon?->freeShipping === true) {
+            $method = new ShippingMethodDTO(
+                id: $method->id,
+                name: $method->name,
+                lineName: $method->lineName,
+                description: $method->description,
+                sendingDays: $method->sendingDays,
+                cost: 0,
+                payOnDelivery: $method->payOnDelivery,
+            );
+        }
+
+        $summary = $buildSummary($lines, $coupon === null ? 0 : $coupon->discount);
 
         $url = ($this->startPayment)(
             $user,
@@ -74,6 +102,7 @@ class PaymentController extends Controller
             $summary,
             route('checkout.callback'),
             (string) $request->ip(),
+            $coupon,
         );
 
         if ($url === null) {
@@ -101,6 +130,8 @@ class PaymentController extends Controller
         }
 
         $request->session()->forget(['checkout.address_id', 'checkout.shipping_method_id']);
+        // The code has been spent on this order; a fresh cart starts clean.
+        $this->resolveCoupon->forget($request);
 
         return redirect()->route('checkout.confirmation', $order);
     }
