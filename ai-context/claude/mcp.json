@@ -1,0 +1,10 @@
+{
+  "_comment": "Reference list of the MCP servers this team uses. Claude Code does NOT read this file — register them once per person at user scope so no token or per-clone config lives in the tree: claude mcp add -s user --transport http <name> <url>. The repo's own .mcp.json holds only laravel-boost, which is project-scoped by nature because it shells into the dev container.",
+  "mcpServers": {
+    "cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp",
+      "_comment": "DNS + the rest of the Cloudflare API for codegeek.ir. OAuth per person, no shared token."
+    }
+  }
+}

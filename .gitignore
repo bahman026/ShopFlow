@@ -7,3 +7,7 @@
 # TLS certificate + key for the production proxy, obtained per-deployment
 # via infrastructure/production/certs/README.md.
 /infrastructure/production/certs/*.pem
+
+# Per-person AI context, never committed — each colleague keeps their own.
+# Injected by the UserPromptSubmit hook in .claude/settings.json.
+/ai-context/claude/personal.md
