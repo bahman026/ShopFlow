@@ -130,6 +130,33 @@ way the stock recipe implies:
   `make:filament-user` — the panel gate `canAccessPanel()` requires a role, and that command assigns
   none, so the account it creates cannot log in.
 
+## Two traps that cost time
+
+**The `deploy` user's login shell is fish, not bash.** A bash loop or `&&` chain
+sent as an `ssh user@host '...'` argument is a syntax error there — it fails
+*after* the earlier steps of a script have already run, which is the worst
+moment. Always pipe remote scripts through bash explicitly:
+
+```bash
+ssh -p 9011 deploy@87.107.104.19 'bash -s' <<'EOF'
+...
+EOF
+```
+
+**Filament caches the resources and pages it discovered** in
+`bootstrap/cache/filament`. While that cache exists a newly added resource or
+page is invisible in the sidebar no matter how correct the code is — and tests
+still pass, because the test process builds its own container without it. If
+something new does not appear in the panel, clear it before doubting the code:
+
+```bash
+docker exec -u www-data shop_flow_admin_app php artisan filament:optimize-clear
+```
+
+The production entrypoint runs `filament:optimize`, which rebuilds this cache on
+every container start — correct there, and not a problem, since a new image
+starts with a fresh one.
+
 ## Commits
 
 - **Never commit or push without being asked in that message.** Finishing work is not permission.
