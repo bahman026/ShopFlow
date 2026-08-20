@@ -6,6 +6,7 @@ namespace App\Actions\Auth;
 
 use App\Contracts\SmsSender;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class SendOtpCode
 {
@@ -53,7 +54,15 @@ class SendOtpCode
         // moment the code actually stops working.
         $expiresAt = now()->addSeconds(self::TTL);
 
-        if (! $this->sms->sendVerificationCode($mobile, $code, $expiresAt)) {
+        // Testing bypass: a configured fixed code is stored without sending
+        // anything, for the window where the provider accepts a send and
+        // delivers nothing. See config/otp.php — this is an authentication
+        // bypass and must be off wherever real customers log in.
+        $fixed = $this->fixedCodeFor($mobile);
+
+        if ($fixed !== null) {
+            $code = $fixed;
+        } elseif (! $this->sms->sendVerificationCode($mobile, $code, $expiresAt)) {
             return null;
         }
 
@@ -64,6 +73,37 @@ class SendOtpCode
         ], $expiresAt);
 
         return $code;
+    }
+
+    /**
+     * The fixed code configured for this mobile, or null when the real flow
+     * applies.
+     *
+     * Every hit is logged, because a bypass nobody can see is a bypass nobody
+     * remembers to remove: `warning` when it is scoped to specific numbers,
+     * `critical` when no allowlist is set and therefore every number on the
+     * site can be signed into with one known code.
+     */
+    private function fixedCodeFor(string $mobile): ?string
+    {
+        $fixed = config('otp.fixed_code');
+
+        if (! is_string($fixed) || $fixed === '') {
+            return null;
+        }
+
+        /** @var array<int, string> $allowed */
+        $allowed = config('otp.fixed_mobiles', []);
+
+        if ($allowed !== [] && ! in_array($mobile, $allowed, true)) {
+            return null;
+        }
+
+        $allowed === []
+            ? Log::critical('OTP fixed code is active for EVERY mobile — anyone can sign in as anyone', ['mobile' => $mobile])
+            : Log::warning('OTP fixed code used instead of sending an SMS', ['mobile' => $mobile]);
+
+        return $fixed;
     }
 
     /**

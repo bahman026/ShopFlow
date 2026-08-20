@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\SendOtpCode;
+use App\Actions\Auth\VerifyOtpCode;
 use App\Contracts\SmsSender;
 use App\Sms\LogSmsSender;
 use App\Sms\SmsIrSender;
@@ -129,4 +130,52 @@ it('logs instead of sending when no api key is configured', function (): void {
 
 it('sends over sms.ir once an api key is configured', function (): void {
     expect(app(SmsSender::class))->toBeInstanceOf(SmsIrSender::class);
+});
+
+// The fixed code is an authentication bypass kept for the sandbox window. The
+// tests that matter most here are the ones proving it is OFF unless somebody
+// deliberately turns it on.
+
+it('sends a real code when no fixed code is configured', function (): void {
+    config()->set('otp.fixed_code', null);
+    smsIrOk();
+
+    $code = app(SendOtpCode::class)('09021311740');
+
+    expect($code)->not->toBe('12345');
+    Http::assertSentCount(1);
+});
+
+it('uses the fixed code for a listed mobile and sends no sms', function (): void {
+    config()->set('otp.fixed_code', '12345');
+    config()->set('otp.fixed_mobiles', ['09021311740']);
+    Http::fake();
+
+    expect(app(SendOtpCode::class)('09021311740'))->toBe('12345');
+
+    // Nothing is sent: the provider would accept it and deliver nothing.
+    Http::assertNothingSent();
+});
+
+it('still sends a real code to a mobile that is not listed', function (): void {
+    config()->set('otp.fixed_code', '12345');
+    config()->set('otp.fixed_mobiles', ['09021311740']);
+    smsIrOk();
+
+    // The allowlist is the whole point: a stranger typing their own number
+    // must not be able to sign in with the known code.
+    $code = app(SendOtpCode::class)('09121112233');
+
+    expect($code)->not->toBe('12345');
+    Http::assertSentCount(1);
+});
+
+it('verifies successfully with the fixed code', function (): void {
+    config()->set('otp.fixed_code', '12345');
+    config()->set('otp.fixed_mobiles', ['09021311740']);
+    Http::fake();
+
+    app(SendOtpCode::class)('09021311740');
+
+    expect(app(VerifyOtpCode::class)('09021311740', '12345'))->toBeTrue();
 });
