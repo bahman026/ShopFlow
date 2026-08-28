@@ -36,9 +36,9 @@ database, so changing one side alone silently breaks the other. `shop/tests/Feat
 fails the build on any mismatch. Change both in the same commit.
 
 **The catalog cache is mirrored the same way, and shares one Redis store.** `app/Support/ProductCache.php`
-plus the eight observers in `app/Observers/` (`Product`, `Variety`, `Image`, `Review` — which forget one
-product page — and `Category`, `Brand`, `Attribute`, `AttributeGroup`, which flush) exist as one file
-copied into each app: the storefront writes the entries, the panel deletes them when staff edit a
+plus the nine observers in `app/Observers/` — `Product`, `Variety`, `Image`, `Review` forget one product
+page; `Category`, `Brand`, `Attribute`, `AttributeGroup` flush everything; `Tag` flushes only the lists —
+exist as one file copied into each app: the storefront writes the entries, the panel deletes them when staff edit a
 product, and both sides have to build the same keys. `shop/tests/Feature/ProductCacheMirrorTest.php`
 compares PHP token streams (not bytes — the apps' Pint configs space concatenation differently) and
 `CatalogCacheStoreTest.php` pins the shared store and prefixes. Change both copies in one commit; see
