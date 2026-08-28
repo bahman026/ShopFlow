@@ -2,13 +2,18 @@
 
 declare(strict_types=1);
 
+use App\Enums\BrandStatusEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\ReviewStatusEnum;
+use App\Models\Attribute;
+use App\Models\AttributeGroup;
+use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Variety;
 use App\Support\ProductCache;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia;
 
 /**
@@ -224,6 +229,159 @@ it('serves page 2 of a listing its own payload, not page 1', function (): void {
 it('fingerprints equivalent filters to the same list key whatever their order', function (): void {
     expect(ProductCache::listKey('category', ['filters' => ['brands' => ['nike', 'adidas']]]))
         ->toBe(ProductCache::listKey('category', ['filters' => ['brands' => ['adidas', 'nike']]]));
+});
+
+/*
+|--------------------------------------------------------------------------
+| Catalog metadata — category, brand, attribute, attribute group
+|--------------------------------------------------------------------------
+|
+| A product page renders all of these live off their relations, so a rename has
+| to reach the cached payload. They flush the generation rather than deleting the
+| entry, so every assertion recomputes the key through `ProductCache`.
+*/
+
+/**
+ * An attribute group, built through the query builder because `ancestor_id` is
+ * required and not fillable on the storefront's read-only model.
+ */
+function metaGroup(string $name = 'رنگ'): AttributeGroup
+{
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => $name, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $groupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => $name, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    return AttributeGroup::findOrFail($groupId);
+}
+
+function cachedDetail(Product $product): mixed
+{
+    return Cache::get(ProductCache::detailKey($product->slug));
+}
+
+it('shows the new category name on the product page after a rename', function (): void {
+    // The end-to-end version of this whole feature: without a CategoryObserver
+    // the second request replays the cached payload and the customer keeps
+    // reading the old category name for the rest of the entry's TTL.
+    $category = catCategory('rename-cat');
+    $product = catProduct($category);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('product.category.heading', 'دسته rename-cat')
+        );
+
+    $category->update(['heading' => 'دستهٔ تازه']);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('product.category.heading', 'دستهٔ تازه')
+        );
+});
+
+it('drops the cached product page when its category is renamed', function (): void {
+    $category = catCategory('meta-cat');
+    $product = catProduct($category);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $category->update(['heading' => 'دسته تازه']);
+
+    expect(cachedDetail($product))->toBeNull();
+});
+
+it('drops the cached product page when an ancestor category is renamed', function (): void {
+    // Breadcrumbs walk parent_id upwards, so a product two levels down renders
+    // the name of a category it does not itself belong to.
+    $root = catCategory('root-cat');
+    $leaf = catCategory('leaf-cat', parentId: $root->id);
+    $product = catProduct($leaf);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $root->update(['heading' => 'ریشهٔ تازه']);
+
+    expect(cachedDetail($product))->toBeNull();
+});
+
+it('keeps the cached product page when only category SEO copy changes', function (): void {
+    $category = catCategory('seo-cat');
+    $product = catProduct($category);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $category->update(['content' => '<p>متن سئو</p>', 'no_index' => true]);
+
+    expect(cachedDetail($product))->not->toBeNull();
+});
+
+it('drops the cached product page when its brand is renamed', function (): void {
+    $brand = Brand::create(['heading' => 'نایک', 'slug' => 'nike-meta', 'status' => BrandStatusEnum::ACTIVE]);
+    $product = catProduct(catCategory('brand-cat'), brandId: $brand->id);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $brand->update(['heading' => 'نایکی']);
+
+    expect(cachedDetail($product))->toBeNull();
+});
+
+it('drops the cached product page when a descriptive attribute is renamed', function (): void {
+    // Rendered in the spec table via the product_attribute pivot.
+    $attribute = Attribute::create(['attribute_group_id' => metaGroup()->id, 'value' => 'قرمز', 'color' => '#ff0000']);
+    $product = catProduct(catCategory('attr-cat'), attributeId: $attribute->id);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $attribute->update(['value' => 'زرشکی']);
+
+    expect(cachedDetail($product))->toBeNull();
+});
+
+it('shows the new variety label and axis option after an attribute rename', function (): void {
+    // Both halves of the page have to agree. The axis option is read live off
+    // the attribute relation; the variety's own label comes from the
+    // denormalised `attribute_value` column, which `AttributeObserver` resyncs.
+    // Before that resync existed, this page rendered the new name on the button
+    // and the old one on the variety — cache or no cache.
+    $attribute = Attribute::create(['attribute_group_id' => metaGroup()->id, 'value' => 'قرمز', 'color' => '#ff0000']);
+    $product = catProduct(catCategory('label-cat'));
+
+    // A variety already in sync, exactly as admin's Variety::booted() leaves it.
+    // Updated through the query builder so no observer fires before warming.
+    Variety::query()->where('product_id', $product->id)->update([
+        'attribute_id' => $attribute->id,
+        'attribute_value' => 'قرمز',
+        'color' => '#ff0000',
+    ]);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('product.varieties.0.label', 'قرمز')
+        );
+
+    $attribute->update(['value' => 'زرشکی']);
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('product.varieties.0.label', 'زرشکی')
+            ->where('product.variantAxes.0.options.0.value', 'زرشکی')
+        );
+});
+
+it('drops the cached product page when an attribute group is renamed', function (): void {
+    // The group name is the heading of the spec row its attributes sit under.
+    $group = metaGroup();
+    $attribute = Attribute::create(['attribute_group_id' => $group->id, 'value' => 'قرمز']);
+    $product = catProduct(catCategory('group-cat'), attributeId: $attribute->id);
+    $this->get('/products/'.$product->slug)->assertOk();
+
+    $group->update(['name' => 'اندازه']);
+
+    expect(cachedDetail($product))->toBeNull();
 });
 
 it('makes both product pages and lists unreachable on flushAll', function (): void {
