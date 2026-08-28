@@ -36,6 +36,23 @@ The last unit is not held during payment, so two people can both reach the payme
 
 `PaymentController::initiate()` calls `ValidateCartStock` to re-check live inventory right before opening a Zarinpal payment session — this closes the common, fully-preventable case (item already out of stock when the customer clicks پرداخت) so nobody is charged for something unavailable. It cannot close the race above (two people mid-payment for the same last unit); that residual case still reaches `DecrementInventoryAndMarkPaid`'s rejection, and since Zarinpal's verify already succeeded there (money genuinely captured), `CompleteCheckoutPayment::failPaidButOversold()` keeps `ref_id`/`paid_at` and writes a "needs manual refund" message into `result_message` instead of a plain `FAILED` with no trace — check the Transactions table for `result_message` mentioning بازگشت وجه.
 
+### The three live stock re-reads must stay uncached
+
+`varieties.inventory` is part of the storefront's **cached** product-page payload
+(`CACHE.md` keys 5/7), and a purchase makes that number wrong. Every write to a
+variety clears the entry, so the stale window is a race rather than a TTL — but
+the reason a stale count cannot oversell anything is that none of the checks
+above read the cache:
+
+1. `CartController::store()` loads the variety fresh before adding a line.
+2. `ValidateCartStock` re-reads before a payment session is opened.
+3. `DecrementInventoryAndMarkPaid` re-reads under `lockForUpdate()`.
+
+Those three are the invariant. Do not "optimise" them onto a cached payload, and
+do not cache `GetCartLines` — a customer briefly seeing a stale quantity cap is a
+cosmetic problem that the server corrects; a cached read inside the decrement is
+an oversold order.
+
 ### Known quirk: `AddToCart`/`MergeGuestCart` floor quantity at 1 even when inventory is 0
 
 Both `App\Actions\Cart\AddToCart` and `App\Actions\Cart\MergeGuestCart` clamp with `max(1, min($desired, $variety->inventory))` — if `$variety->inventory` is 0, this still forces the cart line's `count` to 1. It's harmless at the two call sites that already exist (`CartController::store()` rejects a zero-inventory variety before ever calling `AddToCart`; `MergeGuestCart` only hits zero inventory in the rare case an item went out of stock while sitting in a guest cart, and `GetCartLines`' own `inStock` check still correctly hides it as unavailable everywhere it's displayed). If you add another `AddToCart` call site, check `has_stock`/`inventory` yourself first rather than relying on the floor.
