@@ -9,6 +9,26 @@ jobs:
   create-deployment-artifact:
     name: Create Deployment Artifact
     runs-on: ubuntu-latest
+
+    # `.env.example` sets CACHE_STORE=redis, matching dev and production: both
+    # apps invalidate each other's catalog cache, which only works when they
+    # share one store. Pest itself forces the `array` store (phpunit.xml), but
+    # the artisan steps below boot the app with the real .env.
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+
     steps:
       - uses: actions/checkout@v2
 
@@ -17,6 +37,7 @@ jobs:
         with:
           php-version: 8.5
           tools: composer
+          extensions: redis
 
       - name: Install PHP Dependencies
         working-directory: ./admin
@@ -72,6 +93,18 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      # See the admin job: `.env.example` is on CACHE_STORE=redis so a clone
+      # matches dev/production, where the two apps share one cache store.
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
@@ -79,6 +112,8 @@ jobs:
       DB_DATABASE: shop_flow_test
       DB_USERNAME: shop_flow
       DB_PASSWORD: password
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
 
     steps:
       - uses: actions/checkout@v2
@@ -88,7 +123,7 @@ jobs:
         with:
           php-version: 8.5
           tools: composer
-          extensions: pdo_pgsql, pgsql
+          extensions: pdo_pgsql, pgsql, redis
 
       - name: Build shared schema (admin migrations)
         working-directory: ./admin
