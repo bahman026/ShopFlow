@@ -15,6 +15,7 @@ use App\Models\Order;
 use App\Models\OrderVariety;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Tag;
 use App\Models\Variety;
 use App\Support\ProductCache;
 use Illuminate\Support\Facades\Cache;
@@ -391,4 +392,83 @@ it('keeps the catalog cache when catalog metadata is merely created', function (
 
     expect($detail())->not->toBeNull()
         ->and($list())->toBe(['warm']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Tags — the home page's featured carousels
+|--------------------------------------------------------------------------
+|
+| Tags are the one catalog metadata whose cache key cannot self-heal: nothing in
+| a request for `/` reflects which tags are featured, so `TagObserver` is the
+| only thing that makes a reconfiguration visible before the TTL.
+|
+| It differs from the other metadata observers in three ways, each pinned below:
+| a create counts, an empty change set (a synced attribute_tag pivot) counts, and
+| only the *lists* are flushed — no product page renders a tag, so the product
+| pages must stay warm.
+*/
+
+it('flushes the lists when a tag is created', function () {
+    // Unlike a new category or brand, a new featured tag is immediately visible.
+    [, $detail] = primedDetail();
+    $list = primedList('tag-create');
+
+    Tag::create(['name' => 'تگ تازه', 'slug' => 'obs-fresh', 'show_on_home' => true, 'home_order' => 1]);
+
+    expect($list())->toBeNull()
+        // ...but a tag reaches no product page, so those stay warm.
+        ->and($detail())->not->toBeNull();
+});
+
+it('flushes the lists when a tag is featured or unfeatured', function () {
+    $tag = Tag::create(['name' => 'تگ', 'slug' => 'obs-feature', 'show_on_home' => false]);
+    $list = primedList('tag-feature');
+
+    $tag->update(['show_on_home' => true]);
+
+    expect($list())->toBeNull();
+});
+
+it('flushes the lists when a tag is reordered', function () {
+    $tag = Tag::create(['name' => 'تگ', 'slug' => 'obs-order', 'show_on_home' => true, 'home_order' => 1]);
+    $list = primedList('tag-order');
+
+    $tag->update(['home_order' => 5]);
+
+    expect($list())->toBeNull();
+});
+
+it('flushes the lists when a tag is deleted', function () {
+    $tag = Tag::create(['name' => 'تگ', 'slug' => 'obs-delete', 'show_on_home' => true]);
+    $list = primedList('tag-delete');
+
+    $tag->delete();
+
+    expect($list())->toBeNull();
+});
+
+it('flushes the lists when only a tag attribute pivot is synced', function () {
+    // TagResource syncs attribute_tag after saving the record, so every tag
+    // column comes out clean while what the carousel matches has changed. That
+    // is why TagObserver treats an empty change set as "flush".
+    $tag = Tag::create(['name' => 'تگ', 'slug' => 'obs-pivot', 'show_on_home' => true]);
+    $attribute = Attribute::factory()->create();
+    $list = primedList('tag-pivot');
+
+    $tag->attributes()->sync([$attribute->id]);
+    $tag->save();
+
+    expect($list())->toBeNull();
+});
+
+it('keeps the lists when only tag SEO copy changes', function () {
+    // content/title/description/no_index/canonical render on the tag's own page,
+    // which is not cached.
+    $tag = Tag::create(['name' => 'تگ', 'slug' => 'obs-seo', 'show_on_home' => true]);
+    $list = primedList('tag-seo');
+
+    $tag->update(['content' => '<p>متن</p>', 'title' => 'عنوان', 'no_index' => true]);
+
+    expect($list())->toBe(['warm']);
 });
