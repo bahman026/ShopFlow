@@ -57,8 +57,12 @@ a mass query-builder `update()`, a manual SQL fix.
 
 ## Where invalidation lives
 
-Four observers, registered in **both** apps' `AppServiceProvider` (`invalidateCatalogCache()`), because
-both apps write these tables:
+Eight observers, registered in **both** apps' `AppServiceProvider` (`invalidateCatalogCache()`),
+because both apps write these tables. They split into two groups, and the difference is the important
+part.
+
+**Per-product — these `forget` one page (trait: `ForgetsProductCache`).** They fire often, so they have
+to be cheap and precise:
 
 | Observer | Fires on | Clears |
 |---|---|---|
@@ -67,16 +71,47 @@ both apps write these tables:
 | `ImageObserver` | image saved / updated / deleted | the owning product's page + the listings (a card falls back to a variety image) |
 | `ReviewObserver` | review saved / updated / deleted | the product's page only — no card shows a rating |
 
-Three things about this are load-bearing and easy to get wrong:
+**Catalog metadata — these `flush` both generations (trait: `FlushesCatalogCache`).** They cannot be
+precise, and they fire rarely enough not to need to be:
 
-1. **`saved` and `updated` are both hooked.** Neither alone sees every write: `increment()`/`decrement()`
-   fire only `updated` (so a paid order's stock decrement would be missed), while a pivot-only edit in
-   Filament — `product_attribute` synced after the record itself came out clean — fires only `saved`.
-2. **`products.seen` is ignored.** The storefront bumps the view counter on *every* product-page view.
+| Observer | Fires on | Flushes when |
+|---|---|---|
+| `CategoryObserver` | category updated / deleted | `heading`, `slug`, `parent_id`, `status` changed |
+| `BrandObserver` | brand updated / deleted | `heading`, `slug`, `status` changed |
+| `AttributeObserver` | attribute updated / deleted | `value`, `color`, `attribute_group_id` changed |
+| `AttributeGroupObserver` | attribute group updated / deleted | `name`, `order` changed |
+
+Why they flush rather than forget: the products showing a renamed **attribute** are reachable only
+through three relations at once (`product_attribute` for the spec table, `varieties.attribute_id` for
+the primary variant axis, the `attribute_variety` pivot for the secondary ones); a renamed **category**
+reaches its whole descendant subtree, because breadcrumbs walk `parent_id` upwards; and renaming an
+**attribute group** like "رنگ" touches most of a catalog. Enumerating those sets would mean thousands of
+`Cache::forget()` round trips inside one admin save — worse than the single generation bump.
+
+Five things here are load-bearing and easy to get wrong:
+
+1. **`saved` and `updated` are both hooked on the per-product observers.** Neither alone sees every
+   write: `increment()`/`decrement()` fire only `updated` (so a paid order's stock decrement would be
+   missed), while a pivot-only edit in Filament — `product_attribute` synced after the record itself
+   came out clean — fires only `saved`.
+2. **The metadata observers hook `updated` only, never `saved`** — deliberately the opposite. `saved`
+   also fires for an insert, where `getChanges()` is empty; a "flush on unknown change" rule would then
+   flush the catalog once per row of every seeder run. `updated` cannot fire for an insert, and a new
+   category is attached to no product, so it correctly changes nothing. (Note `wasRecentlyCreated` is
+   *not* a usable guard for this: it stays true for the model instance's whole lifetime, so a
+   create-then-edit in one request would skip the flush.)
+3. **`products.seen` is ignored.** The storefront bumps the view counter on *every* product-page view.
    Treating it as a content change deletes the entry the same request just wrote, on every visit — the
    cache looks implemented and never serves anything. Covered by a test that fails without the guard.
-3. **The old slug is cleared on a rename.** Otherwise the previous URL keeps serving the pre-edit page
+4. **The old slug is cleared on a rename.** Otherwise the previous URL keeps serving the pre-edit page
    for the rest of its TTL.
+5. **A metadata `delete` always flushes, unconditionally.** Deleting metadata rewrites product rows
+   *in the database* with no Eloquent event on any product: `products.brand_id`,
+   `products.attribute_group_id` and `varieties.attribute_id` are `nullOnDelete`, and
+   `product_attribute` / `attribute_variety` `cascadeOnDelete`. `Category` is the exception where this
+   is belt-and-braces — `products.category_id` and `categories.parent_id` both `restrictOnDelete`, so
+   only a childless, product-less category can go — and it flushes anyway so the rule holds without
+   re-auditing six foreign keys.
 
 ---
 
@@ -123,17 +158,44 @@ Per-visitor or write paths in `ProductController@show` and the cart/checkout flo
 | 13 | `products.{gen}.list.home.{row}` | Home page product rows + tag carousels (`GetProductRows`, `GetTagRows` — the heaviest page in the app) | 15 min | already covered by the list generation |
 | 14 | `products.{gen}.list.filters.{fingerprint}` | `GetCategoryFilters`, which runs ~7 queries per category render (facet counts + price bounds) | 15 min | already covered by the list generation |
 
-Keys 12–14 need no new invalidation work: `ProductCache::rememberList` and the existing observers
-already cover anything product-shaped. Search results are deliberately left out — the query is free
-user input, so the key space is unbounded and hit rates would be poor.
+Keys 12–14 reuse `ProductCache::rememberList`, so the product/variety/image side of their invalidation
+is already covered — and as of the metadata observers above, so is the category/brand/attribute side.
+Two things still need work when they ship:
 
-### Known staleness, bounded by TTL
+- **Key 14 (category filters)** additionally reads `attribute_group_category.as_filter`, which nothing
+  invalidates (see "Known staleness").
+- **Key 13's tag carousels** need a `TagObserver`. Unlike the category listing — whose key already
+  encodes the resolved filter values, so a tag reconfiguration naturally produces a new key — nothing in
+  a plain `/` request reflects which tags are currently `show_on_home`, so toggling that flag would
+  otherwise never invalidate anything. The newest/most-viewed rows in key 13 need nothing new.
 
-- **Renaming an `Attribute`** (e.g. "Red" → "Crimson") does not clear product pages that show it as a
-  spec or a variety label. No observer on `Attribute`/`Category`/`Brand` yet; bounded by the 30-min TTL.
+Search results are deliberately left out — the query is free user input, so the key space is unbounded
+and hit rates would be poor.
+
+### Known staleness
+
+- ~~A variety's label and colour are stale after an attribute rename.~~ **Fixed** —
+  `AttributeObserver::resyncDenormalisedVarieties()` pushes a renamed `value`/`color` onto the
+  varieties that copied it, *before* flushing, so the cache rebuilds from corrected rows. It updates
+  only rows still holding the pre-change value: those are the ones `Variety::booted()` populated, so a
+  row holding anything else was set deliberately and is left alone. That guard is load-bearing for
+  `color`, which the panel exposes as a `ColorPicker` on both the variety form and the product form's
+  variety repeater — a per-variety swatch differing from its attribute is a real thing staff do.
+  Covered by `admin/tests/Feature/AttributeResyncTest.php`. A delete deliberately does *not* resync:
+  `varieties.attribute_id` is `nullOnDelete`, and keeping the copied text means the variety still
+  renders a readable label instead of going blank.
+- **`attribute_group_category.as_filter`** has no invalidation. It is edited as its own entity in the
+  panel (`AttributeGroupCategoryResource`), so no `AttributeGroup` event fires, and the metadata
+  observers hook `updated` only. It feeds solely the not-yet-built category-filter cache (key 14), so it
+  is deferred — but it must be handled when that key ships.
 - **A pivot-only edit** that changes no product column relies on Filament firing the parent's `saved`
   event, which it does today. If a future write path syncs `product_attribute` without saving the
   product, add an explicit `ProductCache::forgetProduct()` there.
+- **`products.price` / `products.has_stock` are not synced from variety data** by anything. Listings
+  filter and sort on those columns while cards display the cheapest *variety* price, so an admin who
+  lets them drift makes "cheapest first" disagree with the prices shown. Pre-existing, unrelated to
+  caching, and not fixable by it — noted here because it first becomes visible as "the sort looks
+  wrong" once listings are cached.
 
 ---
 
