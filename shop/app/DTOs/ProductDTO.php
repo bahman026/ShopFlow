@@ -12,8 +12,7 @@ readonly class ProductDTO
      * @param  array{heading: string, url: string}|null  $category
      * @param  array<int, array<string, mixed>>  $variantAxes
      * @param  array<int, VarietyDTO>  $varieties
-     * @param  array<int, array{group: string, value: string}>  $highlights
-     * @param  array<int, array{group: string, value: string}>  $specs
+     * @param  array<int, array{group: string, values: array<int, array{value: string, color: string|null}>, highlight: bool}>  $specs
      * @param  array<int, ReviewDTO>  $reviews
      */
     public function __construct(
@@ -35,7 +34,6 @@ readonly class ProductDTO
         public bool $inStock,
         public array $variantAxes,
         public array $varieties,
-        public array $highlights,
         public array $specs,
         public array $reviews,
         public int $reviewCount,
@@ -66,7 +64,6 @@ readonly class ProductDTO
             'inStock' => $this->inStock,
             'variantAxes' => $this->variantAxes,
             'varieties' => array_map(fn (VarietyDTO $variety): array => $variety->toArray(), $this->varieties),
-            'highlights' => $this->highlights,
             'specs' => $this->specs,
             'reviews' => array_map(fn (ReviewDTO $review): array => $review->toArray(), $this->reviews),
             'reviewCount' => $this->reviewCount,
