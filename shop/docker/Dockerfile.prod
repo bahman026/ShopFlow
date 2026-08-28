@@ -52,6 +52,7 @@ RUN set -eux; \
         pgsql \
         zip \
     ; \
+    pecl channel-update pecl.php.net; \
     pecl install redis; \
     docker-php-ext-enable redis; \
     \

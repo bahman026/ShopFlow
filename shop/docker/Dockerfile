@@ -35,7 +35,7 @@ RUN docker-php-ext-install pcntl
 RUN docker-php-ext-install bcmath
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install zip
-RUN pecl install redis && docker-php-ext-enable redis
+RUN pecl channel-update pecl.php.net && pecl install redis && docker-php-ext-enable redis
 
 RUN curl -sL https://deb.nodesource.com/setup_24.x | bash -
 RUN apt-get install -y nodejs
