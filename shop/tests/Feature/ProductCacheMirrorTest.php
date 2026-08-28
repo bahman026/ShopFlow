@@ -6,10 +6,10 @@ declare(strict_types=1);
  * The catalog cache spans both apps: the storefront writes the entries, the
  * admin panel deletes them when staff edit a product. That works only while the
  * two sides build the *same keys* and agree on which column changes matter, so
- * `App\Support\ProductCache` and the four observers exist as one file copied
- * into each app — the same arrangement as the mirrored enums, and the same
- * failure mode if they drift: no error anywhere, just a storefront serving
- * prices that were edited away, until each entry's TTL runs out.
+ * `App\Support\ProductCache`, the observers and their traits all exist as one
+ * file copied into each app — the same arrangement as the mirrored enums, and
+ * the same failure mode if they drift: no error anywhere, just a storefront
+ * serving prices that were edited away, until each entry's TTL runs out.
  *
  * These tests compare the copies as *code*: PHP token streams with whitespace
  * and comments removed. A byte comparison would be wrong, because the two apps
@@ -35,6 +35,7 @@ const MIRRORED_CACHE_FILES = [
     'Observers/BrandObserver.php',
     'Observers/AttributeObserver.php',
     'Observers/AttributeGroupObserver.php',
+    'Observers/TagObserver.php',
 ];
 
 function adminAppPath(): string
