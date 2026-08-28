@@ -247,3 +247,132 @@ it('keeps the home page query count flat as more tags are featured', function ()
 
     expect($countQueries())->toBe($atCap);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Caching (CACHE.md key 13)
+|--------------------------------------------------------------------------
+|
+| Both product carousel groups are cached: the newest/most-viewed rows and the
+| per-tag rows. The tag rows were the expensive half — every row costs its own
+| category walk, attribute grouping and product query.
+|
+| Tags are the only catalog metadata a *cache key* cannot self-heal from:
+| nothing in a request for `/` reflects which tags are featured, so `TagObserver`
+| is what makes a reconfiguration visible. Several tests below fail without it.
+*/
+
+it('serves the home page carousels from cache on the second visit', function (): void {
+    $category = catCategory('cache-home-cat');
+    foreach (range(1, 15) as $ignored) {
+        catProduct($category);
+    }
+    foreach (range(1, 6) as $i) {
+        Tag::create(['name' => 'c'.$i, 'slug' => 'c-tag-'.$i, 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => $i]);
+    }
+
+    $countQueries = function (): int {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->get('/')->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
+    };
+
+    $cold = $countQueries();
+    $warm = $countQueries();
+
+    // The carousels are the bulk of this page. What survives on a warm request
+    // is the layout that is not cached yet (banners, sliders, the category strip
+    // and nav, settings, featured brands) plus the per-visitor cart count.
+    expect($warm)->toBeLessThan((int) ($cold / 2))
+        ->and($cold)->toBeGreaterThan(40);
+});
+
+it('shows a newly featured tag on the next home page request', function (): void {
+    // The reason TagObserver exists. The cached payload was built when this tag
+    // was not featured, and nothing in a `/` request would produce a new key.
+    $category = catCategory('feature-cat');
+    catProduct($category);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('tagRows', 0));
+
+    Tag::create(['name' => 'تگ تازه', 'slug' => 'fresh-tag', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tagRows', 1)
+            ->where('tagRows.0.title', 'تگ تازه')
+        );
+});
+
+it('drops a tag from the home page when it stops being featured', function (): void {
+    $category = catCategory('unfeature-cat');
+    catProduct($category);
+    $tag = Tag::create(['name' => 'تگ رفتنی', 'slug' => 'going-tag', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('tagRows', 1));
+
+    $tag->update(['show_on_home' => false]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('tagRows', 0));
+});
+
+it('reorders the home carousels when a tag home_order changes', function (): void {
+    $category = catCategory('reorder-cat');
+    catProduct($category);
+    $first = Tag::create(['name' => 'اول', 'slug' => 'ord-1', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+    Tag::create(['name' => 'دوم', 'slug' => 'ord-2', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 2]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('tagRows.0.title', 'اول'));
+
+    $first->update(['home_order' => 9]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('tagRows.0.title', 'دوم'));
+});
+
+it('renames a home carousel when its tag is renamed', function (): void {
+    $category = catCategory('tag-rename-cat');
+    catProduct($category);
+    $tag = Tag::create(['name' => 'نام قبلی', 'slug' => 'rename-tag', 'category_id' => $category->id, 'show_on_home' => true, 'home_order' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('tagRows.0.title', 'نام قبلی'));
+
+    $tag->update(['name' => 'نام تازه']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('tagRows.0.title', 'نام تازه'));
+});
+
+it('shows a newly published product in the newest carousel', function (): void {
+    // Covered by ProductObserver rather than TagObserver, but the home rows are
+    // a new consumer of that invalidation, so it is worth pinning end to end.
+    $category = catCategory('newest-cat');
+    catProduct($category);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('productRows.0.products', 1));
+
+    catProduct($category);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('productRows.0.products', 2));
+});
