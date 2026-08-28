@@ -18,6 +18,9 @@ FROM php:8.5-fpm-bookworm AS base
 # network otherwise surfaces as a confusing "Unable to locate package".
 # opcache is absent from the list on purpose: PHP 8.5 links Zend OPcache in
 # statically, so there is no shared module to build. php.ini tunes it.
+# `pecl channel-update` runs before the install because the channel.xml baked
+# into the base image goes stale, and `pecl install` then fails with the
+# misleading "No releases available for package pecl.php.net/redis".
 RUN set -eux; \
     savedAptMark="$(apt-mark showmanual)"; \
     apt-get -o Acquire::Retries=5 -o Acquire::http::Timeout=30 update; \
