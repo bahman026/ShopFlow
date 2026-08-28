@@ -6,6 +6,10 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\ReviewStatusEnum;
 use App\Filament\Resources\ProductResource;
+use App\Models\Attribute;
+use App\Models\AttributeGroup;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Image;
 use App\Models\Order;
 use App\Models\OrderVariety;
@@ -51,6 +55,26 @@ function primedProduct(): array
     Cache::put($key, ['product' => ['heading' => 'کش قدیمی']], 600);
 
     return [$product, $variety, $key];
+}
+
+/**
+ * A product's page entry primed, plus a reader that **recomputes** its key.
+ *
+ * Needed for the catalog-metadata observers below, which flush the detail
+ * generation rather than deleting the entry: the old key string still resolves
+ * to the orphaned entry, so asserting on a captured key would pass vacuously
+ * (or fail for the wrong reason). Only a rebuilt key proves reachability.
+ *
+ * @return array{0: Product, 1: Closure(): mixed}
+ */
+function primedDetail(): array
+{
+    $product = Product::factory()->create(['status' => ProductStatusEnum::PUBLISHED]);
+    Variety::factory()->create(['product_id' => $product->id, 'inventory' => 10]);
+
+    Cache::put(ProductCache::detailKey($product->slug), ['product' => ['heading' => 'کش قدیمی']], 600);
+
+    return [$product, fn (): mixed => Cache::get(ProductCache::detailKey($product->slug))];
 }
 
 /**
@@ -215,4 +239,156 @@ it('clears a product page and the listings when a product is deleted', function 
 
     expect(Cache::has($key))->toBeFalse()
         ->and($list())->toBeNull();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Catalog metadata — category, brand, attribute, attribute group
+|--------------------------------------------------------------------------
+|
+| These flush both generations rather than forgetting one page, because the
+| products affected are spread across a category's whole descendant subtree
+| (breadcrumbs) or three attribute pivots at once. A flushed detail generation
+| means `detailKey()` returns a *new* key, so "invalidated" is asserted by
+| recomputing the key and finding nothing there — exactly as for the lists.
+*/
+
+it('clears the catalog cache when staff rename a category', function () {
+    // BuildProductDetail renders the category link live, and the breadcrumb
+    // trail walks parent_id upwards, so a rename reaches every product in the
+    // category and every category beneath it.
+    $category = Category::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('category-rename');
+
+    $category->update(['heading' => 'نام تازه دسته']);
+
+    expect($detail())->toBeNull()
+        ->and($list())->toBeNull();
+});
+
+it('clears the catalog cache when a category is re-parented', function () {
+    // Re-parenting rewrites the breadcrumb trail of every product underneath it.
+    $parent = Category::factory()->create();
+    $child = Category::factory()->create();
+    [, $detail] = primedDetail();
+
+    $child->update(['parent_id' => $parent->id]);
+
+    expect($detail())->toBeNull();
+});
+
+it('keeps the catalog cache when only category SEO copy changes', function () {
+    // content/title/description/no_index/canonical render on the category's own
+    // page, which is not cached. Editing them must not cool the whole catalog.
+    $category = Category::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('category-seo');
+
+    $category->update(['content' => '<p>متن سئو</p>', 'title' => 'عنوان', 'no_index' => true]);
+
+    expect($detail())->not->toBeNull()
+        ->and($list())->toBe(['warm']);
+});
+
+it('clears the catalog cache when staff rename a brand', function () {
+    $brand = Brand::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('brand-rename');
+
+    $brand->update(['heading' => 'برند تازه']);
+
+    expect($detail())->toBeNull()
+        ->and($list())->toBeNull();
+});
+
+it('clears the catalog cache when a brand is deleted', function () {
+    // The sharp case: products.brand_id is nullOnDelete, so the database
+    // rewrites every one of the brand's products with no Product event firing.
+    // Nothing but this flush stands between a deleted brand and cached pages
+    // still advertising it.
+    $brand = Brand::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('brand-delete');
+
+    $brand->delete();
+
+    expect($detail())->toBeNull()
+        ->and($list())->toBeNull();
+});
+
+it('clears the catalog cache when staff rename an attribute', function () {
+    // Read live in three places: the spec table (product_attribute), the primary
+    // variant axis (varieties.attribute_id) and the secondary axes
+    // (attribute_variety).
+    $attribute = Attribute::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('attribute-rename');
+
+    $attribute->update(['value' => 'زرشکی']);
+
+    expect($detail())->toBeNull()
+        ->and($list())->toBeNull();
+});
+
+it('clears the catalog cache when an attribute colour changes', function () {
+    // Rendered as the swatch on a colour variant axis.
+    $attribute = Attribute::factory()->create(['color' => '#ff0000']);
+    [, $detail] = primedDetail();
+
+    $attribute->update(['color' => '#00ff00']);
+
+    expect($detail())->toBeNull();
+});
+
+it('clears the catalog cache when staff rename an attribute group', function () {
+    // The group name is the spec row heading and the variant axis label.
+    $group = AttributeGroup::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('group-rename');
+
+    $group->update(['name' => 'اندازه']);
+
+    expect($detail())->toBeNull()
+        ->and($list())->toBeNull();
+});
+
+it('keeps the catalog cache when only an attribute group label changes', function () {
+    // `label` is documented as admin-panel-only and is never rendered to a
+    // customer (GetCategoryFilters displays `name`), so it must not flush.
+    $group = AttributeGroup::factory()->create();
+    [, $detail] = primedDetail();
+    $list = primedList('group-label');
+
+    $group->update(['label' => 'برچسب داخلی تازه']);
+
+    expect($detail())->not->toBeNull()
+        ->and($list())->toBe(['warm']);
+});
+
+it('clears the catalog cache when an attribute group is reordered', function () {
+    // `order` sequences the facet groups on a category page.
+    $group = AttributeGroup::factory()->create(['order' => 1]);
+    [, $detail] = primedDetail();
+
+    $group->update(['order' => 9]);
+
+    expect($detail())->toBeNull();
+});
+
+it('keeps the catalog cache when catalog metadata is merely created', function () {
+    // A brand-new category/brand/attribute is attached to no product, so nothing
+    // cached can be showing it. Without the wasRecentlyCreated guard every
+    // seeder run would flush the catalog once per row — Eloquent reports every
+    // attribute as changed on an insert.
+    [, $detail] = primedDetail();
+    $list = primedList('metadata-create');
+
+    Category::factory()->create();
+    Brand::factory()->create();
+    Attribute::factory()->create();
+    AttributeGroup::factory()->create();
+
+    expect($detail())->not->toBeNull()
+        ->and($list())->toBe(['warm']);
 });
