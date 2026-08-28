@@ -35,6 +35,14 @@ with the same case names and backing values — the values are what the two apps
 database, so changing one side alone silently breaks the other. `shop/tests/Feature/EnumMirrorTest.php`
 fails the build on any mismatch. Change both in the same commit.
 
+**The catalog cache is mirrored the same way, and shares one Redis store.** `app/Support/ProductCache.php`
+plus the four observers in `app/Observers/` (`Product`, `Variety`, `Image`, `Review`) exist as one file
+copied into each app: the storefront writes the entries, the panel deletes them when staff edit a
+product, and both sides have to build the same keys. `shop/tests/Feature/ProductCacheMirrorTest.php`
+compares PHP token streams (not bytes — the apps' Pint configs space concatenation differently) and
+`CatalogCacheStoreTest.php` pins the shared store and prefixes. Change both copies in one commit; see
+`CACHE.md`.
+
 ## Read the docs first
 
 Before starting a task, read the ones relevant to it. They are duplicated in `admin/docs/` and
@@ -44,10 +52,11 @@ Before starting a task, read the ones relevant to it. They are duplicated in `ad
 |---|---|
 | `ShoFlow db doc.md` | schema reference, source of truth |
 | `ORDER.md` | orders + inventory rules. **Stock is decremented only on successful payment** (Strategy A); carts never touch inventory |
-| `CACHE.md` | cache keys identified; nothing is cached yet |
+| `CACHE.md` | the cache register. Products/varieties/category listings **are** cached (Redis, shared by both apps); everything else is still just an identified key |
 | `admin/docs/IMPLEMENTATION.md` | admin build status |
 | `shop/docs/STOREFRONT_IMPLEMENTATION.md` | storefront roadmap — update it as features land |
 | `shop/docs/TAGS.md`, `BANNERS_SLIDERS.md`, `VARIETY_GUIDE.md`, `SHIPPING_GUIDE.md` | the tricky domains |
+| `demo/README.md` | the demo/staging catalog dataset: what is tracked, and how to regenerate its images |
 
 ## Local development
 
@@ -70,6 +79,12 @@ docker exec -u www-data shop_flow_admin_app php artisan migrate
 
 Each compose file reads its own `.env` (`infrastructure/docker/`, `admin/docker/`, `shop/docker/`) —
 copy from `.env.example` and set `USER_ID`/`GROUP_ID` to your own.
+
+`migrate:fresh --seed` from `admin` also runs `DemoSeeder` in `local` and `staging` (never
+production): ~50 demo products with variants, banners, sliders, tags and reviews, read from
+`demo/data/*.json`. Its processed images are **not** in git — each image row is simply skipped when
+the file is missing, so the catalog still seeds, just without pictures. See `demo/README.md` to
+regenerate them.
 
 **Trap: the container's CLI `memory_limit` is 128 MB**, which is not enough for the admin app's full
 Pest run — it dies mid-suite with `Allowed memory size exhausted` inside a Filament view. That is not
@@ -130,7 +145,7 @@ way the stock recipe implies:
   `make:filament-user` — the panel gate `canAccessPanel()` requires a role, and that command assigns
   none, so the account it creates cannot log in.
 
-## Two traps that cost time
+## Traps that cost time
 
 **The `deploy` user's login shell is fish, not bash.** A bash loop or `&&` chain
 sent as an `ssh user@host '...'` argument is a syntax error there — it fails
@@ -142,6 +157,61 @@ ssh -p 9011 deploy@87.107.104.19 'bash -s' <<'EOF'
 ...
 EOF
 ```
+
+**`vendor/bin/pint --dirty` inside the container lints nothing and reports
+"PASS ... 0 files".** `.git` is root-owned while the container runs as `www-data`
+(uid 1000), so git aborts with `detected dubious ownership in repository at
+'/var/www/html'`; Pint swallows that and finds no changed files. Every `--dirty`
+"pass" is therefore vacuous — which is how files that fail `pint --test` reached
+`main`. Either allow the directory once per container:
+
+```bash
+docker exec -u www-data shop_flow_admin_app git config --global --add safe.directory /var/www/html
+```
+
+or skip `--dirty` and pass the paths you touched explicitly, which is reliable:
+
+```bash
+docker exec -u www-data shop_flow_admin_app php -d memory_limit=1024M \
+    vendor/bin/pint --test --format agent app/Support app/Observers
+```
+
+A bare `pint --test` over a whole app also dies on the container's 128 MB CLI
+limit, so use `php -d memory_limit=1024M` and prefer per-directory runs.
+
+**Do not pass a container path through `-e VAR=/tmp/...` from Git Bash.** MSYS
+rewrites `/tmp/phpstan-www` into `C:/Users/<you>/AppData/Local/Temp/phpstan-www`
+*before* docker sees it, so PHPStan created a literal `admin/C:/Users/...`
+directory tree inside the repo (1500 files of untracked cache). The documented
+PHPStan invocation is safe from PowerShell; from Git Bash prefix it with
+`MSYS_NO_PATHCONV=1`, or set the variable inside the container instead
+(`bash -lc 'TMPDIR=/tmp/phpstan-www ...'`). The same mangling puts psysh's
+history there when passing `-e HOME=/tmp`.
+
+**A cache the two apps are meant to share needs *four* settings to agree, not one.**
+The catalog cache works only because both apps resolve the same Redis key, and
+the final key is `{database.redis.options.prefix}{cache.prefix}{key}` — so
+`CACHE_STORE`, `CACHE_PREFIX` **and** `REDIS_PREFIX` all have to match, in both
+`.env` files *and* both config files' defaults. They did not: each app derived
+both prefixes from `APP_NAME` through `Str::slug` with a different separator
+(`_cache_` in admin, `-cache-` in the shop), and `admin/.env` had a bare
+`CACHE_PREFIX=`, which Laravel reads as an empty string rather than falling back
+to the default. Production was *already* `CACHE_STORE=redis` in both apps, so
+this was live: every `Cache::forget()` in the panel would have succeeded and
+cleared nothing, with no error anywhere. All four are now pinned literals, held
+together by `shop/tests/Feature/CatalogCacheStoreTest.php`. When adding a cache
+either app invalidates, verify the round trip rather than trusting the config —
+write from one container and read from the other:
+
+```bash
+docker exec -u www-data -e HOME=/tmp shop_flow_admin_app php artisan tinker \
+    --execute 'Cache::put("probe","x",60); echo config("cache.prefix");'
+docker exec -u www-data -e HOME=/tmp shop_flow_shop_app php artisan tinker \
+    --execute 'var_dump(Cache::get("probe"));'
+```
+
+(`HOME=/tmp` is needed or tinker dies on an unwritable psysh config dir and
+prints nothing at all.)
 
 **Filament caches the resources and pages it discovered** in
 `bootstrap/cache/filament`. While that cache exists a newly added resource or
@@ -156,6 +226,28 @@ docker exec -u www-data shop_flow_admin_app php artisan filament:optimize-clear
 The production entrypoint runs `filament:optimize`, which rebuilds this cache on
 every container start — correct there, and not a problem, since a new image
 starts with a fresh one.
+
+**Run `docker compose` only from the repo root, never from `admin/docker/` or
+`shop/docker/`.** Those leaf files are startable on their own, but each sets its
+own `COMPOSE_PROJECT_NAME` (`shop_flow_admin`, `shop_flow_shop`) while the
+container *names* are fixed — so a leaf invocation claims the root project's
+container names under a different project, and each project then manages only
+half the stack. The symptoms are a `Conflict. The container name
+"/shop_flow_shop_app" is already in use`, or an nginx that came up without its
+app and crash-loops on `host not found in upstream "admin_app"`. Recover by
+`docker rm -f`-ing the containers by name and bringing the stack up from the root.
+
+Related: `docker container prune -f` deletes *stopped* containers, and the whole
+stack is briefly stopped after a Docker Desktop restart — pruning in that window
+removes real stack containers. Re-check `docker ps -a` immediately before pruning,
+not minutes earlier.
+
+**A full host disk makes every writing Docker command fail with `read-only file
+system`** — `docker system df` and `docker builder prune` included, so pruning is
+not a way out. Free space on the host, then **restart Docker Desktop**: buildkit's
+metadata DB stays mounted read-only until the VM restarts, so builds keep failing
+on a disk that now has room. Worth knowing here because a production build
+compiles five images' PHP extensions from source.
 
 ## Commits
 
