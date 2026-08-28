@@ -140,7 +140,15 @@ Each row is one specific, purchasable combination. The seller sets the price and
 | `status` | Published / Draft / Deleted |
 
 **Auto-behaviour on save:**
-- `attribute_value` and `color` are automatically populated from the linked `Attribute` record.
+- `attribute_value` and `color` are automatically populated from the linked `Attribute` record —
+  but only when `attribute_id` itself changes (`Variety::booted()`), so they are a *copy*, not a live
+  read. `BuildProductDetail::variety()` renders the copy in preference to the relation.
+- **Renaming an attribute later pushes the new `value`/`color` down onto the varieties that copied
+  it** (`AttributeObserver::resyncDenormalisedVarieties()`). Only rows still holding the pre-change
+  value are updated; a row holding anything else is treated as a deliberate override and left alone.
+  That matters for `color`, which the panel exposes as a `ColorPicker` per variety — a swatch you set
+  by hand survives a rename of its attribute. Deleting the attribute does not clear the copied text,
+  so the variety keeps a readable label once the link is gone.
 - `product.variety_counts` is automatically updated whenever a variety is created or deleted.
 
 ---
