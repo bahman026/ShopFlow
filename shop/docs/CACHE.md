@@ -57,9 +57,9 @@ a mass query-builder `update()`, a manual SQL fix.
 
 ## Where invalidation lives
 
-Eight observers, registered in **both** apps' `AppServiceProvider` (`invalidateCatalogCache()`),
-because both apps write these tables. They split into two groups, and the difference is the important
-part.
+Nine observers, registered in **both** apps' `AppServiceProvider` (`invalidateCatalogCache()`),
+because both apps write these tables. They split into three shapes, and the differences are the
+important part.
 
 **Per-product — these `forget` one page (trait: `ForgetsProductCache`).** They fire often, so they have
 to be cheap and precise:
@@ -88,7 +88,20 @@ reaches its whole descendant subtree, because breadcrumbs walk `parent_id` upwar
 **attribute group** like "رنگ" touches most of a catalog. Enumerating those sets would mean thousands of
 `Cache::forget()` round trips inside one admin save — worse than the single generation bump.
 
-Five things here are load-bearing and easy to get wrong:
+**`TagObserver` is a third shape again**, and the differences are all deliberate. It flushes only the
+*lists* (no product page renders a tag, so `flushAll()` would cool the catalog for nothing), it hooks
+`saved` so a **create** counts (a brand-new featured tag belongs on the home page immediately — the
+opposite of a new category, which is attached to nothing), and it treats an **empty change set** as a
+flush, because `TagResource` syncs the `attribute_tag` pivot after saving the record and that changes
+what a carousel matches while every tag column stays clean. Rendered columns: `name`, `slug`,
+`show_on_home`, `home_order`, `category_id`.
+
+Tags are the only catalog metadata whose cache key cannot self-heal. A tag's own page is keyed by the
+*resolved* category and attribute ids, so reconfiguring it naturally produces a new key — but nothing
+in a request for `/` reflects which tags are featured, so without this observer a newly featured tag
+would never appear until the entry expired.
+
+Six things here are load-bearing and easy to get wrong:
 
 1. **`saved` and `updated` are both hooked on the per-product observers.** Neither alone sees every
    write: `increment()`/`decrement()` fire only `updated` (so a paid order's stock decrement would be
@@ -105,7 +118,10 @@ Five things here are load-bearing and easy to get wrong:
    cache looks implemented and never serves anything. Covered by a test that fails without the guard.
 4. **The old slug is cleared on a rename.** Otherwise the previous URL keeps serving the pre-edit page
    for the rest of its TTL.
-5. **A metadata `delete` always flushes, unconditionally.** Deleting metadata rewrites product rows
+5. **`TagObserver` inverts rule 2 on purpose** — it hooks `saved` and flushes on an empty change set,
+   because for tags a create and a pivot sync both change what the home page renders. Read its
+   docblock before copying either rule to a new observer.
+6. **A metadata `delete` always flushes, unconditionally.** Deleting metadata rewrites product rows
    *in the database* with no Eloquent event on any product: `products.brand_id`,
    `products.attribute_group_id` and `varieties.attribute_id` are `nullOnDelete`, and
    `product_attribute` / `attribute_variety` `cascadeOnDelete`. `Category` is the exception where this
@@ -123,6 +139,18 @@ Five things here are load-bearing and easy to get wrong:
 | 7 | — | **Subsumed by key 5.** The varieties (with their pivot attributes, price, `sale_price`, `inventory`) are part of the product payload, which is the only place the storefront reads them as a set. A second key would be dead code | — | — | — |
 | 6 | `products.{gen}.list.category.{fingerprint}` | Paginated product cards for a category — `GetCategoryProducts`, which also serves the **tag** landing pages. Fingerprint covers category ids, all six filters, sort and page | redis | 15 min | any card-visible product/variety/image write (generation bump) |
 | — | `products.{gen}.list.related.{product_id}` | The related-products carousel on a product page. A *list* rather than part of the product payload, because it is cards of **other** products — so any product write refreshes it | redis | 15 min | as above |
+| 13 | `products.{gen}.list.home.rows.{fingerprint}` | The newest + most-viewed carousels (`GetProductRows`). Signature is the locale only — the titles come from `trans()` | redis | 15 min | as above |
+| 13 | `products.{gen}.list.home.tags.{fingerprint}` | One carousel per featured tag (`GetTagRows`) — the most expensive thing on the home page, since each row costs its own category walk, attribute grouping and product query | redis | 15 min | as above, **plus `TagObserver`** |
+
+Caching both carousel groups took the home page from **52 queries to 11** (measured with 15 products
+and 6 featured tags). Of the 11 that remain, exactly one — the per-visitor cart count — must stay live;
+the rest are the shared layout/CMS reads below (keys 1, 2, 8, 11 and the featured-brands strip), which
+serve the category and product pages too and are best done as one pass rather than as "home page" work.
+
+**The most-viewed row lags on purpose.** It sorts on `products.seen`, which every product-page view
+increments, and `ProductObserver` ignores `seen` — so the row is up to a TTL out of date. A "most
+viewed" carousel that reordered itself on every page view would be both pointless and ruinous for the
+cache.
 
 ### Cached stock is safe, deliberately
 
@@ -155,19 +183,15 @@ Per-visitor or write paths in `ProductController@show` and the cart/checkout flo
 | 10 | `faqs.{position}` | FAQs for a given position (null = main FAQ page) | 1 hour | FAQ saved / deleted |
 | 11 | `settings.autoload` | Autoloaded site settings (key => content), used for footer/contact | 1 hour | Setting saved / deleted (in admin) |
 | 12 | `products.{gen}.list.brand.{fingerprint}` | Brand page product cards (`GetBrandProducts`) — same shape as key 6, so it can reuse `ProductCache::rememberList` | 15 min | already covered by the list generation |
-| 13 | `products.{gen}.list.home.{row}` | Home page product rows + tag carousels (`GetProductRows`, `GetTagRows` — the heaviest page in the app) | 15 min | already covered by the list generation |
 | 14 | `products.{gen}.list.filters.{fingerprint}` | `GetCategoryFilters`, which runs ~7 queries per category render (facet counts + price bounds) | 15 min | already covered by the list generation |
 
-Keys 12–14 reuse `ProductCache::rememberList`, so the product/variety/image side of their invalidation
+Keys 12 and 14 reuse `ProductCache::rememberList`, so the product/variety/image side of their invalidation
 is already covered — and as of the metadata observers above, so is the category/brand/attribute side.
 Two things still need work when they ship:
 
 - **Key 14 (category filters)** additionally reads `attribute_group_category.as_filter`, which nothing
   invalidates (see "Known staleness").
-- **Key 13's tag carousels** need a `TagObserver`. Unlike the category listing — whose key already
-  encodes the resolved filter values, so a tag reconfiguration naturally produces a new key — nothing in
-  a plain `/` request reflects which tags are currently `show_on_home`, so toggling that flag would
-  otherwise never invalidate anything. The newest/most-viewed rows in key 13 need nothing new.
+- **Key 13 has shipped** (see Implemented), including the `TagObserver` it needed.
 
 Search results are deliberately left out — the query is free user input, so the key space is unbounded
 and hit rates would be poor.
