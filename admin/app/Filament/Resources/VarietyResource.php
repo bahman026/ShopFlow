@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\VarietyResource\Pages\CreateVariety;
@@ -152,7 +153,8 @@ class VarietyResource extends Resource
                             // Product imagery is square everywhere it appears:
                             // the card grid and the gallery are both
                             // aspect-square.
-                            ->imageCropAspectRatio('1:1')
+                            ->imageCropAspectRatio(ImageAspectEnum::VARIETY->aspectRatio())
+                            ->maxSize(ImageAspectEnum::VARIETY->maxSizeKb())
                             ->helperText(trans('variety.path_hint'))
                             ->nullable()
                             ->columnSpanFull(),

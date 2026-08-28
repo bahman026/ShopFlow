@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\TagResource\Pages\CreateTag;
 use App\Filament\Resources\TagResource\Pages\EditTag;
@@ -136,6 +137,14 @@ class TagResource extends Resource
                                 FileUpload::make('path')
                                     ->label(trans('tag.path'))
                                     ->image()
+                                    ->imageEditor()
+                                    // A tag is a landing page, so it is shaped
+                                    // like a page hero. Nothing renders it yet;
+                                    // this keeps uploads consistent until
+                                    // something does.
+                                    ->imageCropAspectRatio(ImageAspectEnum::TAG->aspectRatio())
+                                    ->maxSize(ImageAspectEnum::TAG->maxSizeKb())
+                                    ->helperText(ImageAspectEnum::TAG->hint())
                                     ->nullable()
                                     ->columnSpanFull(),
                             ])

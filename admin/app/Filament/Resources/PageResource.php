@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use App\Enums\ImageAspectEnum;
 use App\Enums\PageStatusEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\PageResource\Pages\CreatePage;
@@ -132,6 +133,13 @@ class PageResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('page.path'))
                             ->image()
+                            ->imageEditor()
+                            // The storefront renders this at full article width
+                            // with no height frame, so an uncropped portrait
+                            // upload pushes the whole page down the screen.
+                            ->imageCropAspectRatio(ImageAspectEnum::PAGE->aspectRatio())
+                            ->maxSize(ImageAspectEnum::PAGE->maxSizeKb())
+                            ->helperText(ImageAspectEnum::PAGE->hint())
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')

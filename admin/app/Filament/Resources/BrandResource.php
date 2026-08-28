@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\BrandStatusEnum;
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\BrandResource\Pages\CreateBrand;
 use App\Filament\Resources\BrandResource\Pages\EditBrand;
@@ -99,6 +100,15 @@ class BrandResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('brand.path'))
                             ->image()
+                            // Deliberately no crop ratio: a logo is drawn with
+                            // object-contain at a fixed height, so a wide
+                            // wordmark is already safe, and forcing it square
+                            // would either cut it or make staff pad it. The
+                            // editor is still on for a manual trim.
+                            ->imageEditor()
+                            ->imageCropAspectRatio(ImageAspectEnum::BRAND->aspectRatio())
+                            ->maxSize(ImageAspectEnum::BRAND->maxSizeKb())
+                            ->helperText(ImageAspectEnum::BRAND->hint())
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

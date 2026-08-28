@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Enums\ReceiptTypeEnum;
 use App\Filament\Resources\ReceiptResource\Pages\CreateReceipt;
@@ -108,6 +109,14 @@ class ReceiptResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('receipt.path'))
                             ->image()
+                            // No crop ratio and, unlike every other upload,
+                            // no image editor either. This is a customer's
+                            // proof of payment: the reference number, amount
+                            // and date are the point of the file, and an
+                            // accidental crop would destroy the evidence
+                            // behind a real transaction. Stored as uploaded.
+                            ->maxSize(ImageAspectEnum::RECEIPT->maxSizeKb())
+                            ->helperText(ImageAspectEnum::RECEIPT->hint())
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')

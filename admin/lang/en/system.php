@@ -9,4 +9,8 @@ return [
 
     'logs_label' => 'Logs',
     'logs_subheading' => 'Log files for the panel and the storefront, in one folder each.',
+
+    // Shared help under every upload field whose shape is fixed (ImageAspectEnum).
+    'image_hint' => 'Cropped to :ratio. Upload at least :size pixels so it stays sharp.',
+    'image_hint_free' => 'Not cropped — the whole image is kept. Recommended size :size pixels.',
 ];

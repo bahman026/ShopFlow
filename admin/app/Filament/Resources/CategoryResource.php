@@ -6,6 +6,7 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\CategoryStatusEnum;
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\CategoryResource\Pages\EditCategory;
@@ -109,6 +110,13 @@ class CategoryResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('category.path'))
                             ->image()
+                            ->imageEditor()
+                            // The home strip draws this in a circle with
+                            // object-cover, so anything but a square loses its
+                            // edges to a crop nobody chose.
+                            ->imageCropAspectRatio(ImageAspectEnum::CATEGORY->aspectRatio())
+                            ->maxSize(ImageAspectEnum::CATEGORY->maxSizeKb())
+                            ->helperText(ImageAspectEnum::CATEGORY->hint())
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

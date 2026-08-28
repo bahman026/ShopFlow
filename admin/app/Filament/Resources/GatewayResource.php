@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\GatewayForEnum;
+use App\Enums\ImageAspectEnum;
 use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\GatewayResource\Pages\CreateGateway;
 use App\Filament\Resources\GatewayResource\Pages\EditGateway;
@@ -98,6 +99,12 @@ class GatewayResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('gateway.path'))
                             ->image()
+                            // A gateway logo, same reasoning as a brand logo:
+                            // contain-fitted, so no forced ratio.
+                            ->imageEditor()
+                            ->imageCropAspectRatio(ImageAspectEnum::GATEWAY->aspectRatio())
+                            ->maxSize(ImageAspectEnum::GATEWAY->maxSizeKb())
+                            ->helperText(ImageAspectEnum::GATEWAY->hint())
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')
