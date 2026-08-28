@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use App\Enums\ImageAspectEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\VarietyStatusEnum;
 use App\Filament\Resources\ProductResource\Pages\CreateProduct;
@@ -16,6 +18,7 @@ use App\Models\AttributeGroup;
 use App\Models\AttributeGroupCategory;
 use App\Models\Product;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -43,6 +46,13 @@ use Livewire\Component;
 
 class ProductResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Product::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
@@ -124,6 +134,12 @@ class ProductResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('product.path'))
                             ->image()
+                            ->imageEditor()
+                            // The card grid and the gallery are both
+                            // aspect-square, so anything else letterboxes.
+                            ->imageCropAspectRatio(ImageAspectEnum::PRODUCT->aspectRatio())
+                            ->maxSize(ImageAspectEnum::PRODUCT->maxSizeKb())
+                            ->helperText(ImageAspectEnum::PRODUCT->hint())
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),
@@ -364,6 +380,12 @@ class ProductResource extends Resource
                                 FileUpload::make('path')
                                     ->label(trans('product.path'))
                                     ->image()
+                                    ->imageEditor()
+                                    // Same square frame as the product images
+                                    // above; keep in step with VarietyResource.
+                                    ->imageCropAspectRatio(ImageAspectEnum::VARIETY->aspectRatio())
+                                    ->maxSize(ImageAspectEnum::VARIETY->maxSizeKb())
+                                    ->helperText(ImageAspectEnum::VARIETY->hint())
                                     ->nullable()
                                     ->columnSpanFull(),
                                 TextInput::make('alt_text')

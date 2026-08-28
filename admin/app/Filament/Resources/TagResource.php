@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
+use App\Enums\ImageAspectEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\TagResource\Pages\CreateTag;
 use App\Filament\Resources\TagResource\Pages\EditTag;
 use App\Filament\Resources\TagResource\Pages\ListTags;
 use App\Models\Tag;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,8 +20,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -28,6 +33,13 @@ use Illuminate\Support\Str;
 
 class TagResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Tag::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-hashtag';
@@ -94,8 +106,25 @@ class TagResource extends Resource
                     ->schema([
                         Toggle::make('show_on_home')
                             ->label(trans('tag.show_on_home'))
+                            ->live()
                             ->hintIcon('heroicon-o-information-circle')
                             ->hintIconTooltip(trans('tag.show_on_home_hint')),
+                        // Featured tags have no position column — they always
+                        // land in the same slot — so the guide is shown only
+                        // once the toggle is on, to say where that slot is.
+                        // UI only: never written to the model.
+                        ViewField::make('position_guide')
+                            ->label(trans('position_guide.label'))
+                            ->helperText(trans('position_guide.hint'))
+                            ->view('filament.forms.position-guide')
+                            ->viewData([
+                                'kind' => 'tags',
+                                'selected' => 'home-tags',
+                                'alpineExpression' => "'home-tags'",
+                            ])
+                            ->visible(fn (Get $get): bool => (bool) $get('show_on_home'))
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
                         TextInput::make('home_order')
                             ->label(trans('tag.home_order'))
                             ->numeric()
@@ -108,6 +137,14 @@ class TagResource extends Resource
                                 FileUpload::make('path')
                                     ->label(trans('tag.path'))
                                     ->image()
+                                    ->imageEditor()
+                                    // A tag is a landing page, so it is shaped
+                                    // like a page hero. Nothing renders it yet;
+                                    // this keeps uploads consistent until
+                                    // something does.
+                                    ->imageCropAspectRatio(ImageAspectEnum::TAG->aspectRatio())
+                                    ->maxSize(ImageAspectEnum::TAG->maxSizeKb())
+                                    ->helperText(ImageAspectEnum::TAG->hint())
                                     ->nullable()
                                     ->columnSpanFull(),
                             ])

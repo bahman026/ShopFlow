@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\AddressResource\Pages\CreateAddress;
 use App\Filament\Resources\AddressResource\Pages\EditAddress;
 use App\Filament\Resources\AddressResource\Pages\ListAddresses;
 use App\Models\Address;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,6 +23,13 @@ use Filament\Tables\Table;
 
 class AddressResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CUSTOMERS;
+    }
+
     protected static ?string $model = Address::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';

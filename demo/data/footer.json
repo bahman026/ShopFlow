@@ -1,0 +1,8 @@
+{
+  "_note": "Reference only — NOT read by DemoSeeder. Footer/contact content (about text, link columns, social links, site name/phone/email/address) is already a real, existing feature: it lives in the `settings` table (key/label/content rows) and is seeded by database/seeders/SettingSeeder.php, which DatabaseSeeder already calls unconditionally for every environment. The four CMS pages linked from those footer links (about-us, return-conditions, privacy, cooperation) are seeded by PageSeeder. DemoSeeder does not touch either — duplicating them would just be a second, driftable copy of the same content. This file documents what already exists so it doesn't get reinvented.",
+  "settings_keys": [
+    "site_name", "site_phone", "site_email", "site_address", "site_working_hours",
+    "footer_about", "footer_copyright", "footer_links_shop", "footer_links_support", "footer_socials"
+  ],
+  "pages_slugs": ["about-us", "return-conditions", "privacy", "cooperation"]
+}

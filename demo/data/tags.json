@@ -1,0 +1,8 @@
+[
+  { "slug": "black-sneakers-tag", "name": "کفش ورزشی مشکی", "category_slug": "sneakers", "attribute_values": ["مشکی"], "show_on_home": true, "home_order": 1, "image_query": "black sneakers shoes" },
+  { "slug": "white-mens-shirts-tag", "name": "پیراهن سفید مردانه", "category_slug": "mens-shirts", "attribute_values": ["سفید"], "show_on_home": true, "home_order": 2, "image_query": "white dress shirt men" },
+  { "slug": "black-manteau-tag", "name": "مانتو مشکی زنانه", "category_slug": "womens-manteau", "attribute_values": ["مشکی"], "show_on_home": true, "home_order": 3, "image_query": "black modest coat women" },
+  { "slug": "rosegold-watches-tag", "name": "ساعت مچی رزگلد", "category_slug": "watches", "attribute_values": ["رزگلد"], "show_on_home": true, "home_order": 4, "image_query": "rose gold wristwatch" },
+  { "slug": "blue-mens-jeans-tag", "name": "شلوار جین آبی", "category_slug": "mens-jeans", "attribute_values": ["آبی"], "show_on_home": false, "home_order": 0, "image_query": "blue denim jeans" },
+  { "slug": "brown-handbags-tag", "name": "کیف دستی قهوه‌ای", "category_slug": "handbags", "attribute_values": ["قهوه‌ای"], "show_on_home": false, "home_order": 0, "image_query": "brown leather handbag" }
+]

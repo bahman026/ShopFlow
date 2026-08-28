@@ -9,6 +9,10 @@ use App\Actions\Category\BuildCategoryDetail;
 use App\Actions\Category\CollectCategoryIds;
 use App\Actions\Category\GetCategoryFilters;
 use App\Actions\Category\GetCategoryProducts;
+use App\Actions\Layout\GetBannersByPosition;
+use App\Actions\Layout\GetSliderByPosition;
+use App\Enums\BannerPositionEnum;
+use App\Enums\SliderPositionEnum;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,6 +28,8 @@ class CategoryController extends Controller
         BuildCategoryBreadcrumbs $buildBreadcrumbs,
         GetCategoryProducts $getCategoryProducts,
         GetCategoryFilters $getCategoryFilters,
+        GetSliderByPosition $getSliderByPosition,
+        GetBannersByPosition $getBannersByPosition,
     ): Response {
         $category = Category::query()
             ->active()
@@ -40,6 +46,10 @@ class CategoryController extends Controller
             'products' => $getCategoryProducts($categoryIds, $filters),
             'filters' => $getCategoryFilters($categoryIds, $filters),
             'applied' => $filters,
+            // Shared across every category: empty until an admin assigns a
+            // published slider/banner to the position.
+            'topSlides' => $getSliderByPosition(SliderPositionEnum::CATEGORY_TOP),
+            'sideBanners' => $getBannersByPosition(BannerPositionEnum::CATEGORY_SIDE),
         ]);
     }
 

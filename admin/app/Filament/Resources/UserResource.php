@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionActionEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Enums\RolesEnum;
 use App\Enums\UserStatusEnum;
 use App\Filament\Resources\UserResource\Pages\EditUser;
@@ -12,6 +14,7 @@ use App\Models\Address;
 use App\Models\City;
 use App\Models\Province;
 use App\Models\User;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -32,6 +35,13 @@ use Illuminate\Support\Str;
 
 class UserResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CUSTOMERS;
+    }
+
     protected static ?string $model = User::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
@@ -235,9 +245,15 @@ class UserResource extends Resource
         return $query;
     }
 
+    /**
+     * Creating panel users stays super-admin only, on top of the customers
+     * permission the trait already requires. Defined here so the stricter of
+     * the two rules wins rather than the trait's shadowing this one.
+     */
     public static function canCreate(): bool
     {
-        return Auth::user()->hasRole('super-admin');
+        return static::allows(PermissionActionEnum::CREATE, 'create')
+            && Auth::user()?->hasRole(RolesEnum::SUPER_ADMIN->value) === true;
     }
 
     public static function getPages(): array

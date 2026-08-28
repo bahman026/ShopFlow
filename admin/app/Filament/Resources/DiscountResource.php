@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\DiscountForEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\DiscountResource\Pages\CreateDiscount;
 use App\Filament\Resources\DiscountResource\Pages\EditDiscount;
 use App\Filament\Resources\DiscountResource\Pages\ListDiscounts;
 use App\Models\Discount;
 use App\Models\Variety;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +27,13 @@ use Filament\Tables\Table;
 
 class DiscountResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::MARKETING;
+    }
+
     protected static ?string $model = Discount::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';

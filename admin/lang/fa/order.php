@@ -20,6 +20,8 @@ return [
     'user_id' => 'مشتری',
     'coupon_id' => 'کوپن',
     'status' => 'وضعیت',
+    'inventory_insufficient' => 'امکان تغییر وضعیت این سفارش نیست: موجودی تنوع :variety برابر :available است اما سفارش به :required عدد نیاز دارد. ابتدا موجودی یا سفارش را اصلاح کنید.',
+    'inventory_insufficient_title' => 'موجودی کافی نیست',
     'src' => 'منبع',
     'for_partner' => 'برای همکار',
 

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property positive-int|null $user_id
  * @property positive-int|null $address_id
  * @property OrderStatusEnum $status
+ * @property positive-int|null $coupon_id
  * @property int $coupon_discount
  * @property int $discount
  * @property int $shipping_cost
@@ -40,6 +41,7 @@ class Order extends Model
         'user_id',
         'address_id',
         'status',
+        'coupon_id',
         'coupon_discount',
         'discount',
         'shipping_cost',

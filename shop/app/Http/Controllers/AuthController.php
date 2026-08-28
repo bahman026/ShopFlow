@@ -161,6 +161,16 @@ class AuthController extends Controller
     {
         $code = $sendOtp($mobile);
 
+        // The provider refused the message and nothing was stored, so keep the
+        // customer on the mobile step where they can try again immediately
+        // rather than sending them to a code form no code will ever arrive for.
+        if ($code === null) {
+            return back()
+                ->withErrors(['mobile' => trans('messages.auth.code_send_failed')])
+                ->with('authStep', 'mobile')
+                ->with('authMobile', $mobile);
+        }
+
         $redirect = back()
             ->with('authStep', 'otp')
             ->with('authMobile', $mobile)

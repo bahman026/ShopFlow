@@ -27,6 +27,7 @@ The admin panel covers the full schema today. The storefront is built feature by
 
 ```
 ShopFlow/
+├── compose.yaml        # Root entry point: brings up all six containers
 ├── admin/              # Filament admin panel (owns the DB schema)
 ├── shop/               # Inertia + Vue storefront (SSR)
 ├── infrastructure/
@@ -54,16 +55,49 @@ Run migrations and seeders from `admin/` only. The storefront must not migrate t
 
 ## Getting started
 
-### 1. Shared services (Postgres + Redis)
+### 1. Docker environment files
 
-In `infrastructure/docker`, create a `.env` from `.env.example`, then start the containers:
+Each compose file reads its own `.env`. Create all three from their examples:
 
 ```bash
-cd infrastructure/docker
-sudo docker compose up -d --build
+cp infrastructure/docker/.env.example infrastructure/docker/.env
+cp admin/docker/.env.example admin/docker/.env
+cp shop/docker/.env.example shop/docker/.env
 ```
 
-### 2. Configure each app
+Fill in the blanks in `infrastructure/docker/.env` (database name, user, password,
+Redis password) and set `USER_ID`/`GROUP_ID` to your own (`id -u`, `id -g`).
+
+### 2. Start every container
+
+The root `compose.yaml` merges the three compose files into one project, so a
+single command from the repository root brings up the shared services and both
+applications:
+
+```bash
+docker compose up -d --build
+```
+
+That starts six containers on a shared `shop_flow_net` network:
+
+| Container | Role | Host port |
+| --- | --- | --- |
+| `shop_flow_db` | PostgreSQL 16 | `127.0.0.1:5432` |
+| `shop_flow_redis` | Redis | `127.0.0.1:6379` |
+| `shop_flow_admin_app` | admin PHP-FPM | — |
+| `shop_flow_admin_nginx` | admin web server | `127.0.0.1:4040` |
+| `shop_flow_shop_app` | storefront PHP-FPM | — |
+| `shop_flow_shop_nginx` | storefront web server | `127.0.0.1:8080` |
+
+Both apps wait for Postgres and Redis to report healthy before they start. Host
+ports come from the `*_EXPOSE_PORT` variables in the three `.env` files.
+
+Each app can still be started on its own — `docker compose up -d` inside
+`infrastructure/docker`, `admin/docker`, or `shop/docker`. In that mode the
+`infrastructure` project must come up first, because it creates the
+`shop_flow_net` network that the other two join as an external network.
+
+### 3. Configure each app
 
 In both `admin/.env` and `shop/.env`, point the database at the shared Postgres (matching the values from `infrastructure/docker/.env`):
 
@@ -74,7 +108,7 @@ DB_PORT=5432
 # DB_DATABASE / DB_USERNAME / DB_PASSWORD must match infrastructure/docker/.env
 ```
 
-### 3. Admin (schema owner — set up first)
+### 4. Admin (schema owner — set up first)
 
 ```bash
 cd admin
@@ -84,7 +118,7 @@ php artisan migrate --seed
 npm install && npm run build
 ```
 
-### 4. Storefront
+### 5. Storefront
 
 ```bash
 cd shop
@@ -94,6 +128,18 @@ npm install && npm run build
 ```
 
 For app-specific details (Docker containers, SSR, conventions), see each app's own `README.md`, `AGENTS.md`, and `docs/`.
+
+## Production
+
+`compose.yaml` is for development only — it bind-mounts the source and installs
+dependencies on every container start. Production uses a separate stack,
+`compose.prod.yaml`, which bakes the application into images, serves both apps
+through Caddy with automatic TLS, and runs the Inertia renderer as its own
+container.
+
+Setup for an Ubuntu VPS is documented in
+[`infrastructure/production/README.md`](infrastructure/production/README.md);
+deploys run through `./infrastructure/production/deploy.sh`.
 
 ## Testing & quality
 

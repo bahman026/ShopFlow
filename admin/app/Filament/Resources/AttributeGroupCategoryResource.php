@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\AttributeGroupCategoryResource\Pages\CreateAttributeGroupCategory;
 use App\Filament\Resources\AttributeGroupCategoryResource\Pages\EditAttributeGroupCategory;
 use App\Filament\Resources\AttributeGroupCategoryResource\Pages\ListAttributeGroupCategories;
 use App\Models\AttributeGroupCategory;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -21,6 +23,13 @@ use Filament\Tables\Table;
 
 class AttributeGroupCategoryResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = AttributeGroupCategory::class;
 
     protected static ?int $navigationSort = 3;

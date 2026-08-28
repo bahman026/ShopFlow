@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\ImageAspectEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\MenuItemResource\Pages\CreateMenuItem;
 use App\Filament\Resources\MenuItemResource\Pages\EditMenuItem;
 use App\Filament\Resources\MenuItemResource\Pages\ListMenuItems;
 use App\Models\MenuItem;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +28,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MenuItemResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CONTENT;
+    }
+
     protected static ?string $model = MenuItem::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-list-bullet';
@@ -108,6 +118,13 @@ class MenuItemResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('menu_item.path'))
                             ->image()
+                            // No crop ratio: the storefront has no render site
+                            // for a menu icon, so there is no real shape to
+                            // enforce. Revisit if one is added.
+                            ->imageEditor()
+                            ->imageCropAspectRatio(ImageAspectEnum::MENU_ITEM->aspectRatio())
+                            ->maxSize(ImageAspectEnum::MENU_ITEM->maxSizeKb())
+                            ->helperText(ImageAspectEnum::MENU_ITEM->hint())
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')

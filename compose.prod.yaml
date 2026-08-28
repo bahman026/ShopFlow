@@ -1,0 +1,275 @@
+# Production stack for a single Ubuntu VPS.
+#
+#   docker compose -f compose.prod.yaml --env-file .env.production up -d --build
+#
+# Use infrastructure/production/deploy.sh instead of calling this directly — it
+# also runs the migration step, which is not part of container startup.
+#
+# Differences from the development compose.yaml: the application source is
+# baked into the images instead of bind-mounted, Postgres and Redis are on named
+# volumes and publish no host ports, and Caddy is the only thing listening on
+# the public interface.
+name: shopflow_prod
+
+# A VPS disk fills up quietly. Cap every container's logs.
+x-logging: &logging
+    driver: json-file
+    options:
+        max-size: "10m"
+        max-file: "5"
+
+x-admin-image: &admin-image
+    build:
+        context: ./admin
+        dockerfile: docker/Dockerfile.prod
+        target: app
+    image: shopflow/admin-app:${IMAGE_TAG:-latest}
+    env_file: [admin/.env.production]
+    restart: unless-stopped
+    logging: *logging
+    networks: [net]
+    depends_on:
+        db: {condition: service_healthy}
+        redis: {condition: service_healthy}
+
+x-shop-image: &shop-image
+    build:
+        context: ./shop
+        dockerfile: docker/Dockerfile.prod
+        target: app
+    image: shopflow/shop-app:${IMAGE_TAG:-latest}
+    env_file: [shop/.env.production]
+    restart: unless-stopped
+    logging: *logging
+    networks: [net]
+    depends_on:
+        db: {condition: service_healthy}
+        redis: {condition: service_healthy}
+
+services:
+
+    # --- shared services ---------------------------------------------------
+
+    db:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        logging: *logging
+        environment:
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            # Without this an initdb on a fresh volume uses trust auth.
+            POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+            POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+            interval: 10s
+            timeout: 5s
+            retries: 6
+            start_period: 30s
+        networks: [net]
+
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        logging: *logging
+        # The password is read from the environment inside the container rather
+        # than passed on the command line, where `docker inspect` would show it.
+        # Kept on one line deliberately: in a YAML folded scalar the flags would
+        # become separate lines after `exec`, i.e. never run at all.
+        command: ["sh", "-c", "exec redis-server --appendonly yes --maxmemory-policy noeviction --requirepass \"$$REDIS_PASSWORD\""]
+        environment:
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+        volumes:
+            - redisdata:/data
+        healthcheck:
+            # Asserts the password is actually enforced. A plain authenticated
+            # PING is not enough: it also succeeds against a server with no
+            # password at all, which is the failure this is guarding against.
+            test:
+                - CMD-SHELL
+                - redis-cli ping 2>&1 | grep -q NOAUTH && redis-cli --no-auth-warning -a "$$REDIS_PASSWORD" ping | grep -q PONG
+            interval: 10s
+            timeout: 5s
+            retries: 6
+        networks: [net]
+
+    # --- admin panel -------------------------------------------------------
+
+    admin_app:
+        <<: *admin-image
+        volumes:
+            # Uploads are the only state the app writes; everything else in
+            # storage/ is disposable.
+            - admin_storage:/var/www/html/storage/app/public
+            # Log files for the in-panel viewer. Shared with shop_app because
+            # the panel shows both apps' logs and cannot otherwise see into
+            # another container. stderr logging is unaffected — the apps write
+            # to both (LOG_STACK=stderr,shared).
+            - applogs:/var/log/shopflow
+        healthcheck:
+            test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9000'"]
+            interval: 15s
+            timeout: 5s
+            retries: 4
+            start_period: 40s
+
+    admin_web:
+        build:
+            context: ./admin
+            dockerfile: docker/Dockerfile.prod
+            target: web
+        image: shopflow/admin-web:${IMAGE_TAG:-latest}
+        restart: unless-stopped
+        logging: *logging
+        volumes:
+            # public/storage is a symlink into this volume; nginx serves the
+            # files directly and never needs to write them.
+            - admin_storage:/var/www/html/storage/app/public:ro
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/up > /dev/null || exit 1"]
+            interval: 15s
+            timeout: 5s
+            retries: 4
+            start_period: 40s
+        depends_on:
+            admin_app: {condition: service_started}
+        networks: [net]
+
+    # --- storefront --------------------------------------------------------
+
+    shop_app:
+        <<: *shop-image
+        volumes:
+            # Writes its logs where the admin panel's viewer can read them.
+            - applogs:/var/log/shopflow
+        healthcheck:
+            test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9000'"]
+            interval: 15s
+            timeout: 5s
+            retries: 4
+            start_period: 40s
+
+    shop_web:
+        build:
+            context: ./shop
+            dockerfile: docker/Dockerfile.prod
+            target: web
+        image: shopflow/shop-web:${IMAGE_TAG:-latest}
+        restart: unless-stopped
+        logging: *logging
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/up > /dev/null || exit 1"]
+            interval: 15s
+            timeout: 5s
+            retries: 4
+            start_period: 40s
+        depends_on:
+            shop_app: {condition: service_started}
+        networks: [net]
+
+    # Its own container so a crashed renderer restarts instead of silently
+    # dropping the storefront back to client-side rendering.
+    shop_ssr:
+        build:
+            context: ./shop
+            dockerfile: docker/Dockerfile.prod
+            target: ssr
+        image: shopflow/shop-ssr:${IMAGE_TAG:-latest}
+        restart: unless-stopped
+        logging: *logging
+        healthcheck:
+            test:
+                - CMD
+                - node
+                - -e
+                - "require('net').connect(13714,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"
+            interval: 15s
+            timeout: 5s
+            retries: 4
+            start_period: 20s
+        networks: [net]
+
+    # --- observability -----------------------------------------------------
+
+    # Feeds Pulse's Servers card (CPU, memory, disk). Every other card is
+    # recorded by the apps themselves as they serve requests; this one needs a
+    # process that samples the machine, so without it that card stays empty.
+    #
+    # Note: `pulse:trim` prunes old samples and runs from the scheduler, which
+    # lives behind the `workers` profile. Until that profile is started the
+    # pulse_* tables only grow — see infrastructure/production/README.md.
+    pulse:
+        <<: *admin-image
+        command: ["php", "artisan", "pulse:check"]
+
+    # --- workers -----------------------------------------------------------
+    # Nothing in the codebase queues a job or registers a scheduled task yet,
+    # so these stay out of the default `up`. Start them with:
+    #   docker compose -f compose.prod.yaml --profile workers up -d
+    # and set QUEUE_CONNECTION=redis in the app env files first.
+
+    admin_queue:
+        <<: *admin-image
+        profiles: [workers]
+        command: ["php", "artisan", "queue:work", "--tries=3", "--max-time=3600", "--sleep=1"]
+
+    admin_scheduler:
+        <<: *admin-image
+        profiles: [workers]
+        command: ["php", "artisan", "schedule:work"]
+
+    shop_queue:
+        <<: *shop-image
+        profiles: [workers]
+        command: ["php", "artisan", "queue:work", "--tries=3", "--max-time=3600", "--sleep=1"]
+
+    shop_scheduler:
+        <<: *shop-image
+        profiles: [workers]
+        command: ["php", "artisan", "schedule:work"]
+
+    # --- edge --------------------------------------------------------------
+    # The only container with published ports. Caddy terminates TLS and renews
+    # Let's Encrypt certificates on its own.
+    proxy:
+        image: caddy:2-alpine
+        restart: unless-stopped
+        logging: *logging
+        ports:
+            - "80:80"
+            - "443:443"
+            - "443:443/udp"
+        environment:
+            SHOP_DOMAIN: ${SHOP_DOMAIN}
+            ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+            SHOP_LEGACY_DOMAINS: ${SHOP_LEGACY_DOMAINS:-legacy.invalid}
+            TRUSTED_PROXIES: ${TRUSTED_PROXIES:-private_ranges}
+            # A certificate obtained off-box (see infrastructure/production/
+            # README.md) and mounted below — this host cannot reach Let's
+            # Encrypt's ACME API to get one on its own.
+            TLS_CERT_FILE: /etc/caddy/certs/fullchain.pem
+            TLS_KEY_FILE: /etc/caddy/certs/privkey.pem
+        volumes:
+            - ./infrastructure/production/Caddyfile:/etc/caddy/Caddyfile:ro
+            - ./infrastructure/production/certs:/etc/caddy/certs:ro
+            - caddy_data:/data
+            - caddy_config:/config
+        depends_on:
+            admin_web: {condition: service_started}
+            shop_web: {condition: service_started}
+        networks: [net]
+
+volumes:
+    pgdata:
+    redisdata:
+    admin_storage:
+    applogs:
+    caddy_data:
+    caddy_config:
+
+networks:
+    net:
+        driver: bridge

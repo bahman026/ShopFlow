@@ -20,6 +20,8 @@ return [
     'user_id' => 'Customer',
     'coupon_id' => 'Coupon',
     'status' => 'Status',
+    'inventory_insufficient' => 'Cannot mark this order as paid: variety :variety has only :available in stock but the order needs :required. Adjust the stock or the order first.',
+    'inventory_insufficient_title' => 'Not enough stock',
     'src' => 'Source',
     'for_partner' => 'For Partner',
 

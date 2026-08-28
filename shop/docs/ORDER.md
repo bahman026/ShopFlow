@@ -54,11 +54,38 @@ Because each attempt gets its own Zarinpal authority (a new `Transaction` row), 
 
 **Known tradeoff**: since retries reuse the order, an old *stale* Zarinpal callback URL (e.g. the customer navigates back to a previous attempt's return link after already starting a newer one) could re-verify against the wrong, now-superseded authority and cancel an order with a different attempt genuinely in flight. This is the same class of rare, accepted race as the last-unit-oversell case below — not specifically guarded against.
 
-## Returned orders (`RETURNED`): nothing happens automatically
+## Admin status changes keep stock in step (2026-08-07)
+
+`App\Observers\OrderObserver` (admin) upholds the same invariant the storefront
+does, for every status change staff make in the panel.
+
+`OrderStatusEnum::consumesStock()` is the single definition: an order holds
+stock while it is `PAID`, `PROCESSING`, `SHIPPED` or `DELIVERED`, and holds none
+while `PENDING`, `CANCELED` or `RETURNED`. Only a move **between those two sets**
+adjusts anything, so `PAID -> SHIPPED` changes nothing and re-saving an order
+changes nothing.
+
+- Entering the set (confirming a card-to-card receipt, say) decrements each
+  line, row-locked, exactly like `DecrementInventoryAndMarkPaid`.
+- Leaving it (cancel, or accepting a return) puts the stock back.
+- If a line cannot be covered, the transition is **refused** — `EditOrder` wraps
+  the save in a transaction, so the status change rolls back and staff get a
+  message naming the variety and the shortfall, instead of an unsigned-column
+  crash or a silently oversold order.
+
+This observer is registered by the admin app only. The storefront has its own
+`Order` model with no observer, so a Zarinpal payment still decrements exactly
+once, in `DecrementInventoryAndMarkPaid`.
+
+**Note this changes the `RETURNED` behaviour described below:** a return now
+restocks automatically. If the goods came back damaged, adjust the variety's
+inventory down by hand afterwards.
+
+## Returned orders (`RETURNED`): what still is not automatic
 
 Setting an order's `status` to `RETURNED` (in the Filament admin panel — there's no storefront-side path to it) is a plain data write. Nothing else is triggered:
 
-- **Inventory is not restocked.** No code anywhere increments `varieties.inventory` back; Strategy A only ever decrements on payment and never reverses it for a return.
+- **Inventory is restocked** as of 2026-08-07 (see the section above). Damaged or unsellable returns need a manual adjustment afterwards.
 - **No `Receipt` or `Transaction` row is created or updated.** There's no observer/event tied to `orders.status` — changing it doesn't touch either table.
 - **No refund is tracked.** Neither `receipts` nor `transactions` has a refund-related column (`refunded_at`, `refund_amount`, etc.) — the free-text "بازگشت وجه" note in `Transaction.result_message` is written only for the unrelated oversold-payment race (`failPaidButOversold()` above), not for a manual return.
 - **No status-transition validation.** `status` is a plain Filament `Select`; any status can be set to `RETURNED` from any prior status.

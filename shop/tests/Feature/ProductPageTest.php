@@ -140,7 +140,7 @@ it('returns 404 for a missing product', function (): void {
     $this->get('/products/does-not-exist')->assertNotFound();
 });
 
-it('pairs descriptive specs and highlights with their attribute group name', function (): void {
+it('pairs descriptive specs with their attribute group name and flags highlighted ones', function (): void {
     $category = Category::create([
         'heading' => 'پوشاک زنانه',
         'slug' => 'womens-clothing',
@@ -172,11 +172,50 @@ it('pairs descriptive specs and highlights with their attribute group name', fun
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('product.specs', 1, fn (AssertableInertia $spec): AssertableInertia => $spec
                 ->where('group', 'متریال')
-                ->where('value', 'پنبه')
+                ->where('highlight', true)
+                ->has('values', 1, fn (AssertableInertia $value): AssertableInertia => $value
+                    ->where('value', 'پنبه')
+                    ->where('color', null)
+                )
             )
-            ->has('product.highlights', 1, fn (AssertableInertia $highlight): AssertableInertia => $highlight
-                ->where('group', 'متریال')
-                ->where('value', 'پنبه')
+        );
+});
+
+it('groups several values in the same spec group into one row', function (): void {
+    $category = Category::create([
+        'heading' => 'کیف و کفش',
+        'slug' => 'bags-shoes',
+        'status' => CategoryStatusEnum::ACTIVE,
+    ]);
+
+    $ancestorId = DB::table('ancestors')->insertGetId([
+        'name' => 'ویژگی‌های ظاهری', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $groupId = DB::table('attribute_groups')->insertGetId([
+        'ancestor_id' => $ancestorId, 'name' => 'سایز کفش', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $sizes = collect(['40', '41', '42'])
+        ->map(fn (string $value): Attribute => Attribute::create(['attribute_group_id' => $groupId, 'value' => $value]));
+
+    $product = Product::create([
+        'heading' => 'کفش رانینگ',
+        'slug' => 'running-shoes',
+        'price' => 1200000,
+        'category_id' => $category->id,
+        'status' => ProductStatusEnum::PUBLISHED,
+        'seen' => 0,
+    ]);
+    makeImage(Product::class, $product->id);
+    $product->attributes()->attach($sizes->pluck('id')->all());
+
+    $this->get('/products/'.$product->slug)
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('product.specs', 1, fn (AssertableInertia $spec): AssertableInertia => $spec
+                ->where('group', 'سایز کفش')
+                ->where('highlight', false)
+                ->has('values', 3)
             )
         );
 });

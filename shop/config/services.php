@@ -45,6 +45,17 @@ return [
     // Zarinpal payment gateway. base_url defaults to the sandbox so local/CI
     // never accidentally hits production; any 36-character merchant_id works
     // in sandbox mode (no real merchant account needed).
+    // sms.ir, used for login/password-reset OTP over the `send/verify`
+    // endpoint (shared service line — no rented number needed). Leave
+    // api_key empty and the app logs the code instead of sending it, so local
+    // and CI need no credentials and spend no credit. template_id is the
+    // approved template from the sms.ir panel.
+    'sms_ir' => [
+        'api_key' => env('SMS_IR_API_KEY'),
+        'template_id' => env('SMS_IR_TEMPLATE_ID'),
+        'base_url' => env('SMS_IR_BASE_URL', 'https://api.sms.ir'),
+    ],
+
     'zarinpal' => [
         'merchant_id' => env('ZARINPAL_MERCHANT_ID'),
         'base_url' => env('ZARINPAL_BASE_URL', 'https://sandbox.zarinpal.com'),

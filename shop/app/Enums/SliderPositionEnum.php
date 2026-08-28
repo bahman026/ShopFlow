@@ -9,9 +9,11 @@ use App\Traits\HasOptions;
 /**
  * Fixed set of places a slider can be shown on the storefront. Mirrors the
  * admin enum (same string values) so the position an admin assigns and the
- * position the frontend looks up can never disagree. Only HOME_MAIN is
- * rendered today (home hero); the others are valid placements for pages that
- * read them later.
+ * position the frontend looks up can never disagree.
+ *
+ * Every case has a render site: HOME_MAIN and HOME_SECONDARY on the home page,
+ * CATEGORY_TOP on the category listing, PRODUCT_SIDE beside the buy box. Each
+ * renders nothing until a published slider is assigned to it.
  */
 enum SliderPositionEnum: string
 {

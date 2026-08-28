@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 5,
+            "command": "f=\"$CLAUDE_PROJECT_DIR/ai-context/claude/personal.md\"; [ -f \"$f\" ] && cat \"$f\"; true"
+          }
+        ]
+      }
+    ]
+  }
+}

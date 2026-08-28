@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Filament\Resources;
 
 use App\Enums\GatewayForEnum;
+use App\Enums\ImageAspectEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\GatewayResource\Pages\CreateGateway;
 use App\Filament\Resources\GatewayResource\Pages\EditGateway;
 use App\Filament\Resources\GatewayResource\Pages\ListGateways;
 use App\Models\Gateway;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +28,13 @@ use Filament\Tables\Table;
 
 class GatewayResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SETTINGS;
+    }
+
     protected static ?string $model = Gateway::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-library';
@@ -89,6 +99,12 @@ class GatewayResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('gateway.path'))
                             ->image()
+                            // A gateway logo, same reasoning as a brand logo:
+                            // contain-fitted, so no forced ratio.
+                            ->imageEditor()
+                            ->imageCropAspectRatio(ImageAspectEnum::GATEWAY->aspectRatio())
+                            ->maxSize(ImageAspectEnum::GATEWAY->maxSizeKb())
+                            ->helperText(ImageAspectEnum::GATEWAY->hint())
                             ->nullable()
                             ->columnSpanFull(),
                         TextInput::make('alt_text')

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\ShippingCityResource\Pages\CreateShippingCity;
 use App\Filament\Resources\ShippingCityResource\Pages\EditShippingCity;
 use App\Filament\Resources\ShippingCityResource\Pages\ListShippingCities;
 use App\Models\ShippingCity;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,6 +26,13 @@ use Filament\Tables\Table;
 
 class ShippingCityResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SHIPPING;
+    }
+
     protected static ?string $model = ShippingCity::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';

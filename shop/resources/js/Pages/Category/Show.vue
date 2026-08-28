@@ -3,6 +3,8 @@ import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import AppHead from '@/Components/AppHead.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SliderSlot from '@/Components/SliderSlot.vue';
+import BannerSlot from '@/Components/BannerSlot.vue';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import ProductCard from '@/Components/ProductCard.vue';
 import Pagination from '@/Components/Pagination.vue';
@@ -31,6 +33,14 @@ const props = defineProps({
     applied: {
         type: Object,
         required: true,
+    },
+    topSlides: {
+        type: Array,
+        default: () => [],
+    },
+    sideBanners: {
+        type: Array,
+        default: () => [],
     },
 });
 
@@ -134,6 +144,8 @@ function onPage(page) {
                 </p>
             </header>
 
+            <SliderSlot :slides="topSlides" aspect="wide" rounded="rounded-xl" />
+
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
                 <div class="lg:col-span-3" :class="showFilters ? 'block' : 'hidden lg:block'">
                     <CategoryFilters
@@ -142,6 +154,12 @@ function onPage(page) {
                         @apply="onApply"
                         @reset="onReset"
                         @close="showFilters = false"
+                    />
+
+                    <BannerSlot
+                        :banners="sideBanners"
+                        layout="stack"
+                        class="mt-6 hidden lg:block"
                     />
                 </div>
 

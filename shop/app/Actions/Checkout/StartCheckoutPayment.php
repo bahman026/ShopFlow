@@ -6,6 +6,7 @@ namespace App\Actions\Checkout;
 
 use App\DTOs\CartLineDTO;
 use App\DTOs\CartSummaryDTO;
+use App\DTOs\CouponDTO;
 use App\DTOs\ShippingMethodDTO;
 use App\Models\Address;
 use App\Models\User;
@@ -26,9 +27,9 @@ class StartCheckoutPayment
      *
      * @param  Collection<int, CartLineDTO>  $lines
      */
-    public function __invoke(User $user, Collection $lines, Address $address, ShippingMethodDTO $method, CartSummaryDTO $summary, string $callbackUrl, string $ip): ?string
+    public function __invoke(User $user, Collection $lines, Address $address, ShippingMethodDTO $method, CartSummaryDTO $summary, string $callbackUrl, string $ip, ?CouponDTO $coupon = null): ?string
     {
-        $order = ($this->createPendingOrder)($user, $lines, $address, $method, $summary);
+        $order = ($this->createPendingOrder)($user, $lines, $address, $method, $summary, $coupon);
 
         return ($this->openSession)($order, $user, $callbackUrl, $ip);
     }

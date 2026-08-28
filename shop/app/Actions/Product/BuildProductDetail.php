@@ -77,14 +77,7 @@ class BuildProductDetail
             inStock: $varieties->contains(fn (Variety $variety): bool => $this->inStock($variety)),
             variantAxes: ($this->buildVariantAxes)($varieties),
             varieties: $varieties->map(fn (Variety $variety): VarietyDTO => $this->variety($variety))->all(),
-            highlights: $product->attributes
-                ->filter(fn (Attribute $attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false))
-                ->map(fn (Attribute $attribute): array => $this->spec($attribute))
-                ->values()
-                ->all(),
-            specs: $product->attributes
-                ->map(fn (Attribute $attribute): array => $this->spec($attribute))
-                ->all(),
+            specs: $this->groupedSpecs($product->attributes),
             reviews: $product->reviews
                 ->map(fn (Review $review): ReviewDTO => new ReviewDTO(
                     id: $review->id,
@@ -121,18 +114,32 @@ class BuildProductDetail
     }
 
     /**
-     * A descriptive product attribute paired with its group name (e.g.
-     * `{group: 'متریال', value: 'پنبه'}`), so specs/highlights are never
-     * shown as bare, out-of-context values.
+     * Descriptive product attributes grouped by attribute group, so a
+     * product with several values in one group (e.g. five available shoe
+     * sizes) renders as a single row with several values instead of one
+     * repeated row per value. A group is `highlight`ed when any of its
+     * attached attributes carries `is_highlight` (set in the admin).
      *
-     * @return array{group: string, value: string}
+     * @param  Collection<int, Attribute>  $attributes
+     * @return array<int, array{group: string, values: array<int, array{value: string, color: string|null}>, highlight: bool}>
      */
-    private function spec(Attribute $attribute): array
+    private function groupedSpecs(Collection $attributes): array
     {
-        return [
-            'group' => (string) $attribute->attributeGroup->name,
-            'value' => $attribute->value,
-        ];
+        return $attributes
+            ->groupBy(fn (Attribute $attribute): string => (string) $attribute->attributeGroup->name)
+            ->map(fn (Collection $group, string $name): array => [
+                'group' => $name,
+                'values' => $group
+                    ->map(fn (Attribute $attribute): array => [
+                        'value' => $attribute->value,
+                        'color' => $attribute->color,
+                    ])
+                    ->values()
+                    ->all(),
+                'highlight' => $group->contains(fn (Attribute $attribute): bool => (bool) ($attribute->pivot->is_highlight ?? false)),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

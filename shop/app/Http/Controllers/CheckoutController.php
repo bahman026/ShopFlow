@@ -9,6 +9,7 @@ use App\Actions\Cart\BuildCartSummary;
 use App\Actions\Cart\GetCartLines;
 use App\Actions\Cart\ResolveCartOwner;
 use App\Actions\Checkout\GetShippingMethods;
+use App\Actions\Coupon\ResolveCartCoupon;
 use App\DTOs\ShippingMethodDTO;
 use App\Models\Address;
 use App\Models\Province;
@@ -31,7 +32,7 @@ class CheckoutController extends Controller
      * Step 2: shipping. The customer picks an address (or adds one when none
      * exist) and a shipping method available for that destination.
      */
-    public function shipping(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, BuildAddressDTO $build): Response|RedirectResponse
+    public function shipping(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, BuildAddressDTO $build, ResolveCartCoupon $resolveCoupon): Response|RedirectResponse
     {
         $user = $this->user($request);
         $lines = $getLines(($this->owner)($request));
@@ -54,8 +55,11 @@ class CheckoutController extends Controller
             ? null
             : $addresses->firstWhere('id', $selectedAddressId);
 
+        // Every checkout step shows the same total the cart promised.
+        $coupon = $resolveCoupon($request, $lines)['coupon'];
+
         return Inertia::render('Checkout/Shipping', [
-            'summary' => $buildSummary($lines)->toArray(),
+            'summary' => $buildSummary($lines, $coupon === null ? 0 : $coupon->discount)->toArray(),
             'addresses' => $addresses->map(fn (Address $address): array => $build($address)->toArray())->all(),
             'selectedAddressId' => $selectedAddressId,
             'shippingMethods' => $this->methodsFor($selectedAddress),
@@ -115,7 +119,7 @@ class CheckoutController extends Controller
     /**
      * Step 3: payment. Placeholder until the gateway/receipt flow is built.
      */
-    public function payment(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, BuildAddressDTO $build): Response|RedirectResponse
+    public function payment(Request $request, GetCartLines $getLines, BuildCartSummary $buildSummary, BuildAddressDTO $build, ResolveCartCoupon $resolveCoupon): Response|RedirectResponse
     {
         $user = $this->user($request);
         $lines = $getLines(($this->owner)($request));
@@ -141,10 +145,19 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.shipping')->with('status', trans('messages.checkout.choose_method'));
         }
 
+        // Same coupon the cart previewed, re-validated against the cart as it
+        // stands now, so this page shows exactly what will be charged.
+        $coupon = $resolveCoupon($request, $lines)['coupon'];
+
+        if ($coupon?->freeShipping === true) {
+            $method['cost'] = 0;
+        }
+
         return Inertia::render('Checkout/Payment', [
-            'summary' => $buildSummary($lines)->toArray(),
+            'summary' => $buildSummary($lines, $coupon === null ? 0 : $coupon->discount)->toArray(),
             'address' => $build($address)->toArray(),
             'shippingMethod' => $method,
+            'coupon' => $coupon?->toArray(),
         ]);
     }
 

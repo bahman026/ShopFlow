@@ -6,6 +6,7 @@ namespace App\Actions\Checkout;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\TransactionStatusEnum;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderVariety;
 use App\Models\Transaction;
@@ -37,6 +38,12 @@ class DecrementInventoryAndMarkPaid
                 }
 
                 $variety->decrement('inventory', $line->quantity);
+            }
+
+            // The coupon is only spent once money is actually captured, so an
+            // abandoned or failed order never eats one of its uses.
+            if ($order->coupon_id !== null) {
+                Coupon::query()->whereKey($order->coupon_id)->increment('total_used');
             }
 
             $order->update(['status' => OrderStatusEnum::PAID]);

@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "mens-clothing",
+    "heading": "پوشاک مردانه",
+    "description": "تی‌شرت، پیراهن، شلوار جین و کاپشن مردانه.",
+    "image_query": "men clothing rack fashion store",
+    "children": [
+      { "slug": "mens-tshirts", "heading": "تی‌شرت و پولوشرت مردانه", "attribute_group": "سایز", "image_query": "men t-shirt folded" },
+      { "slug": "mens-shirts", "heading": "پیراهن مردانه", "attribute_group": "سایز", "image_query": "men dress shirt hanging" },
+      { "slug": "mens-jeans", "heading": "شلوار جین مردانه", "attribute_group": "سایز", "image_query": "men denim jeans folded" },
+      { "slug": "mens-jackets", "heading": "کاپشن و ژاکت مردانه", "attribute_group": "سایز", "image_query": "men winter jacket" }
+    ]
+  },
+  {
+    "slug": "womens-clothing",
+    "heading": "پوشاک زنانه",
+    "description": "مانتو، بلوز و شلوار زنانه.",
+    "image_query": "women clothing rack fashion store",
+    "children": [
+      { "slug": "womens-manteau", "heading": "مانتو و روپوش زنانه", "attribute_group": "سایز", "image_query": "women modest fashion coat" },
+      { "slug": "womens-tshirts", "heading": "تی‌شرت و بلوز زنانه", "attribute_group": "سایز", "image_query": "women blouse clothing" },
+      { "slug": "womens-pants", "heading": "شلوار و شلوارک زنانه", "attribute_group": "سایز", "image_query": "women trousers clothing" }
+    ]
+  },
+  {
+    "slug": "bags-shoes",
+    "heading": "کیف و کفش",
+    "description": "کفش ورزشی، کفش رسمی و کیف دستی زنانه.",
+    "image_query": "shoes and bags display store",
+    "children": [
+      { "slug": "sneakers", "heading": "کفش ورزشی", "attribute_group": "سایز کفش", "image_query": "sneakers shoes pair" },
+      { "slug": "handbags", "heading": "کیف دستی زنانه", "attribute_group": "رنگ", "image_query": "women handbag leather" },
+      { "slug": "formal-shoes", "heading": "کفش رسمی مردانه", "attribute_group": "سایز کفش", "image_query": "men formal leather shoes" }
+    ]
+  },
+  {
+    "slug": "accessories",
+    "heading": "اکسسوری",
+    "description": "ساعت مچی، عینک آفتابی و کمربند.",
+    "image_query": "fashion accessories flat lay",
+    "children": [
+      { "slug": "watches", "heading": "ساعت مچی", "attribute_group": "رنگ", "image_query": "wristwatch" },
+      { "slug": "sunglasses", "heading": "عینک آفتابی", "attribute_group": "رنگ", "image_query": "sunglasses pair" },
+      { "slug": "belts", "heading": "کمربند چرم", "attribute_group": "رنگ", "image_query": "leather belt" }
+    ]
+  }
+]

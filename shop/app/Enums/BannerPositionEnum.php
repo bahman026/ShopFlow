@@ -9,10 +9,11 @@ use App\Traits\HasOptions;
 /**
  * Fixed set of places a banner can be shown on the storefront. Mirrors the
  * admin enum (same string values) so the position an admin assigns and the
- * position the frontend looks up can never disagree. Only HOME_MIDDLE is
- * rendered today (the home banner grid); the others are valid placements for
- * pages/slots that read them later (a slot may render a grid or a single
- * banner — the position doesn't dictate that).
+ * position the frontend looks up can never disagree.
+ *
+ * Every case has a render site: HOME_TOP and HOME_MIDDLE on the home page,
+ * CATEGORY_SIDE on the category listing. Each renders nothing until a
+ * published banner is assigned to it.
  */
 enum BannerPositionEnum: string
 {

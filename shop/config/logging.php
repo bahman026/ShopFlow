@@ -73,6 +73,20 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Rotating file for the in-panel log viewer. Production also keeps
+        // logging to stderr (LOG_STACK=stderr,shared) so `docker logs` and
+        // Docker's own rotation are unaffected — this only adds a copy the
+        // viewer can read. In production LOG_SHARED_PATH points at a volume
+        // both app containers mount, each app in its own subdirectory, since
+        // the admin container cannot otherwise see the storefront's files.
+        'shared' => [
+            'driver' => 'daily',
+            'path' => env('LOG_SHARED_PATH', storage_path('logs/laravel.log')),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

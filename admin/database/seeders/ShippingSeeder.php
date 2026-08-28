@@ -81,5 +81,28 @@ class ShippingSeeder extends Seeder
             'description' => 'تحویل حضوری (شنبه تا چهارشنبه، به‌جز روزهای تعطیل) — بعد از آماده‌سازی، زمان تحویل با شما از طرف فروشگاه هماهنگ می‌شود. هزینه ارسال به صورت پس‌کرایه می‌باشد.',
             'status' => true,
         ]);
+
+        // تیپاکس: nationwide courier, postpaid (pay on delivery) — the
+        // customer settles the freight with the courier when the package
+        // arrives, same as every other پس‌کرایه row: `amount` stays null
+        // because it isn't known at checkout, only at delivery.
+        $tipax = ShippingLine::query()->create([
+            'name' => 'تیپاکس',
+            'cost' => 0,
+        ]);
+        $tipaxMethod = ShippingMethod::query()->create([
+            'shipping_line_id' => $tipax->id,
+            'name' => 'تیپاکس',
+            'type' => 'باربری',
+            'status' => true,
+        ]);
+        ShippingCity::query()->create([
+            'shipping_method_id' => $tipaxMethod->id,
+            'pay_on_delivery' => true,
+            'amount' => null,
+            'sending_days' => '۱ تا ۳ روز کاری',
+            'description' => 'ارسال با شرکت تیپاکس به سراسر کشور. هزینه ارسال به صورت پس‌کرایه است و هنگام تحویل بار در باجه تیپاکس مقصد پرداخت می‌شود.',
+            'status' => true,
+        ]);
     }
 }

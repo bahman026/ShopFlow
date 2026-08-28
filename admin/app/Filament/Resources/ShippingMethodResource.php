@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources;
 
+use App\Enums\PermissionGroupEnum;
 use App\Enums\ShippingMethodForEnum;
 use App\Filament\Resources\ShippingMethodResource\Pages\CreateShippingMethod;
 use App\Filament\Resources\ShippingMethodResource\Pages\EditShippingMethod;
 use App\Filament\Resources\ShippingMethodResource\Pages\ListShippingMethods;
 use App\Models\ShippingMethod;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,6 +26,13 @@ use Filament\Tables\Table;
 
 class ShippingMethodResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::SHIPPING;
+    }
+
     protected static ?string $model = ShippingMethod::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';

@@ -6,11 +6,14 @@ namespace App\Filament\Resources;
 
 use AmidEsfahani\FilamentTinyEditor\TinyEditor;
 use App\Enums\CategoryStatusEnum;
+use App\Enums\ImageAspectEnum;
+use App\Enums\PermissionGroupEnum;
 use App\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\CategoryResource\Pages\EditCategory;
 use App\Filament\Resources\CategoryResource\Pages\ListCategories;
 use App\Models\Category;
 use App\Models\Image;
+use App\Traits\AuthorizesWithPermissions;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -29,6 +32,13 @@ use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
+    public static function permissionGroup(): PermissionGroupEnum
+    {
+        return PermissionGroupEnum::CATALOG;
+    }
+
     protected static ?string $model = Category::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -100,6 +110,13 @@ class CategoryResource extends Resource
                         FileUpload::make('path')
                             ->label(trans('category.path'))
                             ->image()
+                            ->imageEditor()
+                            // The home strip draws this in a circle with
+                            // object-cover, so anything but a square loses its
+                            // edges to a crop nobody chose.
+                            ->imageCropAspectRatio(ImageAspectEnum::CATEGORY->aspectRatio())
+                            ->maxSize(ImageAspectEnum::CATEGORY->maxSizeKb())
+                            ->helperText(ImageAspectEnum::CATEGORY->hint())
                             ->nullable()
                             ->columns(1)
                             ->columnSpanFull(),

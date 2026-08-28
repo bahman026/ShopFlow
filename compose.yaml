@@ -1,0 +1,50 @@
+# Root entry point for local development.
+#
+#   docker compose up -d --build
+#
+# brings up the shared Postgres + Redis and both applications as one project.
+# Each app keeps its own compose file under <app>/docker/ so it can still be
+# started on its own; this file only merges them and adds the wiring that can
+# exist solely when all three are in the same project.
+name: shop_flow
+
+include:
+    - path: infrastructure/docker/docker-compose.yml
+      project_directory: infrastructure/docker
+      env_file: infrastructure/docker/.env
+
+    - path: admin/docker/docker-compose.yml
+      project_directory: admin/docker
+      env_file: admin/docker/.env
+
+    - path: shop/docker/docker-compose.yml
+      project_directory: shop/docker
+      env_file: shop/docker/.env
+
+# admin/ and shop/ declare this network as external because on their own they
+# join a network that infrastructure/ created. Re-declaring it here makes the
+# root project the owner, so a fresh clone needs no manual network create.
+networks:
+    net:
+        name: shop_flow_net
+        driver: bridge
+        # Must be explicit: without it the leaf files' `external: true` wins the
+        # merge and nothing creates the network.
+        external: false
+
+# depends_on cannot live in admin/ or shop/: db is not part of those projects
+# when they run alone. It is expressible only once all three files are merged.
+services:
+    admin_app:
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+
+    shop_app:
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy

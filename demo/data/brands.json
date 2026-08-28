@@ -1,0 +1,12 @@
+[
+  { "slug": "kalehpoosh", "heading": "کاله‌پوش", "description": "پوشاک روزمره مردانه با تمرکز بر پارچه‌های نخی باکیفیت." },
+  { "slug": "parsa-style", "heading": "پارسا استایل", "description": "پیراهن و مانتوهای کلاسیک برای پوشش رسمی و روزمره." },
+  { "slug": "rakhshan", "heading": "رخشان", "description": "پوشاک و کیف و کفش زنانه با طراحی مدرن و رنگ‌بندی متنوع." },
+  { "slug": "modern-tan", "heading": "مدرن‌تن", "description": "شلوار جین و پوشاک دنیم برای مردان و زنان." },
+  { "slug": "artin-lebas", "heading": "آرتین لباس", "description": "محصولات چرمی و پوشاک رسمی با کیفیت بالا." },
+  { "slug": "sevenline", "heading": "سون‌لاین", "description": "پوشاک اسپرت و کژوال با قیمت مناسب." },
+  { "slug": "bahar-poosh", "heading": "بهار پوش", "description": "پوشاک سبک و تابستانه زنانه از جنس‌های طبیعی." },
+  { "slug": "eleganza", "heading": "الگانزا", "description": "پوشاک و اکسسوری زنانه با رویکرد شیک و مجلسی." },
+  { "slug": "kuhsar-sport", "heading": "کوهسار اسپرت", "description": "پوشاک و کفش ورزشی برای فعالیت روزمره و حرفه‌ای." },
+  { "slug": "simorgh", "heading": "سیمرغ", "description": "کیف، کفش و ساعت مچی چرمی با طراحی کلاسیک." }
+]
