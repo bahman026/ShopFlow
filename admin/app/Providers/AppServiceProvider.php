@@ -5,9 +5,17 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\RolesEnum;
+use App\Models\Image;
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\Review;
 use App\Models\User;
+use App\Models\Variety;
+use App\Observers\ImageObserver;
 use App\Observers\OrderObserver;
+use App\Observers\ProductObserver;
+use App\Observers\ReviewObserver;
+use App\Observers\VarietyObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,7 +38,31 @@ class AppServiceProvider extends ServiceProvider
         // the panel — the storefront covers gateway payments on its own side.
         Order::observe(OrderObserver::class);
 
+        $this->invalidateCatalogCache();
+
         $this->gateOperationalDashboards();
+    }
+
+    /**
+     * Clear the storefront's cached product pages and listings whenever staff
+     * change the catalog.
+     *
+     * The entries are written by the *other* app. That only works because both
+     * apps point at the same Redis store with the same pinned prefixes (see
+     * `config/cache.php`) and build keys with the same mirrored
+     * `App\Support\ProductCache`. Get either wrong and every call here still
+     * succeeds while reaching nothing — the storefront would serve edited-away
+     * prices until each entry's TTL expired, with no error anywhere.
+     *
+     * The same four observers are registered on the storefront side, because it
+     * writes these tables too (inventory on payment, the product view counter).
+     */
+    private function invalidateCatalogCache(): void
+    {
+        Product::observe(ProductObserver::class);
+        Variety::observe(VarietyObserver::class);
+        Image::observe(ImageObserver::class);
+        Review::observe(ReviewObserver::class);
     }
 
     /**
