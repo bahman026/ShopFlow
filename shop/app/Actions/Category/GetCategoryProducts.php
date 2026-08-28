@@ -8,8 +8,10 @@ use App\Actions\Catalog\BuildProductCard;
 use App\Actions\Catalog\GroupAttributeIds;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Product;
+use App\Support\ProductCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Pagination\Paginator;
 
 class GetCategoryProducts
 {
@@ -26,11 +28,43 @@ class GetCategoryProducts
     /**
      * Filtered, sorted, paginated product cards for a category.
      *
+     * Cached (`CACHE.md` key 6). The payload depends on the category ids, all
+     * six filters, the sort and the page, so the key space is far too wide to
+     * enumerate and delete: `ProductCache` therefore stamps a generation into
+     * every list key, and a catalog write that changes what a card shows moves
+     * the generation instead of hunting down keys. Stale entries simply become
+     * unreachable and expire.
+     *
+     * The page number has to be part of the signature explicitly — `paginate()`
+     * reads it from the request, not from the arguments, so without it page 2
+     * would be served page 1's payload.
+     *
+     * Serves the tag landing pages too, which call this action with the tag's
+     * attribute ids merged into the filters.
+     *
      * @param  array<int, int>  $categoryIds
      * @param  array{brands: array<int, string>, attributes: array<int, int>, minPrice: int|null, maxPrice: int|null, inStock: bool, sort: string}  $filters
      * @return array{data: array<int, array<string, mixed>>, meta: array{currentPage: int, lastPage: int, perPage: int, total: int, from: int|null, to: int|null}}
      */
     public function __invoke(array $categoryIds, array $filters): array
+    {
+        return ProductCache::rememberList(
+            'category',
+            [
+                'categories' => $categoryIds,
+                'filters' => $filters,
+                'page' => Paginator::resolveCurrentPage(),
+            ],
+            fn (): array => $this->fetch($categoryIds, $filters),
+        );
+    }
+
+    /**
+     * @param  array<int, int>  $categoryIds
+     * @param  array{brands: array<int, string>, attributes: array<int, int>, minPrice: int|null, maxPrice: int|null, inStock: bool, sort: string}  $filters
+     * @return array{data: array<int, array<string, mixed>>, meta: array{currentPage: int, lastPage: int, perPage: int, total: int, from: int|null, to: int|null}}
+     */
+    private function fetch(array $categoryIds, array $filters): array
     {
         $query = Product::query()
             ->published()
