@@ -26,10 +26,15 @@ declare(strict_types=1);
 const MIRRORED_CACHE_FILES = [
     'Support/ProductCache.php',
     'Observers/Concerns/ForgetsProductCache.php',
+    'Observers/Concerns/FlushesCatalogCache.php',
     'Observers/ProductObserver.php',
     'Observers/VarietyObserver.php',
     'Observers/ReviewObserver.php',
     'Observers/ImageObserver.php',
+    'Observers/CategoryObserver.php',
+    'Observers/BrandObserver.php',
+    'Observers/AttributeObserver.php',
+    'Observers/AttributeGroupObserver.php',
 ];
 
 function adminAppPath(): string
