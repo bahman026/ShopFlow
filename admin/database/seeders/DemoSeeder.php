@@ -25,6 +25,7 @@ use App\Models\Slider;
 use App\Models\Tag;
 use App\Models\User;
 use App\Models\Variety;
+use App\Support\ProductCache;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -50,7 +51,7 @@ use Illuminate\Support\Str;
  */
 class DemoSeeder extends Seeder
 {
-    private const DATA_PATH = __DIR__.'/../../../demo/data';
+    private const DATA_PATH = __DIR__ . '/../../../demo/data';
 
     private const IMAGE_BASE_PATH = 'demo';
 
@@ -84,6 +85,12 @@ class DemoSeeder extends Seeder
             $this->seedTags($categories);
             $this->seedMenu();
         });
+
+        // Products are re-seeded by slug and their varieties are wiped and
+        // recreated, so cached storefront pages describe rows that are gone.
+        // Flushing after the transaction commits, not inside it: a rolled-back
+        // seed should not have thrown away a valid cache.
+        ProductCache::flushAll();
 
         $this->printSummary();
     }
@@ -181,7 +188,7 @@ class DemoSeeder extends Seeder
             $brand->image()->delete();
             $initial = mb_substr($data['heading'], 0, 1);
             $brand->image()->create([
-                'path' => "https://placehold.co/400x200/1f2937/ffffff?text=".rawurlencode($initial),
+                'path' => 'https://placehold.co/400x200/1f2937/ffffff?text=' . rawurlencode($initial),
                 'is_featured' => true,
                 'order' => 0,
                 'alt_text' => $data['heading'],
@@ -201,7 +208,7 @@ class DemoSeeder extends Seeder
     /**
      * @param  array<string, AttributeGroup>  $groups
      * @return array<string, Category> keyed by slug (leaf categories only —
-     *                                  the ones products actually belong to)
+     *                                 the ones products actually belong to)
      */
     private function seedCategories(array $groups): array
     {
@@ -309,7 +316,7 @@ class DemoSeeder extends Seeder
                     'width' => null,
                     'height' => null,
                     'status' => 20, // ProductStatusEnum::PUBLISHED
-                    'seen' => abs(crc32($data['slug'].'seen')) % 5000,
+                    'seen' => abs(crc32($data['slug'] . 'seen')) % 5000,
                 ],
             );
             $this->count('products');
@@ -395,8 +402,8 @@ class DemoSeeder extends Seeder
     {
         $materials = implode('، ', $data['materials']);
 
-        return "<p>{$data['heading']} از برند {$this->brandHeadingPlaceholder($data['brand_slug'])} با جنس {$materials} تولید شده است. {$data['highlight_spec']}</p>".
-            '<p>این محصول با دقت در انتخاب مواد اولیه و دوخت تولید شده تا در استفاده روزمره ماندگاری خوبی داشته باشد. '.
+        return "<p>{$data['heading']} از برند {$this->brandHeadingPlaceholder($data['brand_slug'])} با جنس {$materials} تولید شده است. {$data['highlight_spec']}</p>" .
+            '<p>این محصول با دقت در انتخاب مواد اولیه و دوخت تولید شده تا در استفاده روزمره ماندگاری خوبی داشته باشد. ' .
             'پیش از خرید، راهنمای سایزبندی را بررسی کنید و در صورت هرگونه سوال، پیش از ثبت سفارش با پشتیبانی فروشگاه در تماس باشید.</p>';
     }
 
@@ -419,7 +426,7 @@ class DemoSeeder extends Seeder
             if (! $this->demoImageExists($relative)) {
                 continue;
             }
-            $path = self::IMAGE_BASE_PATH.'/'.$relative;
+            $path = self::IMAGE_BASE_PATH . '/' . $relative;
             $product->images()->create([
                 'path' => $path,
                 'is_featured' => $n === 1,
@@ -625,7 +632,7 @@ class DemoSeeder extends Seeder
                 $reviewer = $reviewers[$hash % count($reviewers)];
 
                 Review::query()->create([
-                    'heading' => trim("{$reviewer->first_name} {$reviewer->last_name}").' درباره '.$data['heading'],
+                    'heading' => trim("{$reviewer->first_name} {$reviewer->last_name}") . ' درباره ' . $data['heading'],
                     'content' => $content,
                     'rating' => $rating,
                     'user_id' => $reviewer->id,
@@ -660,7 +667,7 @@ class DemoSeeder extends Seeder
             $relative = "banners/{$data['position']}-{$n}.webp";
             if ($this->demoImageExists($relative)) {
                 $banner->images()->create([
-                    'path' => self::IMAGE_BASE_PATH.'/'.$relative,
+                    'path' => self::IMAGE_BASE_PATH . '/' . $relative,
                     'is_featured' => true,
                     'order' => 0,
                     'alt_text' => $data['heading'],
@@ -691,7 +698,7 @@ class DemoSeeder extends Seeder
                 $relative = "sliders/{$sliderData['position']}-{$slideData['order']}.webp";
                 if ($this->demoImageExists($relative)) {
                     $slide->image()->create([
-                        'path' => self::IMAGE_BASE_PATH.'/'.$relative,
+                        'path' => self::IMAGE_BASE_PATH . '/' . $relative,
                         'is_featured' => true,
                         'order' => 0,
                         'alt_text' => $slideData['heading'],
@@ -739,7 +746,7 @@ class DemoSeeder extends Seeder
             $relative = "tags/{$data['slug']}.webp";
             if ($data['show_on_home'] && $this->demoImageExists($relative)) {
                 $tag->image()->create([
-                    'path' => self::IMAGE_BASE_PATH.'/'.$relative,
+                    'path' => self::IMAGE_BASE_PATH . '/' . $relative,
                     'is_featured' => true,
                     'order' => 0,
                     'alt_text' => $data['name'],
@@ -804,7 +811,7 @@ class DemoSeeder extends Seeder
             return;
         }
         $category->image()->create([
-            'path' => self::IMAGE_BASE_PATH.'/'.$relative,
+            'path' => self::IMAGE_BASE_PATH . '/' . $relative,
             'is_featured' => true,
             'order' => 0,
             'alt_text' => $category->heading,
@@ -813,13 +820,13 @@ class DemoSeeder extends Seeder
 
     private function demoImageExists(string $relative): bool
     {
-        return is_file(storage_path('app/public/'.self::IMAGE_BASE_PATH.'/'.$relative));
+        return is_file(storage_path('app/public/' . self::IMAGE_BASE_PATH . '/' . $relative));
     }
 
     /** @return array<mixed> */
     private function readJson(string $filename): array
     {
-        $path = self::DATA_PATH.'/'.$filename;
+        $path = self::DATA_PATH . '/' . $filename;
         if (! is_file($path)) {
             throw new \RuntimeException("DemoSeeder: missing demo/data/{$filename}. Run the fetch pipeline first (see demo/README.md).");
         }
