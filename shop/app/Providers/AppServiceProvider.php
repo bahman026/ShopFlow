@@ -4,10 +4,18 @@ namespace App\Providers;
 
 use App\Contracts\ProductSearch;
 use App\Contracts\SmsSender;
+use App\Models\Attribute;
+use App\Models\AttributeGroup;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Variety;
+use App\Observers\AttributeGroupObserver;
+use App\Observers\AttributeObserver;
+use App\Observers\BrandObserver;
+use App\Observers\CategoryObserver;
 use App\Observers\ImageObserver;
 use App\Observers\ProductObserver;
 use App\Observers\ReviewObserver;
@@ -59,14 +67,21 @@ class AppServiceProvider extends ServiceProvider
      * the admin panel would mean a sold-out variety still advertising stock
      * until the entry expired.
      *
-     * The same four observers are registered in the admin panel, and both apps
-     * build keys with the same mirrored `App\Support\ProductCache` against one
-     * shared Redis store, so either side's write clears the other side's cache.
+     * The same observers are registered in the admin panel, and both apps build
+     * keys with the same mirrored `App\Support\ProductCache` against one shared
+     * Redis store, so either side's write clears the other side's cache.
      *
-     * `Image` and `Review` do not fire from any storefront path that exists
-     * today (reviews are created `PENDING`, so nothing visible changes) — they
-     * are registered because this app shares the schema with the panel and a
-     * future write here must not be the one place that forgets to invalidate.
+     * The catalog-metadata group (category, brand, attribute, attribute group)
+     * *flushes* rather than forgetting one page: the products affected by a
+     * renamed attribute are spread across three pivots, and a renamed category
+     * reaches its whole descendant subtree through the breadcrumbs. Those edits
+     * are rare enough to afford it — unlike the per-product observers above,
+     * which a single sale triggers.
+     *
+     * Only `Product` and `Variety` fire from a storefront path that exists today
+     * (the view counter and the paid-order stock decrement). The rest are
+     * registered because this app shares the schema with the panel, and a future
+     * write here must not be the one place that forgets to invalidate.
      */
     private function invalidateCatalogCache(): void
     {
@@ -74,5 +89,10 @@ class AppServiceProvider extends ServiceProvider
         Variety::observe(VarietyObserver::class);
         Image::observe(ImageObserver::class);
         Review::observe(ReviewObserver::class);
+
+        Category::observe(CategoryObserver::class);
+        Brand::observe(BrandObserver::class);
+        Attribute::observe(AttributeObserver::class);
+        AttributeGroup::observe(AttributeGroupObserver::class);
     }
 }
