@@ -10,6 +10,7 @@ use App\Actions\Category\CollectCategoryIds;
 use App\Enums\VarietyStatusEnum;
 use App\Models\Product;
 use App\Models\Tag;
+use App\Support\ProductCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -48,9 +49,32 @@ class GetTagRows
      * through. Capping the tags we load is what keeps the query count bounded,
      * which is the point of the limit.
      *
+     * Cached (`CACHE.md` key 13) — by far the most expensive thing on the home
+     * page, since every row costs its own category walk, attribute grouping and
+     * product query. Like `GetProductRows`, the signature is only the locale,
+     * because nothing here varies per visitor.
+     *
+     * Invalidation arrives from three directions, and only the first needed new
+     * code: `TagObserver` (which tags are featured, in what order, and what they
+     * match), `CategoryObserver`/`AttributeObserver` (a tag's scope is resolved
+     * through both), and every product/variety/image write through the shared
+     * list generation.
+     *
      * @return array<int, array<string, mixed>>
      */
     public function __invoke(): array
+    {
+        return ProductCache::rememberList(
+            'home.tags',
+            ['locale' => app()->getLocale()],
+            fn (): array => $this->fetch(),
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetch(): array
     {
         $tags = Tag::query()
             ->where('show_on_home', true)
