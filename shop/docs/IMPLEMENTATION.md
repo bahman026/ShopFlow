@@ -29,7 +29,7 @@ Catalog layer and platform basics.
 - [x] Menus + Menu Items (nested via `parent_id`; optional polymorphic image per item)
 - [x] Pages (CMS static pages; polymorphic image; SCHEDULED status with `published_at`)
 - [x] FAQs (question + answer; `order` and nullable `position` for placement context)
-- [x] Reviews (user reviews for products; `parent_id` for replies; `status` moderation)
+- [x] Reviews (user reviews for products; `rating` 1–5 nullable star rating; `parent_id` for replies; `status` moderation). Reviews are submitted from the storefront (created `PENDING`); staff approve/reject via the Edit form's `status` dropdown
 - [x] Wishlists (`user_id` + `product_id` pivot; cascades on user/product delete; list + delete resource)
 - [x] Addresses (immutable history: model, factory, seeder, Filament resource (+ pages), tests. Editing creates a NEW address instead of mutating; the new address inherits the edited one's primary status; records are never deleted, so orders keep an accurate address history. One primary per user enforced via a model `saved` hook)
 
@@ -37,7 +37,8 @@ Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed
 
 Cross-cutting improvements landed:
 - Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address / Logistics.
-- `CACHE.md` added to track identified-but-not-implemented cache keys.
+- `CACHE.md` added to track cache keys — now also the register of what is implemented.
+- **Catalog cache invalidation** (products + varieties, `CACHE.md` keys 5–7): the storefront caches product pages and category listings in Redis, and **this panel is what clears them**. Four observers registered by `AppServiceProvider::invalidateCatalogCache()` — `Product`, `Variety`, `Image`, `Review` — call the mirrored `App\Support\ProductCache`. Three things to know before touching it: (1) nothing in this panel ever *reads* those entries, so a broken hook is invisible here and shows up only as a customer seeing a price that was edited away — `ProductCacheInvalidationTest` is the only safety net; (2) it works solely because both apps share one Redis store with pinned `CACHE_PREFIX`/`REDIS_PREFIX` (they were silently mismatched before, each derived from `APP_NAME` with a different separator, while production was already on redis); (3) `ProductCache.php` and the four observers are **mirrored byte-for-byte with `shop/`** — change both copies in one commit, as with the enums. Seeders that `truncate()` call `ProductCache::flushAll()`, since truncate fires no model events.
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
 - Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`, `ORDER.md`).
 - **Inventory rule** (`ORDER.md`): stock is decremented only on successful payment (Strategy A); carts never change `varieties.inventory`.
@@ -80,7 +81,7 @@ Depend mostly on Images only.
 - [x] FAQs
 - [x] Reviews
 - [x] Wishlists
-- [x] Tags (admin owns the schema; storefront renders `/tags/{slug}` — see shop `TAGS.md` and `STOREFRONT_IMPLEMENTATION.md`)
+- [x] Tags (SEO landing page for a category and/or attribute filter; `tags` + `attribute_tag` pivot migrations, `Tag` model + factory + seeder, `TagResource` + pages + lang, tests. `category_id` nullable + attributes many-to-many, at-least-one-required; SEO columns added — `title`/`description`/`no_index`/`canonical`; source single `attribute_id` replaced by the pivot and `type` column dropped, single-vendor. See shop `TAGS.md`)
 - [x] Position-driven home/category/product layout (replaced Home Sections, 2026-08-07). `home_sections` was dropped — the storefront never read it, so reordering in the panel changed nothing. What appears in each slot is driven by `BannerPositionEnum` / `SliderPositionEnum` instead; every case now has a render site, the Filament forms show a wireframe of where the chosen position lands, and uploads are cropped to that slot's ratio. See shop `BANNERS_SLIDERS.md`
 - [ ] Brand-Category pages
 - [ ] Redirects

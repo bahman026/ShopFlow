@@ -37,7 +37,8 @@ Sample data for manual admin testing lives in `TestSeeder` (`php artisan db:seed
 
 Cross-cutting improvements landed:
 - Navigation groups reorganized: Catalog / Promotions / Attribute / Content / Address / Logistics.
-- `CACHE.md` added to track identified-but-not-implemented cache keys.
+- `CACHE.md` added to track cache keys — now also the register of what is implemented.
+- **Catalog cache invalidation** (products + varieties, `CACHE.md` keys 5–7): the storefront caches product pages and category listings in Redis, and **this panel is what clears them**. Four observers registered by `AppServiceProvider::invalidateCatalogCache()` — `Product`, `Variety`, `Image`, `Review` — call the mirrored `App\Support\ProductCache`. Three things to know before touching it: (1) nothing in this panel ever *reads* those entries, so a broken hook is invisible here and shows up only as a customer seeing a price that was edited away — `ProductCacheInvalidationTest` is the only safety net; (2) it works solely because both apps share one Redis store with pinned `CACHE_PREFIX`/`REDIS_PREFIX` (they were silently mismatched before, each derived from `APP_NAME` with a different separator, while production was already on redis); (3) `ProductCache.php` and the four observers are **mirrored byte-for-byte with `shop/`** — change both copies in one commit, as with the enums. Seeders that `truncate()` call `ProductCache::flushAll()`, since truncate fires no model events.
 - `ColorPicker` added to Variety form; `ColorColumn` in the table. Auto-fill from attribute only triggers when `attribute_id` changes, preserving manual overrides.
 - Documentation reorganized into `docs/` directory (`ShoFlow db doc.md`, `VARIETY_GUIDE.md`, `IMPLEMENTATION.md`, `CACHE.md`, `ORDER.md`).
 - **Inventory rule** (`ORDER.md`): stock is decremented only on successful payment (Strategy A); carts never change `varieties.inventory`.
