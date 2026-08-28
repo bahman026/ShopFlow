@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 return [
 
     /*
@@ -116,9 +114,17 @@ return [
     | stores, there might be other applications using the same cache. For
     | that reason, you may prefix every cache key to avoid collisions.
     |
+    | This MUST stay byte-identical to admin's `config/cache.php`. The admin
+    | panel invalidates catalog cache entries that this app wrote, so the two
+    | apps have to address the same Redis keys. A prefix derived from APP_NAME
+    | looks harmless and is not: the stock default differs between the two apps
+    | (`-cache-` here, `_cache_` there), so admin's `Cache::forget()` would hit
+    | a key nobody reads and the storefront would keep serving stale prices
+    | until the TTL ran out, with no error anywhere. Hence a fixed literal.
+    |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-cache-'),
+    'prefix' => env('CACHE_PREFIX', 'shopflow_cache_'),
 
     /*
     |--------------------------------------------------------------------------

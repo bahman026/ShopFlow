@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
 use Pdo\Mysql;
 
 return [
@@ -149,7 +148,10 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            // Redis applies this on top of `cache.prefix`, so it is the second
+            // half of the shared keyspace the admin panel invalidates through.
+            // Fixed literal, identical in both apps — see `config/cache.php`.
+            'prefix' => env('REDIS_PREFIX', 'shopflow_database_'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
