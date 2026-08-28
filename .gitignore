@@ -11,3 +11,11 @@
 # Per-person AI context, never committed — each colleague keeps their own.
 # Injected by the UserPromptSubmit hook in .claude/settings.json.
 /ai-context/claude/personal.md
+
+# Demo/staging catalog dataset. The authored content (demo/data/*.json) and
+# the fetch scripts (demo/scripts/) ARE tracked, so the demo is reproducible
+# on any machine — only the regenerable fetch cache and the Pexels API key
+# stay out of git. See demo/README.md.
+/demo/raw/
+/demo/.env
+/demo/scripts/node_modules/

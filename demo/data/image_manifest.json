@@ -1,0 +1,817 @@
+[
+  {
+    "dest": "categories/mens-clothing.webp",
+    "query": "men clothing rack fashion store",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/mens-tshirts.webp",
+    "query": "men t-shirt folded",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/mens-shirts.webp",
+    "query": "men dress shirt hanging",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/mens-jeans.webp",
+    "query": "men denim jeans folded",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/mens-jackets.webp",
+    "query": "men winter jacket",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/womens-clothing.webp",
+    "query": "women clothing rack fashion store",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/womens-manteau.webp",
+    "query": "women modest fashion coat",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/womens-tshirts.webp",
+    "query": "women blouse clothing",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/womens-pants.webp",
+    "query": "women trousers clothing",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/bags-shoes.webp",
+    "query": "shoes and bags display store",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/sneakers.webp",
+    "query": "sneakers shoes pair",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/handbags.webp",
+    "query": "women handbag leather",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/formal-shoes.webp",
+    "query": "men formal leather shoes",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/accessories.webp",
+    "query": "fashion accessories flat lay",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/watches.webp",
+    "query": "wristwatch",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/sunglasses.webp",
+    "query": "sunglasses pair",
+    "kind": "square"
+  },
+  {
+    "dest": "categories/belts.webp",
+    "query": "leather belt",
+    "kind": "square"
+  },
+  {
+    "dest": "products/mens-crewneck-tee-black-1.webp",
+    "query": "men black cotton t-shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-crewneck-tee-black-2.webp",
+    "query": "men black cotton t-shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-polo-pique-1.webp",
+    "query": "men polo shirt pique",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-polo-pique-2.webp",
+    "query": "men polo shirt pique",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-vneck-tee-heather-1.webp",
+    "query": "men v-neck t-shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-vneck-tee-heather-2.webp",
+    "query": "men v-neck t-shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-long-sleeve-tee-1.webp",
+    "query": "men long sleeve t-shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-long-sleeve-tee-2.webp",
+    "query": "men long sleeve t-shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-oxford-shirt-white-1.webp",
+    "query": "men oxford dress shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-oxford-shirt-white-2.webp",
+    "query": "men oxford dress shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-flannel-check-shirt-1.webp",
+    "query": "men flannel check shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-flannel-check-shirt-2.webp",
+    "query": "men flannel check shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-linen-shirt-summer-1.webp",
+    "query": "men linen shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-linen-shirt-summer-2.webp",
+    "query": "men linen shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-denim-shirt-1.webp",
+    "query": "men denim shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-denim-shirt-2.webp",
+    "query": "men denim shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-slimfit-jeans-dark-1.webp",
+    "query": "men slim fit jeans dark denim",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-slimfit-jeans-dark-2.webp",
+    "query": "men slim fit jeans dark denim",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-straight-jeans-light-1.webp",
+    "query": "men straight jeans light wash",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-straight-jeans-light-2.webp",
+    "query": "men straight jeans light wash",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-cargo-jeans-1.webp",
+    "query": "men cargo pants",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-cargo-jeans-2.webp",
+    "query": "men cargo pants",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-skinny-jeans-black-1.webp",
+    "query": "men skinny black jeans",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-skinny-jeans-black-2.webp",
+    "query": "men skinny black jeans",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-puffer-jacket-winter-1.webp",
+    "query": "men puffer jacket winter",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-puffer-jacket-winter-2.webp",
+    "query": "men puffer jacket winter",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-denim-jacket-1.webp",
+    "query": "men denim jacket",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-denim-jacket-2.webp",
+    "query": "men denim jacket",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-leather-jacket-biker-1.webp",
+    "query": "men leather jacket",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-leather-jacket-biker-2.webp",
+    "query": "men leather jacket",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-fleece-hoodie-zip-1.webp",
+    "query": "men zip hoodie fleece",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-fleece-hoodie-zip-2.webp",
+    "query": "men zip hoodie fleece",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-classic-manteau-black-1.webp",
+    "query": "women modest coat fashion",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-classic-manteau-black-2.webp",
+    "query": "women modest coat fashion",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-linen-manteau-summer-1.webp",
+    "query": "women linen coat summer",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-linen-manteau-summer-2.webp",
+    "query": "women linen coat summer",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-long-manteau-formal-1.webp",
+    "query": "women long formal coat",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-long-manteau-formal-2.webp",
+    "query": "women long formal coat",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-denim-manteau-1.webp",
+    "query": "women denim coat jacket",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-denim-manteau-2.webp",
+    "query": "women denim coat jacket",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-basic-tee-white-1.webp",
+    "query": "women basic t-shirt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-basic-tee-white-2.webp",
+    "query": "women basic t-shirt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-oversized-blouse-1.webp",
+    "query": "women oversized blouse",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-oversized-blouse-2.webp",
+    "query": "women oversized blouse",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-crop-top-1.webp",
+    "query": "women crop top",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-crop-top-2.webp",
+    "query": "women crop top",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-satin-blouse-1.webp",
+    "query": "women satin blouse",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-satin-blouse-2.webp",
+    "query": "women satin blouse",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-wide-leg-pants-1.webp",
+    "query": "women wide leg trousers",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-wide-leg-pants-2.webp",
+    "query": "women wide leg trousers",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-skinny-pants-black-1.webp",
+    "query": "women skinny pants black",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-skinny-pants-black-2.webp",
+    "query": "women skinny pants black",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-linen-shorts-1.webp",
+    "query": "women linen shorts",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-linen-shorts-2.webp",
+    "query": "women linen shorts",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-jogger-pants-1.webp",
+    "query": "women jogger sweatpants",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-jogger-pants-2.webp",
+    "query": "women jogger sweatpants",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-running-sneakers-white-1.webp",
+    "query": "men running sneakers white",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-running-sneakers-white-2.webp",
+    "query": "men running sneakers white",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-casual-sneakers-pink-1.webp",
+    "query": "women casual sneakers",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-casual-sneakers-pink-2.webp",
+    "query": "women casual sneakers",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/unisex-canvas-sneakers-1.webp",
+    "query": "canvas sneakers classic",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/unisex-canvas-sneakers-2.webp",
+    "query": "canvas sneakers classic",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-basketball-sneakers-1.webp",
+    "query": "men basketball shoes",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-basketball-sneakers-2.webp",
+    "query": "men basketball shoes",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-platform-sneakers-1.webp",
+    "query": "women platform sneakers",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-platform-sneakers-2.webp",
+    "query": "women platform sneakers",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-tote-bag-leather-1.webp",
+    "query": "leather tote bag women",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-tote-bag-leather-2.webp",
+    "query": "leather tote bag women",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-shoulder-bag-small-1.webp",
+    "query": "women small shoulder bag",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-shoulder-bag-small-2.webp",
+    "query": "women small shoulder bag",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-crossbody-bag-1.webp",
+    "query": "women crossbody bag",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-crossbody-bag-2.webp",
+    "query": "women crossbody bag",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-clutch-evening-1.webp",
+    "query": "women evening clutch bag",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-clutch-evening-2.webp",
+    "query": "women evening clutch bag",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-oxford-shoes-black-1.webp",
+    "query": "men oxford leather shoes",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-oxford-shoes-black-2.webp",
+    "query": "men oxford leather shoes",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-loafers-leather-1.webp",
+    "query": "men leather loafers",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-loafers-leather-2.webp",
+    "query": "men leather loafers",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-heels-classic-black-1.webp",
+    "query": "women classic high heels",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-heels-classic-black-2.webp",
+    "query": "women classic high heels",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-flat-shoes-suede-1.webp",
+    "query": "women suede flat shoes",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-flat-shoes-suede-2.webp",
+    "query": "women suede flat shoes",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-classic-watch-leather-1.webp",
+    "query": "men classic leather watch",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-classic-watch-leather-2.webp",
+    "query": "men classic leather watch",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-sport-watch-steel-1.webp",
+    "query": "men steel sport watch",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-sport-watch-steel-2.webp",
+    "query": "men steel sport watch",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-slim-watch-rosegold-1.webp",
+    "query": "women slim rose gold watch",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-slim-watch-rosegold-2.webp",
+    "query": "women slim rose gold watch",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/unisex-digital-watch-1.webp",
+    "query": "digital sports watch",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/unisex-digital-watch-2.webp",
+    "query": "digital sports watch",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/unisex-aviator-sunglasses-1.webp",
+    "query": "aviator sunglasses",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/unisex-aviator-sunglasses-2.webp",
+    "query": "aviator sunglasses",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/womens-cateye-sunglasses-1.webp",
+    "query": "women cat eye sunglasses",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/womens-cateye-sunglasses-2.webp",
+    "query": "women cat eye sunglasses",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-square-sunglasses-1.webp",
+    "query": "men square sunglasses",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-square-sunglasses-2.webp",
+    "query": "men square sunglasses",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-leather-belt-classic-1.webp",
+    "query": "men leather belt",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-leather-belt-classic-2.webp",
+    "query": "men leather belt",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "products/mens-reversible-belt-1.webp",
+    "query": "reversible leather belt men",
+    "kind": "square",
+    "rank": 0
+  },
+  {
+    "dest": "products/mens-reversible-belt-2.webp",
+    "query": "reversible leather belt men",
+    "kind": "square",
+    "rank": 1
+  },
+  {
+    "dest": "banners/home-top-1.webp",
+    "query": "autumn fashion sale clothing",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/home-top-2.webp",
+    "query": "shoes bags new collection",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/home-middle-1.webp",
+    "query": "men fashion clothing collection",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/home-middle-2.webp",
+    "query": "women fashion clothing collection",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/home-middle-3.webp",
+    "query": "watch accessories flat lay",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/category-side-1.webp",
+    "query": "sneakers sale display",
+    "kind": "wide"
+  },
+  {
+    "dest": "banners/category-side-2.webp",
+    "query": "leather handbag closeup",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-main-1.webp",
+    "query": "autumn winter fashion collection",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-main-2.webp",
+    "query": "sneakers discount sale",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-main-3.webp",
+    "query": "women handbag accessories",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-main-4.webp",
+    "query": "wristwatch collection display",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-secondary-1.webp",
+    "query": "online shopping delivery box",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-secondary-2.webp",
+    "query": "return package shipping",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/home-secondary-3.webp",
+    "query": "online payment security",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/category-top-1.webp",
+    "query": "men clothing collection banner",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/category-top-2.webp",
+    "query": "women clothing collection banner",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/category-top-3.webp",
+    "query": "shoes bags collection banner",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/product-side-1.webp",
+    "query": "fashion product portrait",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/product-side-2.webp",
+    "query": "quality guarantee fashion",
+    "kind": "wide"
+  },
+  {
+    "dest": "sliders/product-side-3.webp",
+    "query": "customer support shopping",
+    "kind": "wide"
+  },
+  {
+    "dest": "tags/black-sneakers-tag.webp",
+    "query": "black sneakers shoes",
+    "kind": "square"
+  },
+  {
+    "dest": "tags/white-mens-shirts-tag.webp",
+    "query": "white dress shirt men",
+    "kind": "square"
+  },
+  {
+    "dest": "tags/black-manteau-tag.webp",
+    "query": "black modest coat women",
+    "kind": "square"
+  },
+  {
+    "dest": "tags/rosegold-watches-tag.webp",
+    "query": "rose gold wristwatch",
+    "kind": "square"
+  },
+  {
+    "dest": "tags/blue-mens-jeans-tag.webp",
+    "query": "blue denim jeans",
+    "kind": "square"
+  },
+  {
+    "dest": "tags/brown-handbags-tag.webp",
+    "query": "brown leather handbag",
+    "kind": "square"
+  }
+]

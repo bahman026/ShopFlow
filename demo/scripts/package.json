@@ -1,0 +1,13 @@
+{
+  "name": "demo-image-pipeline",
+  "private": true,
+  "type": "module",
+  "description": "Fetches Pexels stock photos for demo/data/*.json and writes them into admin/storage/app/public/demo/. See ../README.md.",
+  "scripts": {
+    "manifest": "node manifest.mjs",
+    "fetch": "node fetch.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.4"
+  }
+}

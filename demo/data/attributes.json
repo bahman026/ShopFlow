@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "سایز",
+      "label": "سایز را انتخاب کنید",
+      "ancestor_name": "ویژگی‌های ظاهری",
+      "reuse_existing": false,
+      "values": ["S", "M", "L", "XL", "XXL"]
+    },
+    {
+      "name": "سایز کفش",
+      "label": "سایز کفش را انتخاب کنید",
+      "ancestor_name": "ویژگی‌های ظاهری",
+      "reuse_existing": false,
+      "values": ["36", "37", "38", "39", "40", "41", "42", "43", "44"]
+    },
+    {
+      "name": "رنگ",
+      "label": "انتخاب رنگ",
+      "ancestor_name": "مشخصات فنی",
+      "reuse_existing": true,
+      "note": "This group already exists (AttributeSeeder seeds قرمز/آبی under it). DemoSeeder looks it up by name and adds any missing values below instead of creating a duplicate group.",
+      "values": [
+        { "value": "مشکی", "color": "#111111" },
+        { "value": "سفید", "color": "#ffffff" },
+        { "value": "طوسی", "color": "#9ca3af" },
+        { "value": "سرمه‌ای", "color": "#1e293b" },
+        { "value": "قرمز", "color": "#dc2626" },
+        { "value": "آبی", "color": "#2563eb" },
+        { "value": "سبز", "color": "#16a34a" },
+        { "value": "زرد", "color": "#eab308" },
+        { "value": "صورتی", "color": "#ec4899" },
+        { "value": "بژ", "color": "#d6c3a1" },
+        { "value": "قهوه‌ای", "color": "#7c4a2d" },
+        { "value": "کرم", "color": "#f3e5c9" },
+        { "value": "طلایی", "color": "#c9a227" },
+        { "value": "نقره‌ای", "color": "#c0c0c0" },
+        { "value": "رزگلد", "color": "#e0bfb8" }
+      ]
+    },
+    {
+      "name": "جنس",
+      "label": "جنس محصول",
+      "ancestor_name": "مشخصات فنی",
+      "reuse_existing": false,
+      "descriptive_only": true,
+      "values": [
+        "پنبه", "دنیم", "چرم", "چرم مصنوعی", "پشم", "کتان", "ویسکوز",
+        "ساتن", "پارچه", "مش", "مخمل", "جیر", "استیل", "پلاستیک",
+        "فلز", "کرپ", "پلی‌استر", "سیلیکون"
+      ]
+    }
+  ]
+}

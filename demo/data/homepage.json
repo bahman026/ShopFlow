@@ -1,0 +1,92 @@
+{
+  "banners": [
+    {
+      "position": "home-top",
+      "heading": "حراج پاییزه پوشاک",
+      "url": "/categories/mens-clothing",
+      "sort": 1,
+      "image_query": "autumn fashion sale clothing"
+    },
+    {
+      "position": "home-top",
+      "heading": "کالکشن جدید کیف و کفش",
+      "url": "/categories/bags-shoes",
+      "sort": 2,
+      "image_query": "shoes bags new collection"
+    },
+    {
+      "position": "home-middle",
+      "heading": "پوشاک مردانه",
+      "url": "/categories/mens-clothing",
+      "sort": 1,
+      "image_query": "men fashion clothing collection"
+    },
+    {
+      "position": "home-middle",
+      "heading": "پوشاک زنانه",
+      "url": "/categories/womens-clothing",
+      "sort": 2,
+      "image_query": "women fashion clothing collection"
+    },
+    {
+      "position": "home-middle",
+      "heading": "اکسسوری و ساعت",
+      "url": "/categories/accessories",
+      "sort": 3,
+      "image_query": "watch accessories flat lay"
+    },
+    {
+      "position": "category-side",
+      "heading": "تخفیف ویژه کفش ورزشی",
+      "url": "/categories/sneakers",
+      "sort": 1,
+      "image_query": "sneakers sale display"
+    },
+    {
+      "position": "category-side",
+      "heading": "کیف چرم اصل",
+      "url": "/categories/handbags",
+      "sort": 2,
+      "image_query": "leather handbag closeup"
+    }
+  ],
+  "sliders": [
+    {
+      "position": "home-main",
+      "name": "اسلایدر اصلی صفحه اول",
+      "slides": [
+        { "heading": "کالکشن پاییز و زمستان", "label": "جدیدترین محصولات فصل را ببینید", "url": "/categories/mens-jackets", "order": 1, "image_query": "autumn winter fashion collection" },
+        { "heading": "تا ۴۰٪ تخفیف کفش ورزشی", "label": "پیشنهاد ویژه این هفته", "url": "/categories/sneakers", "order": 2, "image_query": "sneakers discount sale" },
+        { "heading": "کیف و اکسسوری زنانه", "label": "طراحی‌های جدید رسیده", "url": "/categories/handbags", "order": 3, "image_query": "women handbag accessories" },
+        { "heading": "ساعت مچی مردانه و زنانه", "label": "کلکسیون کامل را کشف کنید", "url": "/categories/watches", "order": 4, "image_query": "wristwatch collection display" }
+      ]
+    },
+    {
+      "position": "home-secondary",
+      "name": "اسلایدر دوم صفحه اول",
+      "slides": [
+        { "heading": "ارسال رایگان بالای ۲ میلیون تومان", "label": null, "url": null, "order": 1, "image_query": "online shopping delivery box" },
+        { "heading": "هفت روز ضمانت بازگشت کالا", "label": null, "url": "/return-conditions", "order": 2, "image_query": "return package shipping" },
+        { "heading": "پرداخت امن و متنوع", "label": null, "url": null, "order": 3, "image_query": "online payment security" }
+      ]
+    },
+    {
+      "position": "category-top",
+      "name": "اسلایدر بالای دسته‌بندی",
+      "slides": [
+        { "heading": "کالکشن پوشاک مردانه", "label": "جدیدترین مدل‌ها", "url": "/categories/mens-clothing", "order": 1, "image_query": "men clothing collection banner" },
+        { "heading": "پوشاک زنانه شیک", "label": "برای هر مناسبتی", "url": "/categories/womens-clothing", "order": 2, "image_query": "women clothing collection banner" },
+        { "heading": "کفش و کیف باکیفیت", "label": null, "url": "/categories/bags-shoes", "order": 3, "image_query": "shoes bags collection banner" }
+      ]
+    },
+    {
+      "position": "product-side",
+      "name": "اسلایدر کنار محصول",
+      "slides": [
+        { "heading": "پیشنهاد ویژه", "label": "تا پایان هفته", "url": null, "order": 1, "image_query": "fashion product portrait" },
+        { "heading": "کالای اصل، ضمانت اصالت", "label": null, "url": null, "order": 2, "image_query": "quality guarantee fashion" },
+        { "heading": "مشاوره رایگان خرید", "label": null, "url": null, "order": 3, "image_query": "customer support shopping" }
+      ]
+    }
+  ]
+}

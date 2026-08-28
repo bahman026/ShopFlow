@@ -1,0 +1,47 @@
+{
+  "name": "منوی هدر",
+  "position": "header",
+  "items": [
+    {
+      "name": "پوشاک مردانه",
+      "url": "/categories/mens-clothing",
+      "order": 1,
+      "children": [
+        { "name": "تی‌شرت و پولوشرت", "url": "/categories/mens-tshirts", "order": 1 },
+        { "name": "پیراهن", "url": "/categories/mens-shirts", "order": 2 },
+        { "name": "شلوار جین", "url": "/categories/mens-jeans", "order": 3 },
+        { "name": "کاپشن و ژاکت", "url": "/categories/mens-jackets", "order": 4 }
+      ]
+    },
+    {
+      "name": "پوشاک زنانه",
+      "url": "/categories/womens-clothing",
+      "order": 2,
+      "children": [
+        { "name": "مانتو و روپوش", "url": "/categories/womens-manteau", "order": 1 },
+        { "name": "تی‌شرت و بلوز", "url": "/categories/womens-tshirts", "order": 2 },
+        { "name": "شلوار و شلوارک", "url": "/categories/womens-pants", "order": 3 }
+      ]
+    },
+    {
+      "name": "کیف و کفش",
+      "url": "/categories/bags-shoes",
+      "order": 3,
+      "children": [
+        { "name": "کفش ورزشی", "url": "/categories/sneakers", "order": 1 },
+        { "name": "کیف دستی زنانه", "url": "/categories/handbags", "order": 2 },
+        { "name": "کفش رسمی مردانه", "url": "/categories/formal-shoes", "order": 3 }
+      ]
+    },
+    {
+      "name": "اکسسوری",
+      "url": "/categories/accessories",
+      "order": 4,
+      "children": [
+        { "name": "ساعت مچی", "url": "/categories/watches", "order": 1 },
+        { "name": "عینک آفتابی", "url": "/categories/sunglasses", "order": 2 },
+        { "name": "کمربند چرم", "url": "/categories/belts", "order": 3 }
+      ]
+    }
+  ]
+}
