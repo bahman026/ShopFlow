@@ -5,12 +5,20 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\RolesEnum;
+use App\Models\Attribute;
+use App\Models\AttributeGroup;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Image;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\Variety;
+use App\Observers\AttributeGroupObserver;
+use App\Observers\AttributeObserver;
+use App\Observers\BrandObserver;
+use App\Observers\CategoryObserver;
 use App\Observers\ImageObserver;
 use App\Observers\OrderObserver;
 use App\Observers\ProductObserver;
@@ -54,8 +62,15 @@ class AppServiceProvider extends ServiceProvider
      * succeeds while reaching nothing — the storefront would serve edited-away
      * prices until each entry's TTL expired, with no error anywhere.
      *
-     * The same four observers are registered on the storefront side, because it
+     * The same observers are registered on the storefront side, because it
      * writes these tables too (inventory on payment, the product view counter).
+     *
+     * Two groups, and the difference matters. The first four know which product
+     * they belong to, so they *forget* that product's page precisely — they fire
+     * often (every sale moves inventory) and have to stay cheap. The metadata
+     * observers below cannot: a renamed attribute group reaches most of the
+     * catalog through three pivots at once, so they bump the generation and let
+     * everything rebuild. That is affordable only because they fire rarely.
      */
     private function invalidateCatalogCache(): void
     {
@@ -63,6 +78,11 @@ class AppServiceProvider extends ServiceProvider
         Variety::observe(VarietyObserver::class);
         Image::observe(ImageObserver::class);
         Review::observe(ReviewObserver::class);
+
+        Category::observe(CategoryObserver::class);
+        Brand::observe(BrandObserver::class);
+        Attribute::observe(AttributeObserver::class);
+        AttributeGroup::observe(AttributeGroupObserver::class);
     }
 
     /**
