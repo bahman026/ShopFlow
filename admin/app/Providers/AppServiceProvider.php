@@ -13,6 +13,7 @@ use App\Models\Image;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Tag;
 use App\Models\User;
 use App\Models\Variety;
 use App\Observers\AttributeGroupObserver;
@@ -23,6 +24,7 @@ use App\Observers\ImageObserver;
 use App\Observers\OrderObserver;
 use App\Observers\ProductObserver;
 use App\Observers\ReviewObserver;
+use App\Observers\TagObserver;
 use App\Observers\VarietyObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -83,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
         Brand::observe(BrandObserver::class);
         Attribute::observe(AttributeObserver::class);
         AttributeGroup::observe(AttributeGroupObserver::class);
+        Tag::observe(TagObserver::class);
     }
 
     /**

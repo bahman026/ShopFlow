@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Review;
+use App\Models\Tag;
 use App\Models\Variety;
 use App\Observers\AttributeGroupObserver;
 use App\Observers\AttributeObserver;
@@ -19,6 +20,7 @@ use App\Observers\CategoryObserver;
 use App\Observers\ImageObserver;
 use App\Observers\ProductObserver;
 use App\Observers\ReviewObserver;
+use App\Observers\TagObserver;
 use App\Observers\VarietyObserver;
 use App\Search\DatabaseProductSearch;
 use App\Sms\LogSmsSender;
@@ -94,5 +96,6 @@ class AppServiceProvider extends ServiceProvider
         Brand::observe(BrandObserver::class);
         Attribute::observe(AttributeObserver::class);
         AttributeGroup::observe(AttributeGroupObserver::class);
+        Tag::observe(TagObserver::class);
     }
 }
