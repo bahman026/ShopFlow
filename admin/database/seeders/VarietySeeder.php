@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\Variety;
+use App\Support\ProductCache;
 use Illuminate\Database\Seeder;
 
 class VarietySeeder extends Seeder
@@ -29,5 +30,9 @@ class VarietySeeder extends Seeder
                 ->withImage()
                 ->create();
         });
+
+        // `truncate()` fires no model events, so no observer saw the old
+        // varieties leave — prices and stock counts would stay cached.
+        ProductCache::flushAll();
     }
 }
