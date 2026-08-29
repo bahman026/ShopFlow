@@ -1,7 +1,15 @@
 #!/bin/bash
 
 set -e
-git config --global --add safe.directory /var/www/html
+# --system rather than --global: composer runs as www-data below, and a
+# --global exception written by root only covers root. /etc/gitconfig is
+# readable by every user, so one line covers both.
+git config --system --add safe.directory /var/www/html
+
+# composer caches into $HOME/.composer, and www-data's home (/var/www) is
+# root-owned, so that user cannot create the directory itself. Without this
+# composer still works but rebuilds its cache from scratch every time.
+install -d -o www-data -g www-data /var/www/.composer
 
 # As www-data, not root: php-fpm and the test suite both run as www-data, and
 # Pest writes caches *inside* vendor/ (pest/.temp, plus the type-coverage and
