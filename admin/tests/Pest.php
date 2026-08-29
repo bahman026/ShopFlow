@@ -15,9 +15,8 @@ declare(strict_types=1);
 
 use App\Enums\RolesEnum;
 use App\Models\User;
-use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
@@ -59,13 +58,20 @@ expect()->extend('toBeOne', function () {
  * Roles and permissions come from RolePermissionSeeder rather than being
  * hand-rolled, so resource authorization behaves in tests exactly as it does in
  * the panel — a resource that a real super-admin could not reach must not be
- * reachable here either.
+ * reachable here either. The seeder itself runs once per test run, from
+ * `Tests\TestCase::$seeder`; re-running it here made every test pay for the
+ * same three roles and ~28 permissions again.
+ *
+ * The cache reset stays: a test that creates a permission warms Spatie's
+ * in-memory registrar, and the rollback that follows removes the row without
+ * touching that cache, so the next test would otherwise see a permission the
+ * database no longer has.
  */
 function login(?User $user = null): void
 {
     $user ??= User::factory()->create();
 
-    app(RolePermissionSeeder::class)->run();
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
 
     $user->assignRole(RolesEnum::SUPER_ADMIN->value);
     actingAs($user);
@@ -79,7 +85,7 @@ function loginAsAdmin(?User $user = null): User
 {
     $user ??= User::factory()->create();
 
-    app(RolePermissionSeeder::class)->run();
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
 
     $user->assignRole(RolesEnum::ADMIN->value);
     actingAs($user);
