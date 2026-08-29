@@ -60,7 +60,7 @@
             "@php artisan migrate --graceful --ansi"
         ],
         "test-dev": [
-            "./vendor/bin/pest",
+            "./vendor/bin/pest --parallel",
             "./vendor/bin/pint -v --ansi --bail",
             "./vendor/bin/pest --memory-limit=2048M --type-coverage --min=100",
             "./vendor/bin/phpstan analyze -c ./phpstan.neon --memory-limit=512M"
