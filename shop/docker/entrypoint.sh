@@ -3,7 +3,14 @@
 set -e
 git config --global --add safe.directory /var/www/html
 
-composer install
+# As www-data, not root: php-fpm and the test suite both run as www-data, and
+# Pest writes caches *inside* vendor/ (pest/.temp, plus the type-coverage and
+# mutate plugins). A root-owned vendor/ makes those fail with "Permission
+# denied" — a warning in a normal run, but fatal under `pest --parallel`.
+runuser -u www-data -- composer install
+
+# Self-heal a vendor/ installed as root before the line above existed.
+chown -R www-data:www-data /var/www/html/shop/vendor/pestphp 2>/dev/null || true
 
 php "/var/www/html/shop/artisan" migrate --force
 
